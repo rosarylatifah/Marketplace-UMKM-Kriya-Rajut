@@ -16,6 +16,11 @@ Route::view('/about', 'pembeli.about');
 Route::view('/hubungi', 'pembeli.hubungi');
 Route::view('/lacak-pesanan', 'pembeli.lacak');
 Route::view('/status-pesanan', 'pembeli.status');
+Route::view('/keranjang', 'pembeli.keranjang');
+Route::view('/checkout', 'pembeli.checkout');
+Route::view('/pembayaran', 'pembeli.pembayaran');
+Route::view('/berhasil', 'pembeli.berhasil');
+
 
 /*
 |--------------------------------------------------------------------------

@@ -1,40 +1,25 @@
 @extends('layouts.pembeli')
 
 @section('content')
-<div class="py-20 flex justify-center bg-pink-50 min-h-screen items-center">
-    <div class="bg-white p-8 rounded-2xl shadow-xl border border-pink-100 w-full max-w-md">
+<div class="py-20 flex justify-center">
+    <div class="w-full max-w-md border border-gray-400 p-10 bg-white text-center shadow-sm">
+        <h2 class="text-lg font-bold uppercase mb-8 tracking-widest">Cek Status Pesanan</h2>
         
-        <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-pink-600">Cek Status Pesanan</h1>
-            <p class="text-gray-500">Masukkan detail pesanan Anda</p>
-        </div>
-        
-        <form action="/status-pesanan" method="GET" class="space-y-6">
+        <form action="/status-pesanan" method="GET" class="space-y-6 text-left">
             <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Email Pembeli</label>
-                <input type="email" name="email" 
-                    class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:ring-pink-500 focus:border-pink-500 transition-all outline-none" 
-                    placeholder="nama@email.com" required>
+                <label class="block text-xs font-bold mb-2 uppercase text-gray-500">Email</label>
+                <input type="email" name="email" class="w-full border-gray-400 bg-gray-100 p-3 text-sm focus:ring-0 focus:border-gray-800 outline-none">
             </div>
             
             <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Nomor Telepon</label>
-                <input type="text" name="phone" 
-                    class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:ring-pink-500 focus:border-pink-500 transition-all outline-none" 
-                    placeholder="0812xxxx" required>
+                <label class="block text-xs font-bold mb-2 uppercase text-gray-500">Nomor Telpon</label>
+                <input type="text" name="phone" class="w-full border-gray-400 bg-gray-100 p-3 text-sm focus:ring-0 focus:border-gray-800 outline-none">
             </div>
 
-            <button type="submit" 
-                class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg shadow-pink-200">
-                Lacak Pesanan Sekarang
+            <button type="submit" class="w-full bg-gray-300 border border-gray-400 py-3 text-xs font-bold uppercase hover:bg-gray-400 transition-all">
+                Cek Status Pesanan
             </button>
         </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-xs text-gray-400 italic">
-                *Pastikan nomor telepon sesuai dengan saat pemesanan.
-            </p>
-        </div>
     </div>
 </div>
 @endsection
