@@ -8,96 +8,101 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .bg-nude-soft { background-color: #fdf5f5; } 
+    </style>
 </head>
 
-<body class="bg-pink-50 flex flex-col min-h-screen">
-    <nav class="bg-white border-b border-pink-100 sticky top-0 z-50">
-        <div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+<body class="bg-[#F3F5F1] flex flex-col min-h-screen">
+    {{-- Navbar --}}
+    <nav class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-5">
             <a href="/" class="flex items-center space-x-3">
-                <span class="self-center text-2xl font-bold whitespace-nowrap text-pink-600">Kriya Rajut</span>
+                <span class="self-center text-xl font-bold whitespace-nowrap text-[#001f3f] tracking-[0.2em] uppercase">
+                    Kriya<span class="text-gray-400 font-light">Rajut</span>
+                </span>
             </a>
+            
             <div class="hidden w-full md:block md:w-auto">
-                <ul
-                    class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:flex-row md:space-x-8 md:items-center md:mt-0 md:border-0 bg-white">
-                    <li><a href="/" class="block py-2 px-3 text-pink-600 font-bold">Home</a></li>
-                    <li><a href="/katalog" class="block py-2 px-3 text-gray-700 hover:text-pink-600">Katalog</a></li>
-                    <li><a href="/lacak-pesanan" class="block py-2 px-3 text-gray-700 hover:text-pink-600">Lacak
-                            Pesanan</a></li>
-                    <li><a href="#tentang-kami" class="block py-2 px-3 text-gray-700 hover:text-pink-600">Tentang Kami</a></li>
-                    <a href="/keranjang" title="Keranjang">
-                        <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                    </a>
+                <ul class="flex flex-col md:flex-row md:space-x-10 md:items-center bg-transparent">
+                    <li>
+                        <a href="/" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('/') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Home</a>
+                    </li>
+                    <li>
+                        {{-- PERBAIKAN: Menggunakan named route 'katalog' agar parameter kategori bisa terbaca --}}
+                        <a href="{{ route('katalog') }}" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('katalog*') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Katalog</a>
+                    </li>
+                    <li>
+                        <a href="/lacak-pesanan" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('lacak-pesanan*') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Lacak</a>
+                    </li>
+                    <li class="relative p-2">
+                        <a href="{{ route('keranjang') }}" class="group flex items-center">
+                            <i class="fa-solid fa-bag-shopping text-lg {{ request()->is('keranjang*') ? 'text-pink-600' : 'text-gray-700 group-hover:text-[#001f3f]' }} transition-colors"></i>
+                            <span class="absolute top-1 right-1 flex h-2 w-2">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#001f3f] opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#001f3f]"></span>
+                            </span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-screen-xl mx-auto p-4 flex-grow">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 lg:px-0">
         @yield('content')
     </main>
 
-    <footer id="tentang-kami" class="bg-white border-t border-gray-200 mt-20 pt-16 pb-3">
-        <div class="max-w-screen-xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-                <div>
-                    <h3 class="font-bold text-gray-800 uppercase tracking-wider mb-6">Tentang Kami</h3>
-                    <p class="text-sm text-gray-600 leading-relaxed">
-                        Sejak 2020, kami mengembangkan usaha kriya rajut buatan tangan dengan berbagai produk unik dan
-                        menarik. Kami berkomitmen untuk menghadirkan produk berkualitas dengan sentuhan handmade.
-                        Website ini dibuat agar pelanggan dapat berbelanja dengan lebih mudah dan nyaman.
+    {{-- Footer --}}
+    <footer id="tentang-kami" class="bg-[#EAE4DD] border-t border-gray-100 mt-20 pt-16 pb-8 text-gray-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                 <div class="md:col-span-2">
+                    <h3 class="text-lg font-bold text-[#001f3f] uppercase tracking-[0.3em] mb-6">Kriya Rajut</h3>
+                    <p class="text-[13px] text-gray-700 leading-relaxed max-w-sm">
+                        Menghadirkan kehangatan dalam setiap simpul. Kami berfokus pada kualitas benang premium dan teknik rajutan tangan otentik untuk menciptakan produk yang estetik dan tahan lama.
                     </p>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-gray-800 uppercase tracking-wider mb-6">Dukungan Pelanggan</h3>
-                    <ul class="space-y-4 text-sm text-gray-600">
-                        <li><a href="/lacak-pesanan" class="hover:text-pink-600 transition-colors">Lacak Pesanan</a>
-                        </li>
-                        <li><a href="#" class="hover:text-pink-600 transition-colors">Panduan Pemesanan</a></li>
-                        <li><a href="#" class="hover:text-pink-600 transition-colors">FAQ</a></li>
+                    <h3 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest mb-6">Navigasi</h3>
+                    <ul class="space-y-3 text-[11px] text-gray-600 uppercase tracking-wider">
+                        <li><a href="{{ route('katalog') }}" class="hover:text-[#001f3f] transition-colors">Katalog Produk</a></li>
+                        <li><a href="/lacak-pesanan" class="hover:text-[#001f3f] transition-colors">Lacak Pesanan</a></li>
+                        <li><a href="#" class="hover:text-[#001f3f] transition-colors">Bantuan FAQ</a></li>
                     </ul>
                 </div>
 
                 <div>
-                    <h3 class="font-bold text-gray-800 uppercase tracking-wider mb-6">Terhubung Dengan Kami</h3>
-                    <ul class="space-y-4 text-sm text-gray-600">
-                        <li class="flex items-center gap-3">
-                            <a href="https://instagram.com/akun_kamu" target="_blank"
-                                class="flex items-center gap-3 hover:text-pink-600 transition-colors">
-                                <i class="fab fa-instagram text-xl text-gray-700"></i>
-                                <span>@blabla</span>
-                            </a>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <a href="https://wa.me/6285778092881" target="_blank"
-                                class="flex items-center gap-3 hover:text-green-600 transition-colors">
-                                <i class="fab fa-whatsapp text-xl text-gray-700"></i>
-                                <span>+62 857 7809 2881</span>
-                            </a>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <a href="mailto:blabla@gmail.com"
-                                class="flex items-center gap-3 hover:text-blue-600 transition-colors">
-                                <i class="far fa-envelope text-xl text-gray-700"></i>
-                                <span>blabla@gmail.com</span>
-                            </a>
-                        </li>
-                    </ul>
+                    <h3 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest mb-6">Kontak</h3>
+                    <div class="flex gap-4">
+                        <a href="#" class="w-8 h-8 rounded-full border border-gray-400 flex items-center justify-center text-gray-700 hover:bg-[#001f3f] hover:text-white transition-all overflow-hidden">
+                            <i class="fab fa-instagram text-xs"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full border border-gray-400 flex items-center justify-center text-gray-700 hover:bg-[#001f3f] hover:text-white transition-all overflow-hidden">
+                            <i class="fab fa-whatsapp text-xs"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full border border-gray-400 flex items-center justify-center text-gray-700 hover:bg-[#001f3f] hover:text-white transition-all overflow-hidden">
+                            <i class="far fa-envelope text-xs"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <div class="border-t border-gray-200 pt-3 text-center">
-                <p class="text-xs text-gray-400 padding-y-4">
-                    © 2026 Kriya Rajut. Semua hak dilindungi.
+            <div class="border-t border-gray-300 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-[10px] text-gray-500 uppercase tracking-widest">
+                    © 2026 Kriya Rajut Studio. All Rights Reserved.
                 </p>
+                <div class="flex gap-6 text-[10px] text-gray-500 uppercase tracking-widest">
+                    <a href="#" class="hover:text-gray-700 transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-gray-700 transition-colors">Terms of Service</a>
+                </div>
             </div>
         </div>
     </footer>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 </body>
-
 </html>

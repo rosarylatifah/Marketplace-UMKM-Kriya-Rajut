@@ -1,61 +1,120 @@
 @extends('layouts.pembeli')
 
 @section('content')
-<div class="py-10">
-    <div class="mb-10 text-center">
-        <h1 class="text-3xl font-bold text-gray-800 uppercase tracking-tight">Katalog Produk</h1>
-        <p class="text-gray-500 mt-2">Temukan berbagai kriya rajut handmade berkualitas.</p>
+<div class="py-10 max-w-7xl mx-auto px-4">
+    {{-- Header Katalog Dinamis --}}
+    <div class="mb-4 text-center">
+        <h1 class="text-xl font-bold text-gray-800 uppercase tracking-[0.3em]">
+            {{-- Judul berubah otomatis sesuai kategori yang dipilih --}}
+            Katalog {{ isset($currentCategory) && $currentCategory != 'Semua' ? '— ' . $currentCategory : 'Produk' }}
+        </h1>
+        <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">— Koleksi Rajutan Tangan —</p>
     </div>
 
-    <div class="flex flex-wrap justify-center gap-4 md:gap-8 mb-10 border-b border-gray-100 pb-6">
-        @foreach(['Semua', 'Pakaian', 'Aksesoris', 'Dekorasi', 'Amigurumi', 'Tas & Wadah'] as $kategori)
-            <a href="#" class="text-sm font-medium text-gray-600 hover:text-pink-600 transition-colors uppercase tracking-wider">
-                {{ $kategori }}
-            </a>
-        @endforeach
+    {{-- Sticky Sensor agar animasi kategori jalan --}}
+    <div id="sticky-sensor" class="h-px w-full"></div>
+
+    {{-- Navigasi Kategori --}}
+    <div id="nav-kategori" class="sticky top-[83px] z-[30] w-full transition-all duration-300">
+        <div id="bg-kategori-wrapper" class="w-full border-t border-gray-100 transition-all duration-300 py-6">
+            <div id="container-kategori" class="flex flex-wrap justify-center gap-4 md:gap-8 max-w-7xl mx-auto px-6 transition-all duration-300">
+                @foreach(['Semua', 'Pakaian', 'Aksesoris', 'Dekorasi', 'Amigurumi', 'Tas & Wadah'] as $kategori)
+                @php
+                    // Membuat slug URL: "Tas & Wadah" jadi "tas-wadah"
+                    $slug = strtolower(str_replace([' & ', ' '], ['-', '-'], $kategori));
+                    $isActive = (isset($currentCategory) && $currentCategory == $kategori) || (!isset($currentCategory) && $kategori == 'Semua');
+                @endphp
+                <a href="{{ route('katalog', $slug) }}" 
+                   class="text-[11px] font-bold uppercase tracking-widest transition-colors {{ $isActive ? 'text-[#001f3f] underline underline-offset-8' : 'text-gray-500 hover:text-[#001f3f]' }}">
+                    {{ $kategori }}
+                </a>
+                @endforeach
+            </div>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        @for ($i = 1; $i <= 12; $i++) {{-- Di katalog biasanya lebih banyak produk --}}
-        <div class="bg-white border border-gray-200 rounded-sm p-4 flex flex-col items-center text-center">
-            <div class="w-full bg-gray-100 h-48 mb-4 border border-gray-200 flex items-center justify-center text-gray-400">foto produk</div>
-            <h3 class="font-bold text-gray-800 lowercase text-sm">tas rajut {{ $i }}</h3>
-            <p class="text-[10px] text-gray-500 my-2">Tas rajut handmade dengan material benang katun premium.</p>
+    {{-- Grid Katalog --}}
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16 mt-6">
+        @for ($i = 1; $i <= 12; $i++)
+        <div class="group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
+            {{-- Gambar Produk --}}
+            <div class="w-full bg-gray-50 aspect-square mb-4 border border-gray-50 flex items-center justify-center overflow-hidden">
+                <img src="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig=kat-{{$i}}" 
+                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Produk Rajut">
+            </div>
             
-            <button data-modal-target="modal-katalog-{{ $i }}" data-modal-toggle="modal-katalog-{{ $i }}" class="mt-auto border border-gray-800 text-gray-800 text-[10px] py-2 px-6 hover:bg-gray-800 hover:text-white transition-all uppercase font-bold">
+            <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">
+                {{ isset($currentCategory) && $currentCategory != 'Semua' ? $currentCategory : 'Kriya' }} {{ $i }}
+            </h3>
+            <p class="text-[10px] text-gray-400 my-2 italic px-2 leading-relaxed line-clamp-2">Rajutan tangan eksklusif benang premium.</p>                
+            
+            <button data-modal-target="modal-produk-{{ $i }}" data-modal-toggle="modal-produk-{{ $i }}" 
+                class="mt-auto w-full bg-[#001f3f] text-white text-[9px] py-2.5 rounded-full hover:bg-gray-800 transition-all uppercase font-bold tracking-widest shadow-sm">
                 Lihat Detail
             </button>
 
-            <div id="modal-katalog-{{ $i }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
-                <div class="relative p-4 w-full max-w-4xl h-full md:h-auto">
-                    <div class="relative bg-white border border-gray-400 p-6 md:p-10">
-                        <button data-modal-hide="modal-katalog-{{ $i }}" class="flex items-center text-gray-800 mb-6 font-medium">
-                            <span class="mr-2">&lt;</span> Kembali
-                        </button>
+            {{-- Modal Detail Produk --}}
+            <div id="modal-produk-{{ $i }}" tabindex="-1" aria-hidden="true" 
+                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black/60 backdrop-blur-sm">
+                <div class="relative p-4 w-full max-w-3xl h-auto">
+                    <div class="relative bg-white border border-gray-300 p-6 md:p-8 shadow-2xl">
+                        
+                        {{-- FORM START --}}
+                        <form action="{{ route('cart.store') }}" method="POST">
+                            @csrf
+                            {{-- Data Produk Hidden --}}
+                            <input type="hidden" name="id" value="KAT-{{ $i }}">
+                            <input type="hidden" name="nama" value="{{ isset($currentCategory) && $currentCategory != 'Semua' ? $currentCategory : 'Eksklusif Rajut' }} {{ $i }}">
+                            <input type="hidden" name="harga" value="150000">
+                            <input type="hidden" name="foto" value="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig=kat-{{$i}}">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border border-gray-300 p-8">
-                            <div class="aspect-square bg-white border border-gray-300 flex items-center justify-center text-gray-400">Foto Produk</div>
-                            <div class="text-left space-y-4">
-                                <h2 class="text-2xl font-bold text-gray-800 uppercase">Tas Rajut {{ $i }}</h2>
-                                <p class="text-xl font-semibold text-gray-800">Rp. 150.000</p>
-                                <p class="text-sm text-gray-700 leading-relaxed">Deskripsi produk rajutan premium yang dibuat secara manual dengan penuh ketelitian.</p>
-                                <p class="text-sm text-gray-600 italic">Tersedia (10 stok)</p>
-                                
-                                <form action="/tambah-keranjang" method="POST">
-                                    @csrf
-                                    <input type="hidden" name="id" value="K-{{ $i }}">
-                                    <input type="hidden" name="nama" value="Tas Rajut {{ $i }}">
-                                    <input type="hidden" name="harga" value="150000">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                                {{-- Sisi Kiri: Foto --}}
+                                <div class="aspect-square border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
+                                    <img src="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig=kat-{{$i}}" 
+                                         class="w-full h-full object-cover" alt="Detail Katalog">
+                                </div>
+
+                                {{-- Sisi Kanan: Info --}}
+                                <div class="flex flex-col">
                                     <div class="mb-4">
-                                        <label class="block text-sm mb-1">Jumlah</label>
-                                        <input type="number" name="jumlah" value="1" min="1" class="w-24 bg-gray-200 border-none p-2 text-center text-sm focus:ring-0">
+                                        <h2 class="text-xl font-bold text-gray-900 mb-1 uppercase tracking-tight">
+                                            {{ isset($currentCategory) && $currentCategory != 'Semua' ? $currentCategory : 'Eksklusif Rajut' }} {{ $i }}
+                                        </h2>
+                                        <p class="text-lg font-bold text-gray-700">Rp 150.000</p>
                                     </div>
-                                    <button type="submit" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 text-sm font-medium border border-gray-400">
-                                        +tambah ke keranjang
+                                    
+                                    <p class="text-[12px] text-gray-500 leading-relaxed mb-6">
+                                        Dibuat khusus secara handmade oleh UMKM Kriya Rajut. Setiap simpul dipastikan kuat dan rapi.
+                                    </p>
+
+                                    <div class="flex items-center gap-2 mb-6">
+                                        <span class="px-2 py-0.5 bg-green-50 text-green-700 text-[9px] font-bold uppercase tracking-wider border border-green-100">Tersedia</span>
+                                        <span class="text-[10px] text-gray-400">(10 pcs)</span>
+                                    </div>
+
+                                    <div class="mb-6">
+                                        <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Jumlah</span>
+                                        <div class="flex items-center w-28 border border-gray-300 rounded-full overflow-hidden h-8">
+                                            <button type="button" class="w-8 h-full flex items-center justify-center hover:bg-gray-100 border-r border-gray-300 font-bold transition-colors" onclick="this.parentNode.querySelector('input').stepDown()">-</button>
+                                            <input type="number" name="quantity" value="1" min="1" 
+                                                class="w-full border-none p-0 text-center text-xs focus:ring-0 font-bold bg-transparent">
+                                            <button type="button" class="w-8 h-full flex items-center justify-center hover:bg-gray-100 border-l border-gray-300 font-bold transition-colors" onclick="this.parentNode.querySelector('input').stepUp()">+</button>
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="w-full bg-[#001f3f] text-white py-3.5 rounded-full text-center hover:bg-gray-800 transition-all font-bold text-[10px] uppercase tracking-widest shadow-md">
+                                        + Tambah ke Keranjang
                                     </button>
-                                </form>
+                                </div>
                             </div>
-                        </div>
+                        </form>
+                        {{-- FORM END --}}
+                        
+                        {{-- Close Button --}}
+                        <button data-modal-hide="modal-produk-{{ $i }}" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -63,4 +122,35 @@
         @endfor
     </div>
 </div>
+
+<script>
+    /* Script animasi kategori */
+    document.addEventListener('DOMContentLoaded', function () {
+        const bgWrapper = document.getElementById('bg-kategori-wrapper');
+        const sensor = document.getElementById('sticky-sensor');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const isStuck = entry.boundingClientRect.top < 70;
+                if (isStuck) {
+                    bgWrapper.style.backgroundColor = "white";
+                    bgWrapper.style.boxShadow = "0 2px 4px rgba(0,0,0,0.05)";
+                    bgWrapper.style.width = "100vw";
+                    bgWrapper.style.position = "relative";
+                    bgWrapper.style.left = "50%";
+                    bgWrapper.style.marginLeft = "-50vw";
+                    bgWrapper.classList.replace('py-6', 'py-3');
+                } else {
+                    bgWrapper.style.backgroundColor = "transparent";
+                    bgWrapper.style.boxShadow = "none";
+                    bgWrapper.style.width = "100%";
+                    bgWrapper.style.left = "0";
+                    bgWrapper.style.marginLeft = "0";
+                    bgWrapper.classList.replace('py-3', 'py-6');
+                }
+            });
+        }, { rootMargin: '-70px 0px 0px 0px', threshold: [0, 1] });
+        observer.observe(sensor);
+    });
+</script>
 @endsection
