@@ -2,7 +2,6 @@
 
 @section('content')
 <div class="py-12 max-w-7xl mx-auto px-4 lg:px-0">
-    {{-- Header Halaman --}}
     <div class="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
             <span class="text-[10px] uppercase tracking-[0.5em] text-gray-400 mb-2 block">Konfirmasi Pesanan</span>
@@ -11,13 +10,11 @@
         <div class="h-[1px] flex-grow hidden md:block bg-gray-200 mb-2 ml-4"></div>
     </div>
 
-    {{-- Navigasi Kembali --}}
     <a href="/keranjang" class="mb-10 text-[10px] uppercase tracking-[0.2em] text-gray-400 hover:text-[#001f3f] transition-all font-bold flex items-center gap-2 group w-fit">
         <i class="fa-solid fa-arrow-left-long transition-transform group-hover:-translate-x-1"></i> Kembali ke Keranjang
     </a>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {{-- Form Data Pengiriman --}}
         <div class="lg:col-span-2 space-y-8">
             <div class="bg-white border border-gray-100 p-8 shadow-sm rounded-sm">
                 <h2 class="font-bold text-[11px] mb-8 uppercase tracking-[0.3em] text-[#001f3f] border-b border-gray-50 pb-4">
@@ -58,26 +55,22 @@
                     <div>
                         <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">Metode Pembayaran</label>
                         <select class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer">
-                            <option>Transfer Bank</option>
-                            <option>QRIS / E-Wallet</option>
+                            <option value="qris">QRIS / E-Wallet</option>
+                            <option value="transfer">Transfer Bank</option>
                         </select>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Ringkasan Pesanan --}}
         <div class="bg-white border border-gray-100 p-8 h-fit shadow-sm rounded-sm">
             <div class="flex justify-between items-center mb-8 border-b border-gray-50 pb-4">
-                <h3 class="font-bold text-[11px] uppercase tracking-[0.3em] text-[#001f3f]">
-                    Total Pembelian
-                </h3>
+                <h3 class="font-bold text-[11px] uppercase tracking-[0.3em] text-[#001f3f]">Total Pembelian</h3>
                 <button onclick="toggleDetail()" class="text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-black">
                     <span id="text-detail">Lihat Detail</span>
                 </button>
             </div>
             
-            {{-- Detail Produk Dinamis dari Session --}}
             <div id="detail-produk" class="hidden space-y-4 mb-8 animate-fadeIn">
                 @php $subtotal = 0; @endphp
                 @if(session('cart'))
@@ -106,7 +99,6 @@
                     <span class="text-gray-400 font-medium">Ongkos Kirim</span>
                     <span id="ongkir-display" class="font-bold text-gray-800">Rp 0</span>
                 </div>
-                
                 <div class="flex flex-col gap-1 pt-6 border-t border-gray-100">
                     <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Total Pembayaran</span>
                     <span id="total-bayar" class="text-xl font-bold text-[#001f3f]">Rp {{ number_format($subtotal, 0, ',', '.') }}</span>
@@ -114,7 +106,7 @@
             </div>
 
             <a href="/pembayaran" class="mt-8 block w-full text-center bg-[#001f3f] text-white py-4 rounded-full font-bold text-[10px] hover:bg-gray-800 shadow-md hover:shadow-xl transition-all uppercase tracking-[0.2em]">
-                Buat Pesanan Sekarang
+                LANJUT KE PEMBAYARAN
             </a>
         </div>
     </div>
@@ -146,10 +138,8 @@
         const ongkirDisplay = document.getElementById('ongkir-display');
         const totalDisplay = document.getElementById('total-bayar');
         const subtotal = parseInt(document.getElementById('subtotal-produk').getAttribute('data-harga'));
-        
         const ongkirBaru = parseInt(select.value);
         const totalBaru = subtotal + ongkirBaru;
-
         ongkirDisplay.innerText = 'Rp ' + ongkirBaru.toLocaleString('id-ID');
         totalDisplay.innerText = 'Rp ' + totalBaru.toLocaleString('id-ID');
     }

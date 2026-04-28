@@ -67,11 +67,10 @@
                 </div>
 
                 <div>
-                    <h3 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest mb-6">Navigasi</h3>
+                    <h3 class="text-[11px] font-bold text-gray-900 uppercase tracking-widest mb-6">Dukungan Pengguna</h3>
                     <ul class="space-y-3 text-[11px] text-gray-600 uppercase tracking-wider">
-                        <li><a href="{{ route('katalog') }}" class="hover:text-[#001f3f] transition-colors">Katalog Produk</a></li>
-                        <li><a href="/lacak-pesanan" class="hover:text-[#001f3f] transition-colors">Lacak Pesanan</a></li>
-                        <li><a href="#" class="hover:text-[#001f3f] transition-colors">Bantuan FAQ</a></li>
+                        <li><a href="/panduan" class="hover:text-[#001f3f] transition-colors">Panduan Pengguna</a></li>
+                        <li><a href="/FAQ" class="hover:text-[#001f3f] transition-colors">Bantuan FAQ</a></li>
                     </ul>
                 </div>
 

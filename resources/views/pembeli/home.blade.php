@@ -37,14 +37,34 @@
 </div>
 
 {{-- Grid Produk - 5 Kolom --}}
+@php
+$produk = [
+    ['file' => 'amigurumibebek-rajut.jpg', 'nama' => 'Amigurumi Bebek'],
+    ['file' => 'amigurumidoraemon-rajut.jpg', 'nama' => 'Amigurumi Doraemon'],
+    ['file' => 'amigurumimonster-rajut.jpg', 'nama' => 'Amigurumi Monster'],
+    ['file' => 'amigurumimouse-rajut.jpg', 'nama' => 'Amigurumi Mouse'],
+    ['file' => 'amigurumiSmurf&Smurfette-rajut.jpg', 'nama' => 'Amigurumi Smurf'],
+    ['file' => 'cermin-rajut.jpg', 'nama' => 'Cermin Rajut'],
+    ['file' => 'dompet-rajut.jpg', 'nama' => 'Dompet Rajut'],
+    ['file' => 'gantungankunci-rajut.jpg', 'nama' => 'Gantungan Kunci Rajut'],
+    ['file' => 'hiasanpotbunga-rajut.jpg', 'nama' => 'Hiasan Pot Bunga'],
+    ['file' => 'jepitrambut-rajut.jpg', 'nama' => 'Jepit Rambut Rajut'],
+    ['file' => 'setpakaiananakdino-rajut.jpg', 'nama' => 'Set Pakaian Anak Dino'],
+    ['file' => 'setpakaiananakjerapah-rajut.jpg', 'nama' => 'Set Pakaian Jerapah'],
+    ['file' => 'setpakaiananakpink-rajut.jpg', 'nama' => 'Set Pakaian Anak Pink'],
+    ['file' => 'setpakaiananaksapi-rajut.jpg', 'nama' => 'Set Pakaian Anak Sapi'],
+    ['file' => 'sweteranakpink-rajut.jpg', 'nama' => 'Sweater Anak Pink'],
+];
+@endphp
+
 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
-    @for ($i = 1; $i <= 15; $i++) 
+    @foreach($produk as $i => $p)
     <div class="group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
         <div class="w-full bg-gray-50 aspect-square mb-4 border border-gray-100 flex items-center justify-center overflow-hidden">
-            <img src="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig={{$i}}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="tas rajut">
+            <img src="{{ asset('images/produk/' . $p['file']) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $p['nama'] }}">
         </div>
         
-        <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">Tas Rajut {{ $i }}</h3>
+        <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">{{ $p['nama'] }}</h3>
         <p class="text-[10px] text-gray-400 my-2 italic px-2 leading-relaxed">Handmade premium quality.</p>
         
         <button data-modal-target="modal-produk-{{ $i }}" data-modal-toggle="modal-produk-{{ $i }}"
@@ -63,20 +83,20 @@
                         @csrf
                         {{-- Data Produk Tersembunyi --}}
                         <input type="hidden" name="id" value="{{ $i }}">
-                        <input type="hidden" name="nama" value="Tas Rajut {{ $i }}">
+                        <input type="hidden" name="nama" value="{{ $p['nama'] }}">
                         <input type="hidden" name="harga" value="150000">
-                        <input type="hidden" name="foto" value="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig={{$i}}">
+                        <input type="hidden" name="foto" value="{{ asset('images/produk/' . $p['file']) }}">
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                             {{-- Sisi Kiri: Foto --}}
                             <div class="aspect-square border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                <img src="https://plus.unsplash.com/premium_photo-1678120610667-27a944670c79?q=80&w=400&auto=format&fit=crop&sig={{$i}}" class="w-full h-full object-cover" alt="Detail Produk">
+                                <img src="{{ asset('images/produk/' . $p['file']) }}" class="w-full h-full object-cover" alt="{{ $p['nama'] }}">
                             </div>
 
                             {{-- Sisi Kanan: Detail --}}
                             <div class="flex flex-col">
                                 <div class="mb-4">
-                                    <h2 class="text-xl font-bold text-gray-900 mb-1 uppercase tracking-tight">Tas Rajut Premium {{ $i }}</h2>
+                                    <h2 class="text-xl font-bold text-gray-900 mb-1 uppercase tracking-tight">{{ $p['nama'] }}</h2>
                                     <p class="text-lg font-bold text-gray-700">Rp 150.000</p>
                                 </div>
                                 
@@ -117,6 +137,6 @@
             </div>
         </div>
     </div>
-    @endfor
+    @endforeach
 </div>
 @endsection

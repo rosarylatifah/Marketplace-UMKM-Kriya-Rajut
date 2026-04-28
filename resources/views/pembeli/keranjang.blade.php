@@ -77,7 +77,7 @@
             <p class="text-[9px] text-gray-400 italic mb-8">* Estimasi total belum termasuk biaya pengiriman (ongkir).</p>
             
             <a href="/checkout" class="block w-full text-center bg-[#001f3f] text-white py-4 rounded-full font-bold text-[10px] hover:bg-gray-800 shadow-md hover:shadow-xl transition-all uppercase tracking-[0.2em]">
-                Lanjut ke Pembayaran
+                BUAT PESANAN SEKARANG
             </a>
         </div>
     </div>
