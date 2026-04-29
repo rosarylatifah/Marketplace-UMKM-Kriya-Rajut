@@ -7,24 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-pink-50 flex items-center justify-center h-screen">
-    <div class="bg-white p-8 rounded-2xl shadow-xl border border-pink-100 w-full max-w-md">
+
+    <div class="bg-white p-8 rounded-none border border-gray-400 w-full max-w-sm">
+        
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-pink-600">Admin Login</h1>
-            <p class="text-gray-500">Marketplace UMKM Kriya Rajut</p>
+            <h1 class="text-2xl font-bold uppercase text-black tracking-widest">Admin Login</h1>
         </div>
-        <form action="/admin/dashboard" method="GET" class="space-y-6">
+
+        <form action="/admin/dashboard" method="GET" class="space-y-5">
             <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Email Admin</label>
-                <input type="email" class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:ring-pink-500 focus:border-pink-500" placeholder="admin@rajut.com" required>
+                <label class="block mb-1 text-xs font-bold text-gray-600 uppercase tracking-wider">Email Admin</label>
+                <input type="email" class="w-full px-3 py-2 rounded-none bg-gray-50 border border-gray-400 focus:ring-0 focus:border-black outline-none text-sm" placeholder="admin@rajut.com" required>
             </div>
             <div>
-                <label class="block mb-2 text-sm font-medium text-gray-700">Password</label>
-                <input type="password" class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-300 focus:ring-pink-500 focus:border-pink-500" placeholder="••••••••" required>
+                <label class="block mb-1 text-xs font-bold text-gray-600 uppercase tracking-wider">Password</label>
+                <input type="password" class="w-full px-3 py-2 rounded-none bg-gray-50 border border-gray-400 focus:ring-0 focus:border-black outline-none text-sm" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="w-full bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-lg transition-colors">
-                Masuk ke Panel
-            </button>
+            
+            <a href="/admin/dashboard" class="block w-full">
+                <button type="button" class="w-full bg-pink-600 hover:bg-pink-700 text-white border border-gray-400 font-bold py-3 rounded-none uppercase text-sm tracking-widest transition-colors">
+                    Masuk ke Panel
+                </button>
+            </a>
+
         </form>
     </div>
+
 </body>
 </html>

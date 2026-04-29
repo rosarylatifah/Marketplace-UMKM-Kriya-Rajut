@@ -8,20 +8,19 @@ class CartController extends Controller
 {
     public function index()
     {
-        return view('keranjang');
+        // Pastiin view-nya ada di folder resources/views/pembeli/keranjang.blade.php
+        return view('pembeli.keranjang');
     }
 
     public function katalog($category = 'Semua')
-{
-    // Kita capitalize supaya tampilannya rapi, misal: "pakaian" jadi "Pakaian"
-    $currentCategory = ucfirst($category);
-    
-return view('pembeli.katalog', compact('currentCategory'));}
+    {
+        $currentCategory = ucfirst($category);
+        return view('pembeli.katalog', compact('currentCategory'));
+    }
 
     public function store(Request $request)
     {
         $cart = session()->get('cart', []);
-
         $id = $request->id;
 
         if(isset($cart[$id])) {
@@ -36,8 +35,15 @@ return view('pembeli.katalog', compact('currentCategory'));}
         }
 
         session()->put('cart', $cart);
-        
-        // Redirect balik ke halaman sebelumnya dengan pesan sukses
         return redirect()->back()->with('success', 'Produk berhasil ditambah!');
+    }
+
+    // --- INI FUNGSI YANG TADI KETINGGALAN, ZAR! ---
+    public function checkout()
+    {
+        $cart = session()->get('cart', []);
+        
+        // Kirim data cart ke halaman checkout biar bisa di-looping tampilannya
+        return view('pembeli.checkout', compact('cart'));
     }
 }

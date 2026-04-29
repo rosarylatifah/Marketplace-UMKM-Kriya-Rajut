@@ -3,7 +3,7 @@
 @section('content')
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold text-gray-800">Kelola Kategori Produk</h1>
-    <button class="text-white bg-pink-600 hover:bg-pink-700 font-medium rounded-lg text-sm px-5 py-2.5">
+    <button class="text-white bg-pink-600 hover:bg-pink-600 font-medium rounded-lg text-sm px-5 py-2.5">
         + Tambah Kategori
     </button>
 </div>

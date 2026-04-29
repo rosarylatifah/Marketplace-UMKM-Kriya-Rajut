@@ -18,9 +18,14 @@
         <div class="h-full px-3 pb-4 overflow-y-auto">
             <ul class="space-y-2 font-medium">
                 <li><a href="/admin/dashboard" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Dashboard</a></li>
-                <li><a href="/admin/produk" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Kelola Produk</a></li>
-                <li><a href="/admin/pesanan" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Pesanan Masuk</a></li>
-                <li class="pt-4 mt-4 border-t border-gray-200"><a href="/" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded-lg font-bold">Log Out</a></li>
+                <li><a href="{{ route('admin.produk.index') }}" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Kelola Produk</a></li>
+                <li><a href="/admin/pesanan-masuk" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Pesanan Masuk</a></li>
+                <li><a href="/admin/pesanan-selesai" class="flex items-center p-2 text-gray-900 rounded-lg hover:bg-pink-50">Pesanan Selesai</a></li>
+                <li class="pt-4 mt-4 border-t border-gray-200">
+                    <a href="/admin/login" class="flex items-center p-2 text-red-600 hover:bg-red-50 rounded-lg font-bold">
+                    Log Out
+                </a>
+                </li>
             </ul>
         </div>
     </aside>
