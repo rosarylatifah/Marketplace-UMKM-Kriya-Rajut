@@ -74,7 +74,7 @@
         {{-- Info Pesanan --}}
         <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 24px;">
             <tr style="border-bottom: 1px solid #f3f5f1;">
-                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">No. Pesanan</td>
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Kode Pesanan</td>
                 <td style="padding: 12px 0; font-weight: 700; text-align: right;">#ORD-0012</td>
             </tr>
             <tr style="border-bottom: 1px solid #f3f5f1;">
@@ -83,15 +83,15 @@
             </tr>
             <tr style="border-bottom: 1px solid #f3f5f1;">
                 <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Nama Penerima</td>
-                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Nama Pembeli</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Rere Rosary</td>
             </tr>
             <tr style="border-bottom: 1px solid #f3f5f1;">
                 <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Alamat</td>
-                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Jl. Contoh No. 1, Kota</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Orchard Park, R22, Kota Batam, Kep. Riau</td>
             </tr>
             <tr style="border-bottom: 1px solid #f3f5f1;">
                 <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Produk</td>
-                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Tas Rajut Boboho</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">Tas Butterfly Rajut</td>
             </tr>
             <tr style="border-bottom: 1px solid #f3f5f1;">
                 <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Metode Pembayaran</td>
@@ -99,7 +99,7 @@
             </tr>
             <tr>
                 <td style="padding: 16px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Total Pembayaran</td>
-                <td style="padding: 16px 0; font-weight: 800; font-size: 16px; text-align: right;">Rp312.000</td>
+                <td style="padding: 16px 0; font-weight: 800; font-size: 16px; text-align: right;">Rp290.000</td>
             </tr>
         </table>
 

@@ -20,8 +20,8 @@
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Nomor Telepon</label>
-                <input type="text" name="phone" placeholder="08xxxxxxxxxx"
+                <label class="block text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2">Kode Pesanan</label>
+                <input type="text" name="kode" placeholder=" contoh: #ORD-0012"
                     class="w-full border border-gray-200 rounded-lg bg-[#F3F5F1] px-4 py-3.5 text-sm text-[#001f3f] placeholder-gray-300 focus:outline-none focus:border-[#001f3f] focus:bg-white transition-all duration-150">
             </div>
 

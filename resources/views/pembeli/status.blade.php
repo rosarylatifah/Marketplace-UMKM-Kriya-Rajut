@@ -1,70 +1,136 @@
 @extends('layouts.pembeli')
 
 @section('content')
-<div class="py-12 px-2">
-
-    {{-- Header --}}
+<div class="py-12 max-w-6xl mx-auto px-4 lg:px-0">
+    {{-- Header Halaman --}}
     <div class="mb-10">
-        <h1 class="text-[11px] uppercase tracking-[0.3em] text-gray-400 mb-2">Pesananmu</h1>
-        <p class="text-2xl font-bold text-[#001f3f] uppercase tracking-[0.15em]">Status Pesanan</p>
+        <span class="text-[10px] tracking-[0.5em] text-gray-400 mb-2 block">PESANANMU</span>
+        <h1 class="text-2xl font-bold text-[#001f3f] tracking-[0.2em]">STATUS PESANAN
         <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
     </div>
 
-    {{-- Daftar Pesanan --}}
-    <div class="space-y-4 mb-14">
-
-        {{-- Item 1 --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between gap-6 hover:shadow-sm transition-shadow duration-200">
-            <div class="flex items-center gap-6 flex-1 min-w-0">
-                <div class="w-20 h-20 flex-shrink-0 bg-[#F3F5F1] border border-gray-200 rounded-lg flex items-center justify-center">
-                    <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest text-center leading-relaxed">Foto<br>Produk</span>
+    {{-- Container Daftar Pesanan --}}
+    <div class="space-y-4">
+        @if(isset($pesanan) && count($pesanan) > 0)
+            @foreach($pesanan as $id => $details)
+            {{-- Card Melebar --}}
+            <div class="bg-white border border-gray-100 p-6 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-all">
+                
+                {{-- Foto Produk --}}
+                <div class="w-24 h-24 bg-gray-50 border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden rounded-lg">
+                    <img src="{{ $details['foto'] }}" class="w-full h-full object-cover" alt="{{ $details['nama'] }}">
                 </div>
-                <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-1">No. #ORD-0012</p>
-                    <h3 class="font-bold text-[#001f3f] text-base tracking-wide truncate">Tas Rajut Boboho</h3>
-                    <div class="flex items-center gap-2 mt-1.5">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <p class="text-xs text-emerald-600 font-medium italic">Dalam Perjalanan</p>
+
+                {{-- Info Produk --}}
+                <div class="flex-grow flex flex-col justify-between py-1 text-left">
+                    <div>
+                        <h3 class="font-bold text-sm text-[#001f3f] uppercase tracking-widest">
+                            {{ $details['nama'] }}
+                        </h3>
+                        
+                       {{-- Tombol Lihat Detail --}}
+<button 
+    class="btn-lihat-detail mt-1 text-[10px] tracking-widest font-bold text-[#001f3f] hover:underline block text-left"
+    data-nama="{{ $details['nama'] }}"
+    {{-- Ganti 'jumlah' menjadi 'quantity' --}}
+    data-total="{{ number_format($details['harga'] * ($details['quantity'] ?? 1), 0, ',', '.') }}"
+    data-deskripsi="{{ $details['deskripsi'] ?? 'Tidak ada deskripsi.' }}"
+    {{-- Ganti 'jumlah' menjadi 'quantity' --}}
+    data-jumlah="{{ $details['quantity'] ?? 1 }}"
+    data-foto="{{ $details['foto'] }}">
+    Lihat Detail
+</button>
+                    </div>
+
+                    {{-- Status Pesanan --}}
+                    <div class="mt-4 flex items-center gap-2">
+                        <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <p class="text-[10px] font-bold text-emerald-500 italic tracking-widest">Sedang diproses</p>
                     </div>
                 </div>
-            </div>
-            <a href="https://wa.me/6285778092881" target="_blank"
-                class="flex-shrink-0 flex items-center gap-2 border border-gray-300 bg-white hover:bg-[#001f3f] hover:text-white hover:border-[#001f3f] text-gray-700 px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-200">
-                <i class="fab fa-whatsapp text-sm"></i> Kontak Penjual
-            </a>
-        </div>
 
-        {{-- Item 2 --}}
-        <div class="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between gap-6 hover:shadow-sm transition-shadow duration-200">
-            <div class="flex items-center gap-6 flex-1 min-w-0">
-                <div class="w-20 h-20 flex-shrink-0 bg-[#F3F5F1] border border-gray-200 rounded-lg flex items-center justify-center">
-                    <span class="text-[8px] text-gray-400 font-bold uppercase tracking-widest text-center leading-relaxed">Foto<br>Produk</span>
-                </div>
-                <div class="min-w-0">
-                    <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-1">No. #ORD-0013</p>
-                    <h3 class="font-bold text-[#001f3f] text-base tracking-wide truncate">Dompet Mini Rajut</h3>
-                    <div class="flex items-center gap-2 mt-1.5">
-                        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                        <p class="text-xs text-emerald-600 font-medium italic">Dalam Perjalanan</p>
-                    </div>
+                {{-- Action Button (Kanan) --}}
+                <div class="flex-shrink-0 w-full md:w-auto">
+                    <a href="https://wa.me/628123456789" target="_blank"
+                        class="flex items-center justify-center gap-2 border border-gray-200 px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-gray-600 hover:bg-gray-50 transition-all w-full md:w-auto">
+                        <i class="fa-brands fa-whatsapp text-sm text-emerald-500"></i>
+                        Kontak Penjual
+                    </a>
                 </div>
             </div>
-            <a href="https://wa.me/6285778092881" target="_blank"
-                class="flex-shrink-0 flex items-center gap-2 border border-gray-300 bg-white hover:bg-[#001f3f] hover:text-white hover:border-[#001f3f] text-gray-700 px-5 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-200">
-                <i class="fab fa-whatsapp text-sm"></i> Kontak Penjual
-            </a>
-        </div>
-
+            @endforeach
+        @else
+            <div class="text-center py-20 bg-white border border-dashed border-gray-200 rounded-xl">
+                <p class="text-gray-400 text-[10px] tracking-[0.3em]">Belum ada data pesanan untuk dilacak</p>
+            </div>
+        @endif
     </div>
 
-    {{-- Tombol Mulai Belanja --}}
-    <div class="text-center">
-        <a href="{{ route('katalog') }}"
-            class="inline-flex items-center gap-3 bg-[#001f3f] hover:bg-[#003366] text-white font-bold uppercase tracking-[0.25em] text-[11px] px-12 py-4 rounded-full transition-all duration-200 shadow-md hover:shadow-lg">
-            <i class="fa-solid fa-bag-shopping text-sm"></i>
+    {{-- Tombol Kembali --}}
+    <div class="mt-12 text-center">
+        <a href="/katalog" class="bg-[#001f3f] text-white px-10 py-4 rounded-full text-[10px] font-bold tracking-[0.2em] shadow-lg hover:bg-gray-800 transition-all inline-flex items-center gap-3">
+            <i class="fa-solid fa-bag-shopping"></i>
             Mulai Belanja
         </a>
     </div>
-
 </div>
+
+{{-- MODAL DETAIL --}}
+<div id="modal-detail" 
+    class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="bg-white w-full max-w-2xl relative shadow-2xl flex flex-col md:flex-row">
+        <button onclick="tutupModalDetail()" class="absolute top-4 right-4 text-gray-400 hover:text-black z-10">
+            <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+
+        {{-- Bagian Foto --}}
+        <div class="w-full md:w-1/2 bg-gray-50 aspect-square flex items-center justify-center overflow-hidden">
+            <img id="detail-foto" src="" class="w-full h-full object-cover" alt="Foto">
+        </div>
+
+        {{-- Bagian Teks --}}
+        <div class="p-8 md:w-1/2 flex flex-col justify-center text-left">
+            <h2 id="detail-nama" class="text-lg font-bold text-[#001f3f] tracking-widest uppercase mb-1">Nama</h2>
+            <p id="detail-harga" class="text-xs font-bold text-gray-400 mb-4 italic">IDR 0</p>
+            <p id="detail-deskripsi" class="text-[11px] text-gray-500 leading-relaxed mb-6">Deskripsi...</p>
+            
+            {{-- Info Detail Pesanan --}}
+            <div class="pt-4 border-t border-gray-100 flex flex-col gap-1">
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Jumlah</span>
+                    <span id="detail-jumlah" class="text-[10px] font-bold text-[#001f3f]">0 Pcs</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-[9px] text-gray-400 font-bold uppercase tracking-widest">Total Bayar</span>
+                    <span id="detail-total" class="text-[10px] font-bold text-[#001f3f]">Rp 0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('.btn-lihat-detail').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const data = this.dataset;
+            
+            // Isi elemen modal dengan data dari tombol
+            document.getElementById('detail-nama').innerText = data.nama;
+            document.getElementById('detail-harga').innerText = 'IDR ' + data.total;
+            document.getElementById('detail-deskripsi').innerText = data.deskripsi;
+            document.getElementById('detail-foto').src = data.foto;
+            
+            // Isi data rincian pesanan
+            document.getElementById('detail-jumlah').innerText = data.jumlah + ' Pcs';
+            document.getElementById('detail-total').innerText = 'Rp ' + data.total;
+            
+            // Tampilkan modal
+            document.getElementById('modal-detail').classList.remove('hidden');
+        });
+    });
+
+    function tutupModalDetail() {
+        document.getElementById('modal-detail').classList.add('hidden');
+    }
+</script>
 @endsection

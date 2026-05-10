@@ -7,11 +7,23 @@ use Illuminate\Http\Request;
 
 class ProdukController extends Controller 
 {
-    public function index()
-    {
-        $produk = Produk::all(); 
-        return view('admin.kelola_produk', compact('produk')); 
-    }
+public function index($category = null)
+{
+    // Mapping dari slug URL ke Nama Kategori yang bagus
+    $categories = [
+        'semua' => 'Semua',
+        'pakaian' => 'Pakaian',
+        'aksesoris' => 'Aksesoris',
+        'dekorasi' => 'Dekorasi',
+        'amigurumi' => 'Amigurumi',
+        'tas-wadah' => 'Tas & Wadah'
+    ];
+
+    // Ambil nama kategori asli berdasarkan slug, kalau tidak ada default ke 'Semua'
+    $currentCategory = $categories[$category] ?? 'Semua';
+
+    return view('pembeli.katalog', compact('currentCategory'));
+}
 
     public function create()
     {

@@ -20,7 +20,7 @@ Route::view('/FAQ', 'pembeli.FAQ');
 Route::view('/panduan', 'pembeli.panduan');
 
 // Mengikuti struktur temen lu (Katalog & Keranjang di CartController)
-Route::get('/katalog/{category?}', [CartController::class, 'katalog'])->name('katalog');
+Route::get('/katalog/{category?}', [App\Http\Controllers\ProdukController::class, 'index'])->name('katalog');
 Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
 Route::post('/add-to-cart', [CartController::class, 'store'])->name('cart.store');
 Route::post('/update-cart', [CartController::class, 'update'])->name('cart.update');
@@ -28,10 +28,11 @@ Route::post('/remove-from-cart', [CartController::class, 'remove'])->name('cart.
 
 // Tracking & Status
 Route::view('/lacak-pesanan', 'pembeli.lacak');
-Route::view('/status-pesanan', 'pembeli.status');
+Route::get('/status-pesanan', [CartController::class, 'statusPesanan'])->name('status.pesanan');
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::view('/pembayaran', 'pembeli.pembayaran');
 Route::view('/berhasil', 'pembeli.berhasil');
+Route::post('/proses-checkout', [CartController::class, 'prosesCheckout'])->name('checkout.proses');
 
 /*
 |--------------------------------------------------------------------------
@@ -60,4 +61,9 @@ Route::prefix('admin')->group(function () {
     Route::delete('/hapus-pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.hapus');
     
     Route::view('/lihat-semua', 'admin.lihat_semua')->name('admin.lihat_semua');
+});
+
+Route::get('/clear-session', function () {
+    session()->flush();
+    return "Session sudah bersih! Silakan balik ke Katalog.";
 });

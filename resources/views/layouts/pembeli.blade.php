@@ -28,7 +28,7 @@
             <div class="hidden w-full md:block md:w-auto">
                 <ul class="flex flex-col md:flex-row md:space-x-10 md:items-center bg-transparent">
                     <li>
-                        <a href="/" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('/') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Home</a>
+                        <a href="/" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('/') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Beranda</a>
                     </li>
                     <li>
                         {{-- PERBAIKAN: Menggunakan named route 'katalog' agar parameter kategori bisa terbaca --}}
