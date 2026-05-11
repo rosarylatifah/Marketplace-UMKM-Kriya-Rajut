@@ -13,7 +13,7 @@ use App\Http\Controllers\PesananController;
 |--------------------------------------------------------------------------
 */
 
-Route::view('/', 'pembeli.home');
+Route::get('/', [App\Http\Controllers\ProdukController::class, 'home']);
 Route::view('/about', 'pembeli.about');
 Route::view('/hubungi', 'pembeli.hubungi');
 Route::view('/FAQ', 'pembeli.FAQ');

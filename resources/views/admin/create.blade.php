@@ -1,43 +1,45 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-black uppercase tracking-tight">Tambah Produk Baru</h1>
-    <p class="text-gray-500 text-sm">Input detail produk rajutan terbaru ke katalog Namonic</p>
+
+{{-- Header --}}
+<div class="mb-10">
+    <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-2">Manajemen</p>
+    <h1 class="text-2xl font-bold text-[#001f3f] uppercase tracking-[0.15em]">Tambah Produk Baru</h1>
+    <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
+    <p class="text-sm text-gray-400 mt-3">Input detail produk rajutan terbaru ke katalog.</p>
 </div>
 
-<div class="bg-white border border-black p-8 max-w-4xl">
-    {{-- ACTION diarahkan ke route store --}}
-    <form action="{{ route('admin.produk.store') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-white border border-gray-200 rounded-xl p-10 max-w-4xl">
+    <form action="{{ route('admin.produk.store') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-10">
         @csrf
-        <div class="space-y-4">
-            <label class="block text-xs font-bold text-black uppercase tracking-widest">Foto Produk</label>
-            {{-- Tambahin onclick biar pas kotak diklik, input filenya kebuka --}}
-            <div onclick="document.getElementById('input_foto').click()" class="border-2 border-dashed border-black w-full h-64 flex flex-col items-center justify-center bg-gray-50 group hover:bg-gray-100 transition-colors cursor-pointer">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4" />
-                </svg>
-                <span class="text-[10px] font-bold text-gray-500 uppercase" id="foto_label">Klik untuk Upload Gambar</span>
-                {{-- NAME WAJIB ADA: 'foto' --}}
+
+        {{-- Upload Foto --}}
+        <div class="space-y-3">
+            <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">Foto Produk</label>
+            <div onclick="document.getElementById('input_foto').click()"
+                class="border-2 border-dashed border-gray-200 w-full h-64 flex flex-col items-center justify-center bg-[#F3F5F1] hover:border-[#001f3f] hover:bg-white transition-all duration-150 cursor-pointer rounded-xl">
+                <i class="fa-regular fa-image text-3xl text-gray-300 mb-3"></i>
+                <span class="text-[11px] font-bold uppercase tracking-widest text-gray-400" id="foto_label">Klik untuk Upload Gambar</span>
                 <input type="file" name="foto" id="input_foto" class="hidden" onchange="updateLabel(this)">
             </div>
-            <p class="text-[10px] text-gray-400">Format: JPG, PNG. Maksimal 2MB.</p>
+            <p class="text-[10px] text-gray-300 uppercase tracking-widest">Format: JPG, PNG. Maksimal 2MB.</p>
         </div>
 
-        <div class="space-y-5">
+        {{-- Detail Produk --}}
+        <div class="space-y-6">
+
             <div>
-                <label class="block mb-1 text-xs font-bold text-black uppercase tracking-widest">Nama Produk</label>
-                {{-- Kelas 'uppercase' gue apus, biar sesuai inputan lu --}}
-                <input type="text" name="nama" required 
-                    class="w-full px-3 py-2 border border-black rounded-none focus:ring-0 focus:border-pink-600 outline-none text-sm font-semibold" 
-                    placeholder="Contoh: Tas Rajut Sakura">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Nama Produk</label>
+                <input type="text" name="nama" required placeholder="Contoh: Tas Rajut Sakura"
+                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-medium placeholder-gray-300 bg-transparent outline-none">
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-6">
                 <div>
-                    <label class="block mb-1 text-xs font-bold text-black uppercase tracking-widest">Kategori</label>
-                    {{-- NAME WAJIB ADA: 'kategori' --}}
-                    <select name="kategori" class="w-full px-3 py-2 border border-black rounded-none focus:ring-0 focus:border-pink-600 outline-none text-sm font-bold bg-white">
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Kategori</label>
+                    <select name="kategori"
+                        class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
                         <option value="TAS">Pakaian</option>
                         <option value="AKSESORIS">Aksesoris</option>
                         <option value="PAKAIAN">Dekorasi</option>
@@ -46,32 +48,35 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block mb-1 text-xs font-bold text-black uppercase tracking-widest">Stok</label>
-                    {{-- NAME WAJIB ADA: 'stok' --}}
-                    <input type="number" name="stok" required class="w-full px-3 py-2 border border-black rounded-none focus:ring-0 focus:border-pink-600 outline-none text-sm font-bold" placeholder="0">
+                    <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Stok</label>
+                    <input type="number" name="stok" required placeholder="0"
+                        class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-bold placeholder-gray-300 bg-transparent outline-none">
                 </div>
             </div>
 
             <div>
-                <label class="block mb-1 text-xs font-bold text-black uppercase tracking-widest">Harga (Rp)</label>
-                {{-- NAME WAJIB ADA: 'harga' --}}
-                <input type="number" name="harga" required class="w-full px-3 py-2 border border-black rounded-none focus:ring-0 focus:border-pink-600 outline-none text-sm font-bold text-pink-600" placeholder="0">
+                <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Harga (Rp)</label>
+                <input type="number" name="harga" required placeholder="0"
+                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-bold placeholder-gray-300 bg-transparent outline-none">
             </div>
 
             <div>
-                <label class="block mb-1 text-xs font-bold text-black uppercase tracking-widest">Deskripsi Singkat</label>
-                {{-- NAME WAJIB ADA: 'deskripsi' --}}
-                <textarea name="deskripsi" rows="3" class="w-full px-3 py-2 border border-black rounded-none focus:ring-0 focus:border-pink-600 outline-none text-sm" placeholder="Ceritakan detail rajutanmu..."></textarea>
+                <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Deskripsi Singkat</label>
+                <textarea name="deskripsi" rows="3" placeholder="Ceritakan detail rajutanmu..."
+                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 placeholder-gray-300 bg-transparent outline-none resize-none"></textarea>
             </div>
 
-            <div class="flex gap-3 pt-4">
-                <button type="submit" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 border border-black rounded-none uppercase text-xs tracking-widest transition-colors">
+            <div class="flex gap-3 pt-2">
+                <button type="submit"
+                    class="flex-1 bg-[#001f3f] hover:bg-[#003366] text-white font-bold py-3.5 rounded-full uppercase text-[11px] tracking-[0.25em] transition-all duration-200 shadow-md hover:shadow-lg">
                     Simpan Produk
                 </button>
-                <a href="{{ route('admin.produk.index') }}" class="px-6 bg-white hover:bg-gray-100 text-black border border-black rounded-none font-bold uppercase text-xs tracking-widest transition-colors flex items-center">
+                <a href="{{ route('admin.produk.index') }}"
+                    class="px-8 bg-white hover:bg-[#F3F5F1] text-[#001f3f] border border-gray-200 rounded-full font-bold uppercase text-[11px] tracking-[0.25em] transition-all duration-200 flex items-center">
                     Batal
                 </a>
             </div>
+
         </div>
     </form>
 </div>
@@ -83,4 +88,5 @@
         }
     }
 </script>
+
 @endsection

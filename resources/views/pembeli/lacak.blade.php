@@ -11,6 +11,12 @@
             <div class="mt-4 h-px w-12 bg-[#001f3f] mx-auto"></div>
         </div>
 
+        @if(session('error'))
+        <div class="mb-6 bg-red-50 border border-red-200 text-red-500 text-[11px] font-bold uppercase tracking-widest px-4 py-3 rounded-lg text-center">
+        {{ session('error') }}
+        </div>
+        @endif
+        
         {{-- Form --}}
         <form action="/status-pesanan" method="GET" class="space-y-6">
             <div>

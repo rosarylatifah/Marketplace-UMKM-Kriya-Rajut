@@ -1,79 +1,83 @@
 @extends('layouts.admin')
 
 @section('content')
-<div class="mb-8">
-    <h1 class="text-2xl font-bold text-black uppercase tracking-tight">Dashboard Admin</h1>
-    <p class="text-gray-500 text-sm">Selamat datang, Admin</p>
+
+{{-- Header --}}
+<div class="mb-10">
+    <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-2">Panel Admin</p>
+    <h1 class="text-2xl font-bold text-[#001f3f] uppercase tracking-[0.15em]">Dashboard</h1>
+    <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
+    <p class="text-sm text-gray-400 mt-3">Selamat datang kembali, Admin.</p>
 </div>
 
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-    <div class="p-5 bg-white border border-black rounded-none">
-        <h5 class="text-black text-sm font-semibold mb-3">Produk Tersedia</h5>
-        <p class="text-4xl font-bold mb-1">18</p>
-        <p class="text-xs text-gray-500 font-medium">dari 8 jenis produk</p>
+{{-- Stat Cards --}}
+<div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
+
+    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
+        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
+        <p class="text-[11px] text-gray-400">total produk aktif</p>
     </div>
 
-    <div class="p-5 bg-white border border-black rounded-none">
-        <h5 class="text-black text-sm font-semibold mb-3">Pesanan Terbaru</h5>
-        <p class="text-4xl font-bold mb-1">1</p>
-        <p class="text-xs text-gray-500 font-medium">Menunggu Konfirmasi</p>
+    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Baru</p>
+        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananBaru }}</p>
+        <p class="text-[11px] text-gray-400">Menunggu Konfirmasi</p>
     </div>
 
-    <div class="p-5 bg-white border border-black rounded-none">
-        <h5 class="text-black text-sm font-semibold mb-3">Pesanan Aktif</h5>
-        <p class="text-4xl font-bold mb-1">1</p>
-        <p class="text-xs text-gray-500 font-medium">Belum Dikirim</p>
+    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Aktif</p>
+        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananAktif }}</p>
+        <p class="text-[11px] text-gray-400">Sedang Diproses</p>
     </div>
 
-    <div class="p-5 bg-white border border-black rounded-none">
-        <h5 class="text-black text-sm font-semibold mb-3">Total Pendapatan</h5>
-        <p class="text-2xl font-bold mb-1">Rp600.000</p>
-        <p class="text-xs text-gray-500 font-medium">Bulan ini</p>
+    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
+        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Total Pendapatan</p>
+        <p class="text-2xl font-bold text-[#001f3f] mb-1">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
+        <p class="text-[11px] text-gray-400">Dari pesanan selesai</p>
     </div>
+
 </div>
 
-<div class="p-8 bg-white border border-black rounded-none">
-    <div class="flex justify-between items-center mb-8">
-        <h2 class="text-lg font-bold text-black uppercase">Aktivitas Terbaru</h2>
-        <a href="{{ url('/admin/lihat-semua') }}" class="text-sm font-medium text-black hover:underline">Lihat Semua</a>
+{{-- Aktivitas Terbaru --}}
+<div class="bg-white border border-gray-200 rounded-xl p-8">
+
+    <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+        <div>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-1">Riwayat</p>
+            <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-[0.2em]">Aktivitas Terbaru</h2>
+        </div>
+        <a href="/admin/pesanan-masuk" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-[#001f3f] transition-colors">
+            Lihat Semua
+        </a>
     </div>
 
-    <div class="space-y-4">
-        <div class="flex justify-between items-center p-5 bg-gray-100 border border-black">
+    <div class="divide-y divide-gray-100">
+        @forelse($aktivitas as $a)
+        <div class="flex justify-between items-center py-4 hover:bg-[#F3F5F1] px-4 rounded-lg transition-colors duration-150">
             <div>
-                <p class="font-bold text-black tracking-tight">ORD-1775410603875</p>
-                <p class="text-xs text-gray-600 mt-1">Budi Sanjaya</p>
-                <p class="text-xs text-gray-600">Rp312.000</p>
+                <p class="text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $a->id_pesanan }}</p>
+                <p class="text-xs text-gray-400 mt-1">{{ $a->nama_pembeli }} &nbsp;·&nbsp; Rp {{ number_format($a->total, 0, ',', '.') }}</p>
             </div>
             <div class="text-right">
-                <p class="font-bold text-xs uppercase tracking-widest text-black mb-1">Diproses</p>
-                <p class="text-[10px] text-gray-500 font-medium">12/02/2026</p>
+                @if($a->status == 'SEDANG DIPROSES')
+                    <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Diproses</span>
+                @elseif($a->status == 'DALAM PERJALANAN')
+                    <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dikirim</span>
+                @elseif($a->status == 'SELESAI')
+                    <span class="inline-block bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Selesai</span>
+                @endif
+                <p class="text-[10px] text-gray-300 mt-1">{{ $a->created_at->format('d/m/Y') }}</p>
             </div>
         </div>
-
-        <div class="flex justify-between items-center p-5 bg-gray-100 border border-black">
-            <div>
-                <p class="font-bold text-black tracking-tight">ORD-1775410603875</p>
-                <p class="text-xs text-gray-600 mt-1">Bayu Suwono</p>
-                <p class="text-xs text-gray-600">Rp740.000</p>
-            </div>
-            <div class="text-right">
-                <p class="font-bold text-xs uppercase tracking-widest text-black mb-1">Dikirim</p>
-                <p class="text-[10px] text-gray-500 font-medium">07/02/2026</p>
-            </div>
+        @empty
+        <div class="py-16 text-center">
+            <i class="fa-solid fa-chart-simple text-3xl text-gray-200 mb-3"></i>
+            <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada aktivitas</p>
         </div>
-
-        <div class="flex justify-between items-center p-5 bg-gray-100 border border-black">
-            <div>
-                <p class="font-bold text-black tracking-tight">ORD-1775410603875</p>
-                <p class="text-xs text-gray-600 mt-1">Lila Lolali</p>
-                <p class="text-xs text-gray-600">Rp125.000</p>
-            </div>
-            <div class="text-right">
-                <p class="font-bold text-xs uppercase tracking-widest text-black mb-1">Selesai</p>
-                <p class="text-[10px] text-gray-500 font-medium">22/01/2026</p>
-            </div>
-        </div>
+        @endforelse
     </div>
+
 </div>
+
 @endsection

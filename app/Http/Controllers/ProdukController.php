@@ -9,20 +9,30 @@ class ProdukController extends Controller
 {
 public function index($category = null)
 {
-    // Mapping dari slug URL ke Nama Kategori yang bagus
     $categories = [
-        'semua' => 'Semua',
-        'pakaian' => 'Pakaian',
+        'semua'     => 'Semua',
+        'pakaian'   => 'Pakaian',
         'aksesoris' => 'Aksesoris',
-        'dekorasi' => 'Dekorasi',
+        'dekorasi'  => 'Dekorasi',
         'amigurumi' => 'Amigurumi',
         'tas-wadah' => 'Tas & Wadah'
     ];
 
-    // Ambil nama kategori asli berdasarkan slug, kalau tidak ada default ke 'Semua'
     $currentCategory = $categories[$category] ?? 'Semua';
 
-    return view('pembeli.katalog', compact('currentCategory'));
+    if (request()->is('admin/*')) {
+        $produk = \App\Models\Produk::all();
+        return view('admin.kelola_produk', compact('produk'));
+    }
+
+    // Ambil dari database
+    if ($currentCategory == 'Semua') {
+        $produk = \App\Models\Produk::all();
+    } else {
+        $produk = \App\Models\Produk::where('kategori', strtoupper($currentCategory))->get();
+    }
+
+    return view('pembeli.katalog', compact('currentCategory', 'produk'));
 }
 
     public function create()
@@ -113,4 +123,9 @@ public function index($category = null)
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus!');
     }
-}
+    public function home()
+    {
+        $produk = \App\Models\Produk::latest()->take(10)->get();
+        return view('pembeli.home', compact('produk'));
+    }
+}   

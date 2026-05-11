@@ -29,17 +29,17 @@
                         </h3>
                         
                        {{-- Tombol Lihat Detail --}}
-<button 
-    class="btn-lihat-detail mt-1 text-[10px] tracking-widest font-bold text-[#001f3f] hover:underline block text-left"
-    data-nama="{{ $details['nama'] }}"
-    {{-- Ganti 'jumlah' menjadi 'quantity' --}}
-    data-total="{{ number_format($details['harga'] * ($details['quantity'] ?? 1), 0, ',', '.') }}"
-    data-deskripsi="{{ $details['deskripsi'] ?? 'Tidak ada deskripsi.' }}"
-    {{-- Ganti 'jumlah' menjadi 'quantity' --}}
-    data-jumlah="{{ $details['quantity'] ?? 1 }}"
-    data-foto="{{ $details['foto'] }}">
-    Lihat Detail
-</button>
+                        <button 
+                            class="btn-lihat-detail mt-1 text-[10px] tracking-widest font-bold text-[#001f3f] hover:underline block text-left"
+                            data-nama="{{ $details['nama'] }}"
+                            {{-- Ganti 'jumlah' menjadi 'quantity' --}}
+                            data-total="{{ number_format($details['harga'] * ($details['quantity'] ?? 1), 0, ',', '.') }}"
+                            data-deskripsi="{{ $details['deskripsi'] ?? 'Tidak ada deskripsi.' }}"
+                            {{-- Ganti 'jumlah' menjadi 'quantity' --}}
+                            data-jumlah="{{ $details['quantity'] ?? 1 }}"
+                            data-foto="{{ $details['foto'] }}">
+                            Lihat Detail
+                        </button>
                     </div>
 
                     {{-- Status Pesanan --}}
