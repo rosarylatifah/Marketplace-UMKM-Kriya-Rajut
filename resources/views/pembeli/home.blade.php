@@ -39,8 +39,10 @@
             <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $p->nama }}">
         </div>
 
-        <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">{{ $p->nama }}</h3>
-        <p class="text-[10px] text-gray-400 my-2 italic">Handmade premium quality.</p>
+        <h3 class="font-bold text-gray-800 text-[13px] uppercase tracking-wider">{{ $p->nama }}</h3>
+        <p class="text-[12px] font-bold text-gray-400 my-2 tracking-wide">
+            Rp {{ number_format($p->harga, 0, ',', '.') }}
+        </p>
 
         <button data-modal-target="modal-home-{{ $i }}" data-modal-toggle="modal-home-{{ $i }}"
             class="mt-auto w-full bg-[#001f3f] text-white text-[9px] py-2.5 rounded-full hover:bg-gray-800 transition-all uppercase font-bold tracking-widest shadow-sm">
@@ -59,11 +61,46 @@
                     <input type="hidden" name="deskripsi" value="{{ $p->deskripsi }}">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                        <img src="{{ asset('images/' . $p->foto) }}" class="w-full aspect-square object-cover border border-gray-100">
+                        
+                        {{-- PERUBAHAN UTAMA: Slider Foto Produk Multi Images --}}
+                        <div class="relative w-full aspect-square overflow-hidden border border-gray-100 group">
+                            <div class="flex transition-transform duration-500 ease-in-out h-full" id="slider-{{ $p->id }}">
+                                @if($p->fotos && $p->fotos->count() > 0)
+                                    @foreach($p->fotos as $foto)
+                                        <div class="w-full h-full flex-shrink-0">
+                                            <img src="{{ asset('images/' . $foto->nama_foto) }}" class="w-full h-full object-cover">
+                                        </div>
+                                    @endforeach
+                                @else
+                                    <div class="w-full h-full flex-shrink-0">
+                                        <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover">
+                                    </div>
+                                @endif
+                            </div>
+
+                            @if($p->fotos && $p->fotos->count() > 1)
+                                <button type="button" onclick="moveSlide('{{ $p->id }}', -1)" 
+                                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100 z-10">
+                                    &larr;
+                                </button>
+
+                                <button type="button" onclick="moveSlide('{{ $p->id }}', 1)" 
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100 z-10">
+                                    &rarr;
+                                </button>
+
+                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 px-2 py-1 rounded-full z-10">
+                                    @foreach($p->fotos as $index => $foto)
+                                        <span class="dot-{{ $p->id }} w-2 h-2 rounded-full bg-white/50 transition-all {{ $index === 0 ? '!bg-white w-4' : '' }}"></span>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
                         <div class="flex flex-col">
                             <h2 class="text-xl font-bold uppercase">{{ $p->nama }}</h2>
                             <p class="text-lg font-bold text-gray-700 mb-4">Rp {{ number_format($p->harga, 0, ',', '.') }}</p>
-                            <p class="text-[12px] text-gray-500 mb-4">{{ $p->deskripsi }}</p>
+                            <p class="text-[12px] text-gray-500 mb-4">{!! nl2br(e($p->deskripsi)) !!}</p>
 
                             <div class="flex items-center gap-2 mb-4">
                                 @if($p->stok > 0)
@@ -103,4 +140,38 @@
     </div>
     @endforelse
 </div>
+
+{{-- JAVASCRIPT SLIDER --}}
+<script>
+    const currentSlides = {};
+
+    function moveSlide(productId, direction) {
+        const slider = document.getElementById(`slider-${productId}`);
+        const totalSlides = slider.children.length;
+
+        if (currentSlides[productId] === undefined) {
+            currentSlides[productId] = 0;
+        }
+
+        currentSlides[productId] += direction;
+
+        if (currentSlides[productId] >= totalSlides) {
+            currentSlides[productId] = 0;
+        } else if (currentSlides[productId] < 0) {
+            currentSlides[productId] = totalSlides - 1;
+        }
+
+        const percentage = -(currentSlides[productId] * 100);
+        slider.style.transform = `translateX(${percentage}%)`;
+
+        const dots = document.querySelectorAll(`.dot-${productId}`);
+        dots.forEach((dot, index) => {
+            if (index === currentSlides[productId]) {
+                dot.classList.add('!bg-white', 'w-4');
+            } else {
+                dot.classList.remove('!bg-white', 'w-4');
+            }
+        });
+    }
+</script>
 @endsection

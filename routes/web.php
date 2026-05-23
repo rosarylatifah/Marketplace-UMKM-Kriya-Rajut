@@ -20,7 +20,7 @@ Route::view('/FAQ', 'pembeli.FAQ');
 Route::view('/panduan', 'pembeli.panduan');
 
 // Mengikuti struktur temen lu (Katalog & Keranjang di CartController)
-Route::get('/katalog/{category?}', [App\Http\Controllers\ProdukController::class, 'index'])->name('katalog');
+Route::get('/katalog/{category?}', [App\Http\Controllers\ProdukController::class, 'katalog'])->name('katalog');
 Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang');
 Route::post('/add-to-cart', [CartController::class, 'store'])->name('cart.store');
 Route::post('/update-cart', [CartController::class, 'update'])->name('cart.update');

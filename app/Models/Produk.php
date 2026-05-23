@@ -9,10 +9,12 @@ class Produk extends Model
 {
     use HasFactory;
 
-    // Ini biar Laravel tau nama tabelnya 'produks' (jamak dari Produk)
-    // Kalau di database kamu namanya 'produk', ganti jadi protected $table = 'produk';
     protected $table = 'produk';
+    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto']; // Kolom 'foto' lama kita biarkan sebagai foto utama/thumbnail
 
-    // Mass Assignment - Biar bisa input data sekaligus pake ::create()
-    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto'];
+    // Hubungkan ke tabel foto_produk
+    public function fotos()
+    {
+        return $this->hasMany(FotoProduk::class, 'produk_id');
+    }
 }

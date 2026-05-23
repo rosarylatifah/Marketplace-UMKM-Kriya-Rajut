@@ -3,36 +3,43 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\FotoProduk;
 use Illuminate\Http\Request;
 
 class ProdukController extends Controller 
 {
-public function index($category = null)
+    public function index($category = null)
 {
-    $categories = [
-        'semua'     => 'Semua',
-        'pakaian'   => 'Pakaian',
-        'aksesoris' => 'Aksesoris',
-        'dekorasi'  => 'Dekorasi',
-        'amigurumi' => 'Amigurumi',
-        'tas-wadah' => 'Tas & Wadah'
-    ];
+    // Mulai query dengan eager loading relasi 'fotos'
+    $query = Produk::with('fotos');
 
-    $currentCategory = $categories[$category] ?? 'Semua';
-
-    if (request()->is('admin/*')) {
-        $produk = \App\Models\Produk::all();
-        return view('admin.kelola_produk', compact('produk'));
+    // Jika ada kategori yang dipilih, lakukan filter (sesuaikan logika filter kategori kamu jika berbeda)
+    if ($category && $category !== 'semua') {
+        // Mengganti tanda strip kembali ke spasi/format asli jika diperlukan
+        $categoryName = str_replace('-', ' ', $category);
+        $query->where('kategori', $categoryName);
     }
 
-    // Ambil dari database
-    if ($currentCategory == 'Semua') {
-        $produk = \App\Models\Produk::all();
-    } else {
-        $produk = \App\Models\Produk::where('kategori', strtoupper($currentCategory))->get();
+    $produk = Produk::with('fotos')->get();
+    $currentCategory = $category ? ucwords(str_replace('-', ' ', $category)) : 'Semua';
+
+    return view('admin.kelola_produk', compact('produk', 'currentCategory'));
+}
+
+public function katalog($category = null)
+{
+    $query = Produk::with('fotos');
+
+    if ($category && $category !== 'semua') {
+        $categoryName = str_replace('-', ' ', $category);
+        $query->where('kategori', $categoryName);
     }
 
-    return view('pembeli.katalog', compact('currentCategory', 'produk'));
+    $produk = $query->get();
+    $currentCategory = $category ? ucwords(str_replace('-', ' ', $category)) : 'Semua';
+
+    // Wajib pakai pembeli.katalog karena filenya ada di dalam folder 'pembeli'
+    return view('pembeli.katalog', compact('produk', 'currentCategory'));
 }
 
     public function create()
@@ -41,35 +48,62 @@ public function index($category = null)
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required',
-            'kategori' => 'required',
-            'stok' => 'required|numeric',
-            'harga' => 'required|numeric',
-            'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
+{
+    // 1. Validasi input form admin
+    $request->validate([
+        'nama' => 'required',
+        'kategori' => 'required',
+        'stok' => 'required|numeric',
+        'harga' => 'required|numeric',
+        'deskripsi' => 'nullable',
+        'foto' => 'required|array', 
+        'foto.*' => 'image|mimes:jpeg,png,jpg|max:2048'
+    ]);
 
-        $nama_foto = time().'.'.$request->foto->extension();  
-        $request->foto->move(public_path('images'), $nama_foto);
+    // Tempat menampung nama file yang sukses di-upload
+    $uploaded_images = [];
 
-        Produk::create([
-            'nama' => $request->nama,
-            'kategori' => $request->kategori,
-            'stok' => $request->stok,
-            'harga' => $request->harga,
-            'deskripsi' => $request->deskripsi,
-            'foto' => $nama_foto,
-        ]);
-
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambah!');
+    // 2. Upload SEMUA foto terlebih dahulu ke folder public/images
+    if ($request->hasFile('foto')) {
+        foreach ($request->file('foto') as $index => $file_foto) {
+            // Buat nama file unik memakai timestamp dan index array
+            $nama_file = time() . '_' . $index . '_' . str_replace(' ', '_', $file_foto->getClientOriginalName());
+            
+            // Pindahkan file fisik ke folder public/images
+            $file_foto->move(public_path('images'), $nama_file);
+            
+            // Catat namanya ke dalam array pembantu
+            $uploaded_images[] = $nama_file;
+        }
     }
+
+    // 3. Ambil nama file pertama dari array untuk dijadikan foto utama produk
+    $foto_utama = !empty($uploaded_images) ? $uploaded_images[0] : null;
+
+    // 4. Simpan data produk ke tabel 'produk'
+    $produk = Produk::create([
+        'nama' => $request->nama,
+        'kategori' => $request->kategori,
+        'stok' => $request->stok,
+        'harga' => $request->harga,
+        'deskripsi' => $request->deskripsi,
+        'foto' => $foto_utama, // Berupa string nama file utama
+    ]);
+
+    // 5. Simpan semua daftar foto yang ada di array ke tabel relasi 'foto_produk'
+    foreach ($uploaded_images as $nama_img) {
+        \App\Models\FotoProduk::create([
+            'produk_id' => $produk->id,
+            'nama_foto' => $nama_img,
+        ]);
+    }
+
+    return redirect()->route('admin.produk.index')->with('success', 'Produk dan foto tambahan berhasil disimpan!');
+}
 
     public function edit($id)
     {
-        // Cari data produk yang mau diedit
         $produk = Produk::findOrFail($id);
-        // Lempar ke file produk_edit.blade.php
         return view('admin.produk_edit', compact('produk'));
     }
 
@@ -77,7 +111,6 @@ public function index($category = null)
     {
         $produk = Produk::findOrFail($id);
 
-        // Validasi data (foto nggak 'required' karena belum tentu user mau ganti foto)
         $request->validate([
             'nama' => 'required',
             'kategori' => 'required',
@@ -86,19 +119,15 @@ public function index($category = null)
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Logic kalau user upload foto baru
         if ($request->hasFile('foto')) {
-            // Hapus foto lama biar hemat storage
             if ($produk->foto && file_exists(public_path('images/' . $produk->foto))) {
                 unlink(public_path('images/' . $produk->foto));
             }
-            // Upload foto baru
             $nama_foto = time().'.'.$request->foto->extension();  
             $request->foto->move(public_path('images'), $nama_foto);
             $produk->foto = $nama_foto;
         }
 
-        // Update data lainnya
         $produk->update([
             'nama' => $request->nama,
             'kategori' => $request->kategori,
@@ -123,9 +152,10 @@ public function index($category = null)
 
         return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus!');
     }
+
     public function home()
     {
-        $produk = \App\Models\Produk::latest()->take(10)->get();
-        return view('pembeli.home', compact('produk'));
+        $produk = Produk::with('fotos')->get(); 
+        return view('pembeli.home', compact('produk')); 
     }
-}   
+}

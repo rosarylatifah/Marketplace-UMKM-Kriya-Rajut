@@ -16,14 +16,24 @@
 
         {{-- Upload Foto --}}
         <div class="space-y-3">
-            <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">Foto Produk</label>
+            <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">Foto Produk (Bisa Pilih Banyak)</label>
             <div onclick="document.getElementById('input_foto').click()"
                 class="border-2 border-dashed border-gray-200 w-full h-64 flex flex-col items-center justify-center bg-[#F3F5F1] hover:border-[#001f3f] hover:bg-white transition-all duration-150 cursor-pointer rounded-xl">
                 <i class="fa-regular fa-image text-3xl text-gray-300 mb-3"></i>
-                <span class="text-[11px] font-bold uppercase tracking-widest text-gray-400" id="foto_label">Klik untuk Upload Gambar</span>
-                <input type="file" name="foto" id="input_foto" class="hidden" onchange="updateLabel(this)">
+                <span class="text-[11px] font-bold uppercase tracking-widest text-gray-400 text-center px-4" id="foto_label">Klik untuk Upload Gambar</span>
+                
+                {{-- PERUBAHAN UTAMA: name="foto[]" berupa array dan ada atribut multiple --}}
+                <input type="file" name="foto[]" id="input_foto" class="hidden" multiple onchange="updateLabel(this)" required>
             </div>
-            <p class="text-[10px] text-gray-300 uppercase tracking-widest">Format: JPG, PNG. Maksimal 2MB.</p>
+            
+            @error('foto')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+            @error('foto.*')
+                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
+            
+            <p class="text-[10px] text-gray-300 uppercase tracking-widest">Format: JPG, PNG. Maksimal 2MB per file.</p>
         </div>
 
         {{-- Detail Produk --}}
@@ -40,11 +50,11 @@
                     <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Kategori</label>
                     <select name="kategori"
                         class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
-                        <option value="TAS">Pakaian</option>
+                        <option value="PAKAIAN">Pakaian</option>
                         <option value="AKSESORIS">Aksesoris</option>
-                        <option value="PAKAIAN">Dekorasi</option>
+                        <option value="DEKORASI">Dekorasi</option>
                         <option value="AMIGURUMI">Amigurumi</option>
-                        <option value="AMIGURUMI">Tas & Wadah</option>
+                        <option value="TAS & WADAH">Tas & Wadah</option>
                     </select>
                 </div>
                 <div>
@@ -82,9 +92,17 @@
 </div>
 
 <script>
+    // PERUBAHAN JAVASCRIPT: Menangani teks label untuk multiple files
     function updateLabel(input) {
-        if (input.files && input.files[0]) {
-            document.getElementById('foto_label').innerText = input.files[0].name;
+        const label = document.getElementById('foto_label');
+        if (input.files && input.files.length > 0) {
+            if (input.files.length === 1) {
+                label.innerText = input.files[0].name;
+            } else {
+                label.innerText = input.files.length + " Foto Terpilih";
+            }
+        } else {
+            label.innerText = "Klik untuk Upload Gambar";
         }
     }
 </script>
