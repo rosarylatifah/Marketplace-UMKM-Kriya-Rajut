@@ -9,10 +9,16 @@ class Produk extends Model
 {
     use HasFactory;
 
-    // Ini biar Laravel tau nama tabelnya 'produks' (jamak dari Produk)
-    // Kalau di database kamu namanya 'produk', ganti jadi protected $table = 'produk';
+    // Ini biar Laravel tau nama tabelnya 'produk'
     protected $table = 'produk';
 
     // Mass Assignment - Biar bisa input data sekaligus pake ::create()
-    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto'];
+    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto', 'ukuran', 'warna'];
+
+    // ================= KODE BARU: RELASI ONE-TO-MANY KE TABEL VARIASI =================
+    // Fungsi ini biar Produk bisa langsung manggil variasi-variasinya
+    public function variasis()
+    {
+        return $this->hasMany(ProdukVariasi::class, 'produk_id');
+    }
 }

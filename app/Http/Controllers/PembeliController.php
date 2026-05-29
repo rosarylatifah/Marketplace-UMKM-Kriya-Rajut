@@ -3,26 +3,18 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Produk; // <-- WAJIB IMPORT MODEL PRODUK LU DI SINI!
 
 class PembeliController extends Controller
 {
-    // --- INI FUNGSI UNTUK MENCETAK/AMBIL DATA (getData) ---
-    private function getDataProduk()
-    {
-        // Data ini nanti diambil dari database, tapi untuk praktikum bisa hardcode dulu
-        return [
-            ['nama' => 'Tas Rajut Sakura', 'harga' => 150000, 'foto' => 'sakura.jpg'],
-            ['nama' => 'Boneka Amigurumi', 'harga' => 45000, 'foto' => 'kelinci.jpg'],
-        ];
-    }
-
-    // --- INI FUNGSI UNTUK MENAMPILKAN VIEW ---
+    // --- INI FUNGSI UNTUK MENAMPILKAN VIEW KATALOG ---
     public function index()
     {
-        // Memanggil fungsi getData di atas
-        $produk = $this->getDataProduk();
+        // SEKARANG KITA AMBIL DATA ASLI DARI DATABASE BENERAN!
+        // Ambil semua data produk yang di-input admin lewat database
+        $produk = Produk::all();
 
-        // Mengirim data ke view 'pembeli.home'
-        return view('pembeli.home', compact('produk'));
+        // Mengirim data asli database ke view 'pembeli.katalog' (atau nama file katalog lu)
+        return view('pembeli.katalog', compact('produk'));
     }
 }

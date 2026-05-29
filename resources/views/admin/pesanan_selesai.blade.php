@@ -27,7 +27,6 @@
                     <th class="px-8 py-4">ID Pesanan</th>
                     <th class="px-8 py-4">Nama Pembeli</th>
                     <th class="px-8 py-4 text-center">Nama Barang</th>
-                    <th class="px-8 py-4 text-center">Jumlah Item</th>
                     <th class="px-8 py-4">Total</th>
                     <th class="px-8 py-4 text-center">Tanggal</th>
                 </tr>
@@ -38,9 +37,6 @@
                     <td class="px-8 py-4 text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $p->id_pesanan }}</td>
                     <td class="px-8 py-4 text-sm text-gray-700">{{ $p->nama_pembeli }}</td>
                     <td class="px-8 py-4 text-sm text-gray-700 text-center">{{ $p->nama_barang }}</td>
-                    <td class="px-8 py-4 text-center">
-                        <span class="text-sm font-bold text-[#001f3f]">{{ $p->jumlah ?? '1' }}</span>
-                    </td>
                     <td class="px-8 py-4 text-sm font-bold text-[#001f3f]">
                         Rp{{ number_format($p->total, 0, ',', '.') }}
                     </td>

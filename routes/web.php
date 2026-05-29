@@ -45,6 +45,7 @@ Route::prefix('admin')->group(function () {
     Route::view('/login', 'admin.login');
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::view('/kategori', 'admin.kategori');
+    Route::get('/lihat-semua', [App\Http\Controllers\PesananController::class, 'lihatSemua'])->name('admin.lihat_semua');
     
     // Kelola Produk (Kodingan Lu)
     Route::get('/produk-list', [ProdukController::class, 'index'])->name('admin.produk.index');
@@ -59,8 +60,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/pesanan-selesai', [PesananController::class, 'selesai'])->name('admin.pesanan.selesai');
     Route::put('/pesanan-update/{id}', [PesananController::class, 'update'])->name('pesanan.update');
     Route::delete('/hapus-pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.hapus');
-    
-    Route::view('/lihat-semua', 'admin.lihat_semua')->name('admin.lihat_semua');
+
 });
 
 Route::get('/clear-session', function () {

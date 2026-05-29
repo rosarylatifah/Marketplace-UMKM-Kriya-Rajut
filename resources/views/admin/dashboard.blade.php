@@ -47,7 +47,7 @@
             <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-1">Riwayat</p>
             <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-[0.2em]">Aktivitas Terbaru</h2>
         </div>
-        <a href="/admin/pesanan-masuk" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-[#001f3f] transition-colors">
+        <a href="/admin/lihat-semua" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-[#001f3f] transition-colors">
             Lihat Semua
         </a>
     </div>

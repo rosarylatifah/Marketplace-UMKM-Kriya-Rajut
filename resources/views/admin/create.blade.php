@@ -11,6 +11,19 @@
 </div>
 
 <div class="bg-white border border-gray-200 rounded-xl p-10 max-w-4xl">
+
+    {{-- TARUH DI SINI (DI ATAS FORM) --}}
+    @if ($errors->any())
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs">
+            <p class="font-bold uppercase tracking-wider mb-2">Waduh Zar, ada error di inputan lu nih:</p>
+            <ul class="list-disc list-inside space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.produk.store') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-10">
         @csrf
 
@@ -35,29 +48,54 @@
                     class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-medium placeholder-gray-300 bg-transparent outline-none">
             </div>
 
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Kategori</label>
-                    <select name="kategori"
-                        class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
-                        <option value="TAS">Pakaian</option>
-                        <option value="AKSESORIS">Aksesoris</option>
-                        <option value="PAKAIAN">Dekorasi</option>
-                        <option value="AMIGURUMI">Amigurumi</option>
-                        <option value="AMIGURUMI">Tas & Wadah</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Stok</label>
-                    <input type="number" name="stok" required placeholder="0"
-                        class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-bold placeholder-gray-300 bg-transparent outline-none">
-                </div>
+            <div>
+                <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Kategori</label>
+                <select name="kategori"
+                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
+                    <option value="PAKAIAN">Pakaian</option>
+                    <option value="AKSESORIS">Aksesoris</option>
+                    <option value="DEKORASI">Dekorasi</option>
+                    <option value="AMIGURUMI">Amigurumi</option>
+                    <option value="TAS">Tas & Wadah</option>
+                </select>
             </div>
 
-            <div>
-                <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Harga (Rp)</label>
-                <input type="number" name="harga" required placeholder="0"
-                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-bold placeholder-gray-300 bg-transparent outline-none">
+            {{-- ================= FORM MASUKAN VARIASI DINAMIS + HARGA (KODE PRO) ================= --}}
+            <div class="mb-4 bg-gray-50/50 p-4 border border-gray-100 rounded-xl">
+                <div class="flex items-center justify-between mb-3">
+                    <label class="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">Variasi Produk, Stok, & Harga</label>
+                    <button type="button" id="btn-tambah-variasi" 
+                            class="bg-[#001f3f] text-white text-[9px] font-bold uppercase tracking-widest px-2.5 py-1.5 rounded-md hover:bg-gray-800 transition-all shadow-sm">
+                        + Tambah Varian
+                    </button>
+                </div>
+
+                {{-- Tempat menampung baris variasi --}}
+                <div id="wrapper-variasi" class="space-y-3">
+                    <div class="flex flex-wrap md:flex-nowrap gap-2 items-center pb-2 item-variasi">
+                        <div class="w-full md:w-4/12">
+                            <input type="text" name="variasi[0][ukuran]" placeholder="Ukuran (S, M, All Size)" required
+                                class="w-full border border-gray-200 rounded p-1.5 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                        </div>
+                        <div class="w-full md:w-3/12">
+                            <input type="text" name="variasi[0][warna]" placeholder="Warna (Pink, Sage)" required
+                                class="w-full border border-gray-200 rounded p-1.5 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                        </div>
+                        <div class="w-full md:w-2/12">
+                            <input type="number" name="variasi[0][stok]" min="0" value="0" required title="Stok" placeholder="Stok"
+                                class="w-full border border-gray-200 rounded p-1.5 text-xs text-center font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                        </div>
+                        <div class="w-full md:w-3/12">
+                            <input type="number" name="variasi[0][harga]" min="0" placeholder="Harga (Rp)" required
+                                class="w-full border border-gray-200 rounded p-1.5 text-xs font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                        </div>
+                        <div class="w-auto">
+                            <button type="button" class="text-red-400 hover:text-red-600 text-[10px] font-bold uppercase px-1 btn-hapus-variasi">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -81,12 +119,67 @@
     </form>
 </div>
 
+{{-- ================= FULL LOGIKA JAVASCRIPT GABUNGAN ================= --}}
 <script>
+    // Fungsi bawaan temen lu untuk update label nama foto
     function updateLabel(input) {
         if (input.files && input.files[0]) {
             document.getElementById('foto_label').innerText = input.files[0].name;
         }
     }
+
+    // Fungsi dinamisasi variasi pro saat DOM siap
+    document.addEventListener('DOMContentLoaded', function () {
+        const wrapper = document.getElementById('wrapper-variasi');
+        const btnTambah = document.getElementById('btn-tambah-variasi');
+        let indexVariasi = 1;
+
+        // Aksi tambah baris variasi
+        btnTambah.addEventListener('click', function () {
+            const barisBaru = document.createElement('div');
+            barisBaru.className = "flex flex-wrap md:flex-nowrap gap-2 items-center pb-2 item-variasi";
+            // Ganti isi innerHTML di dalam script tambah variasi lu jadi gini:
+            barisBaru.innerHTML = `
+                <div class="w-full md:w-4/12">
+                    <input type="text" name="variasi[${indexVariasi}][ukuran]" placeholder="Ukuran (S, M, All Size)" required
+                        class="w-full border border-gray-200 rounded p-1.5 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                </div>
+                <div class="w-full md:w-3/12">
+                    <input type="text" name="variasi[${indexVariasi}][warna]" placeholder="Warna (Pink, Sage)" required
+                        class="w-full border border-gray-200 rounded p-1.5 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                </div>
+                <div class="w-full md:w-2/12">
+                    <input type="number" name="variasi[${indexVariasi}][stok]" min="0" value="0" required title="Stok" placeholder="Stok"
+                        class="w-full border border-gray-200 rounded p-1.5 text-xs text-center font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                </div>
+                <div class="w-full md:w-3/12">
+                    <input type="number" name="variasi[${indexVariasi}][harga]" min="0" placeholder="Harga (Rp)" required
+                        class="w-full border border-gray-200 rounded p-1.5 text-xs font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
+                </div>
+                <div class="w-auto">
+                    <button type="button" class="text-red-400 hover:text-red-600 text-[10px] font-bold uppercase px-1 btn-hapus-variasi">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `;
+            wrapper.appendChild(barisBaru);
+            indexVariasi++;
+        });
+
+        // Aksi hapus baris variasi
+        wrapper.addEventListener('click', function (e) {
+            // Cek apakah yang diklik tombol hapus atau icon tong sampah di dalamnya
+            if (e.target.classList.contains('btn-hapus-variasi') || e.target.closest('.btn-hapus-variasi')) {
+                const semuaBaris = wrapper.querySelectorAll('.item-variasi');
+                if (semuaBaris.length > 1) {
+                    const barisTarget = e.target.closest('.item-variasi');
+                    barisTarget.remove();
+                } else {
+                    alert('Minimal harus ada 1 variasi produk ya, Zar!');
+                }
+            }
+        });
+    });
 </script>
 
 @endsection

@@ -3,73 +3,95 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produk;
+use App\Models\ProdukVariasi;
 use Illuminate\Http\Request;
 
 class ProdukController extends Controller 
 {
-public function index($category = null)
-{
-    $categories = [
-        'semua'     => 'Semua',
-        'pakaian'   => 'Pakaian',
-        'aksesoris' => 'Aksesoris',
-        'dekorasi'  => 'Dekorasi',
-        'amigurumi' => 'Amigurumi',
-        'tas-wadah' => 'Tas & Wadah'
-    ];
+    public function index($category = null)
+    {
+        $categories = [
+            'semua'     => 'Semua',
+            'pakaian'   => 'Pakaian',
+            'aksesoris' => 'Aksesoris',
+            'dekorasi'  => 'Dekorasi',
+            'amigurumi' => 'Amigurumi',
+            'tas-wadah' => 'Tas & Wadah'
+        ];
 
-    $currentCategory = $categories[$category] ?? 'Semua';
+        $currentCategory = $categories[$category] ?? 'Semua';
 
-    if (request()->is('admin/*')) {
-        $produk = \App\Models\Produk::all();
-        return view('admin.kelola_produk', compact('produk'));
+        if (request()->is('admin/*')) {
+            $produk = \App\Models\Produk::all();
+            return view('admin.kelola_produk', compact('produk'));
+        }
+
+        // Ambil dari database
+        if ($currentCategory == 'Semua') {
+            $produk = \App\Models\Produk::all();
+        } else {
+            $produk = \App\Models\Produk::where('kategori', strtoupper($currentCategory))->get();
+        }
+
+        return view('pembeli.katalog', compact('currentCategory', 'produk'));
     }
-
-    // Ambil dari database
-    if ($currentCategory == 'Semua') {
-        $produk = \App\Models\Produk::all();
-    } else {
-        $produk = \App\Models\Produk::where('kategori', strtoupper($currentCategory))->get();
-    }
-
-    return view('pembeli.katalog', compact('currentCategory', 'produk'));
-}
 
     public function create()
     {
         return view('admin.create'); 
     }
 
+    // ================= LOGIKA STORE PRO (DUA TABEL + HARGA VARIASI) =================
     public function store(Request $request)
     {
+        // 1. Validasi murni tanpa 'harga' biasa
         $request->validate([
             'nama' => 'required',
             'kategori' => 'required',
-            'stok' => 'required|numeric',
-            'harga' => 'required|numeric',
             'foto' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'variasi' => 'required|array|min:1', 
         ]);
 
+        // 2. Proses upload file foto produk (pake gaya penamaan file lu)
         $nama_foto = time().'.'.$request->foto->extension();  
         $request->foto->move(public_path('images'), $nama_foto);
 
-        Produk::create([
+        // 3. Hitung total stok otomatis & ambil harga variasi pertama sebagai harga dasar
+        $totalStok = 0;
+        foreach ($request->variasi as $v) {
+            $totalStok += (int) $v['stok'];
+        }
+        $hargaDefault = $request->variasi[0]['harga'] ?? 0; // Buat pajangan di katalog luar sebelum di-klik detail
+
+        // 4. Simpan identitas umum ke tabel 'produk' utama
+        $produk = Produk::create([
             'nama' => $request->nama,
             'kategori' => $request->kategori,
-            'stok' => $request->stok,
-            'harga' => $request->harga,
+            'stok' => $totalStok, // Otomatis terisi total gabungan variasi
+            'harga' => $hargaDefault, // Terisi harga default dari variasi pertama
             'deskripsi' => $request->deskripsi,
             'foto' => $nama_foto,
+            'ukuran' => null, // Kita set null karena datanya pindah ke tabel variasi
+            'warna' => null,  // Kita set null karena datanya pindah ke tabel variasi
         ]);
 
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil ditambah!');
+        // 5. Looping buat simpan data variasi + harga spesifik ke tabel anak ('produk_variasi')
+        foreach ($request->variasi as $item) {
+            ProdukVariasi::create([
+                'produk_id' => $produk->id, // Mengikat ke ID produk utama yang baru aja kebuat di atas
+                'ukuran' => $item['ukuran'],
+                'warna' => $item['warna'],
+                'stok' => $item['stok'],
+                'harga' => $item['harga'], // <-- Menyimpan harga masing-masing variasi secara pro!
+            ]);
+        }
+
+        return redirect()->route('admin.produk.index')->with('success', 'Produk dan Variasi berharga berhasil ditambah!');
     }
 
     public function edit($id)
     {
-        // Cari data produk yang mau diedit
         $produk = Produk::findOrFail($id);
-        // Lempar ke file produk_edit.blade.php
         return view('admin.produk_edit', compact('produk'));
     }
 
@@ -77,55 +99,62 @@ public function index($category = null)
     {
         $produk = Produk::findOrFail($id);
 
-        // Validasi data (foto nggak 'required' karena belum tentu user mau ganti foto)
+        // 1. Validasi input umum & array variasi (tanpa harga/stok tunggal)
         $request->validate([
             'nama' => 'required',
             'kategori' => 'required',
-            'harga' => 'required|numeric',
-            'stok' => 'required|integer',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'variasi' => 'required|array|min:1',
         ]);
 
-        // Logic kalau user upload foto baru
+        // 2. Logic upload foto kalau diganti
         if ($request->hasFile('foto')) {
-            // Hapus foto lama biar hemat storage
             if ($produk->foto && file_exists(public_path('images/' . $produk->foto))) {
                 unlink(public_path('images/' . $produk->foto));
             }
-            // Upload foto baru
             $nama_foto = time().'.'.$request->foto->extension();  
             $request->foto->move(public_path('images'), $nama_foto);
             $produk->foto = $nama_foto;
         }
 
-        // Update data lainnya
+        // 3. Hitung ulang total stok otomatis & ambil harga dasar terbaru dari baris pertama variasi
+        $totalStok = 0;
+        foreach ($request->variasi as $v) {
+            $totalStok += (int) $v['stok'];
+        }
+        $hargaDefault = $request->variasi[0]['harga'] ?? 0;
+
+        // 4. Update data produk induk
         $produk->update([
             'nama' => $request->nama,
             'kategori' => $request->kategori,
-            'harga' => $request->harga,
-            'stok' => $request->stok,
+            'stok' => $totalStok, 
+            'harga' => $hargaDefault,
             'deskripsi' => $request->deskripsi,
             'foto' => $produk->foto,
+            'ukuran' => null, 
+            'warna' => null,   
         ]);
 
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil diupdate!');
-    }
+        // 5. SELESAIKAN DATA ANAK: Hapus variasi lama, lalu tulis ulang dengan variasi baru yang diedit
+        $produk->variasis()->delete(); 
 
-    public function destroy($id)
-    {
-        $produk = Produk::findOrFail($id);
-        
-        if ($produk->foto && file_exists(public_path('images/' . $produk->foto))) {
-            unlink(public_path('images/' . $produk->foto));
+        foreach ($request->variasi as $item) {
+            \App\Models\ProdukVariasi::create([
+                'produk_id' => $produk->id,
+                'ukuran' => $item['ukuran'],
+                'warna' => $item['warna'],
+                'stok' => $item['stok'],
+                'harga' => $item['harga'],
+            ]);
         }
 
-        $produk->delete();
-
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus!');
+        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil diperbarui dengan variasi baru, Zar!');
     }
+
     public function home()
     {
         $produk = \App\Models\Produk::latest()->take(10)->get();
         return view('pembeli.home', compact('produk'));
     }
-}   
+}

@@ -18,7 +18,9 @@ return new class extends Migration
             $table->integer('stok');    // TAMBAHIN INI
             $table->integer('harga');
             $table->text('deskripsi')->nullable(); // TAMBAHIN INI
-            $table->string('foto');    // TAMBAHIN INI
+            $table->string('foto');
+            $table->string('ukuran')->nullable()->comment('Contoh: S, M, L atau All Size atau Kecil, Besar');
+            $table->string('warna')->nullable()->comment('Contoh: Merah, Hitam, Sage');
             $table->timestamps();
         });
     }

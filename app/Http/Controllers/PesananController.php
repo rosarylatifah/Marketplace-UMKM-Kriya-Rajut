@@ -8,6 +8,11 @@ use App\Models\Produk;
 
 class PesananController extends Controller
 {   
+    public function lihatSemua()
+    {
+        $semua_pesanan = \App\Models\Pesanan::orderBy('created_at', 'desc')->get();
+        return view('admin.lihat_semua', compact('semua_pesanan'));
+    }
 
     public function index()
     {
