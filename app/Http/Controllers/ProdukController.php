@@ -89,6 +89,30 @@ class ProdukController extends Controller
         return redirect()->route('admin.produk.index')->with('success', 'Produk dan Variasi berharga berhasil ditambah!');
     }
 
+    // 3. Ambil nama file pertama dari array untuk dijadikan foto utama produk
+    $foto_utama = !empty($uploaded_images) ? $uploaded_images[0] : null;
+
+    // 4. Simpan data produk ke tabel 'produk'
+    $produk = Produk::create([
+        'nama' => $request->nama,
+        'kategori' => $request->kategori,
+        'stok' => $request->stok,
+        'harga' => $request->harga,
+        'deskripsi' => $request->deskripsi,
+        'foto' => $foto_utama, // Berupa string nama file utama
+    ]);
+
+    // 5. Simpan semua daftar foto yang ada di array ke tabel relasi 'foto_produk'
+    foreach ($uploaded_images as $nama_img) {
+        \App\Models\FotoProduk::create([
+            'produk_id' => $produk->id,
+            'nama_foto' => $nama_img,
+        ]);
+    }
+
+    return redirect()->route('admin.produk.index')->with('success', 'Produk dan foto tambahan berhasil disimpan!');
+}
+
     public function edit($id)
     {
         $produk = Produk::findOrFail($id);
@@ -154,7 +178,7 @@ class ProdukController extends Controller
 
     public function home()
     {
-        $produk = \App\Models\Produk::latest()->take(10)->get();
-        return view('pembeli.home', compact('produk'));
+        $produk = Produk::with('fotos')->get(); 
+        return view('pembeli.home', compact('produk')); 
     }
 }

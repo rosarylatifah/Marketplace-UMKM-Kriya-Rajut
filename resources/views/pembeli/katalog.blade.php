@@ -31,7 +31,7 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16 mt-6">
         @forelse($produk as $i => $p)
         <div class="group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
-            <div class="w-full bg-gray-50 aspect-square mb-4 border border-gray-50 flex items-center justify-center overflow-hidden">
+            <div class="w-full bg-gray-50 aspect-square mb-4 border border-gray-100 flex items-center justify-center overflow-hidden">
                 <img src="{{ asset('images/' . $p->foto) }}"
                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $p->nama }}">
             </div>
@@ -70,8 +70,40 @@
                             <input type="hidden" name="harga" class="input-harga-hidden" value="{{ $p->variasis->first()->harga ?? $p->harga }}">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                                <div class="aspect-square border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                                    <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                
+                                {{-- PERUBAHAN UTAMA: Slider Multi Images --}}
+                                <div class="relative w-full aspect-square overflow-hidden border border-gray-100 bg-gray-50 group">
+                                    <div class="flex transition-transform duration-500 ease-in-out h-full" id="slider-{{ $p->id }}">
+                                        @if($p->fotos && $p->fotos->count() > 0)
+                                            @foreach($p->fotos as $foto)
+                                                <div class="w-full h-full flex-shrink-0">
+                                                    <img src="{{ asset('images/' . $foto->nama_foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                                </div>
+                                            @endforeach
+                                        @else
+                                            <div class="w-full h-full flex-shrink-0">
+                                                <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    @if($p->fotos && $p->fotos->count() > 1)
+                                        <button type="button" onclick="moveSlide('{{ $p->id }}', -1)" 
+                                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100 z-10 font-bold">
+                                            &larr;
+                                        </button>
+
+                                        <button type="button" onclick="moveSlide('{{ $p->id }}', 1)" 
+                                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100 z-10 font-bold">
+                                            &rarr;
+                                        </button>
+
+                                        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 px-2 py-1 rounded-full z-10">
+                                            @foreach($p->fotos as $index => $foto)
+                                                <span class="dot-{{ $p->id }} w-2 h-2 rounded-full bg-white/50 transition-all {{ $index === 0 ? '!bg-white w-4' : '' }}"></span>
+                                            @endforeach
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <div class="flex flex-col">
@@ -157,6 +189,39 @@
 
 {{-- SCRIPT INTERAKTIF JAVASCRIPT LIVE UPDATE HARGA & STOK --}}
 <script>
+    // 1. SCRIPT UNTUK SLIDER MULTIPLE IMAGES
+    const currentSlides = {};
+
+    function moveSlide(productId, direction) {
+        const slider = document.getElementById(`slider-${productId}`);
+        const totalSlides = slider.children.length;
+
+        if (currentSlides[productId] === undefined) {
+            currentSlides[productId] = 0;
+        }
+
+        currentSlides[productId] += direction;
+
+        if (currentSlides[productId] >= totalSlides) {
+            currentSlides[productId] = 0;
+        } else if (currentSlides[productId] < 0) {
+            currentSlides[productId] = totalSlides - 1;
+        }
+
+        const percentage = -(currentSlides[productId] * 100);
+        slider.style.transform = `translateX(${percentage}%)`;
+
+        const dots = document.querySelectorAll(`.dot-${productId}`);
+        dots.forEach((dot, index) => {
+            if (index === currentSlides[productId]) {
+                dot.classList.add('!bg-white', 'w-4');
+            } else {
+                dot.classList.remove('!bg-white', 'w-4');
+            }
+        });
+    }
+
+    // 2. SCRIPT BAWAAN STICKY NAV KATEGORI
     document.addEventListener('DOMContentLoaded', function () {
         const modals = document.querySelectorAll('.container-modal-produk');
         

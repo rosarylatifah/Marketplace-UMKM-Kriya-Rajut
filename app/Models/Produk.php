@@ -11,6 +11,7 @@ class Produk extends Model
 
     // Ini biar Laravel tau nama tabelnya 'produk'
     protected $table = 'produk';
+    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto']; // Kolom 'foto' lama kita biarkan sebagai foto utama/thumbnail
 
     // Mass Assignment - Biar bisa input data sekaligus pake ::create()
     protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto', 'ukuran', 'warna'];
