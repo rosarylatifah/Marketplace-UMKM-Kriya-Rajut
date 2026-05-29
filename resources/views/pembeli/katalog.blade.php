@@ -11,23 +11,38 @@
 
     <div id="sticky-sensor" class="h-px w-full"></div>
 
+    {{-- KATEGORI NAV DENGAN FITUR SLIDER HORIZONTAL --}}
     <div id="nav-kategori" class="sticky top-[83px] z-[30] w-full transition-all duration-300">
         <div id="bg-kategori-wrapper" class="w-full border-t border-gray-100 transition-all duration-300 py-6">
-            <div id="container-kategori" class="flex flex-wrap justify-center gap-4 md:gap-8 max-w-7xl mx-auto px-6 transition-all duration-300">
-                @foreach(['Semua', 'Pakaian', 'Aksesoris', 'Dekorasi', 'Amigurumi', 'Tas & Wadah'] as $kategori)
-                @php
-                    $slug = strtolower(str_replace([' & ', ' '], ['-', '-'], $kategori));
-                    $isActive = (isset($currentCategory) && $currentCategory == $kategori) || (!isset($currentCategory) && $kategori == 'Semua');
-                @endphp
-                <a href="{{ route('katalog', $slug) }}"
-                   class="text-[11px] font-bold uppercase tracking-widest transition-colors {{ $isActive ? 'text-[#001f3f] underline underline-offset-8' : 'text-gray-500 hover:text-[#001f3f]' }}">
-                    {{ $kategori }}
-                </a>
-                @endforeach
+            <div class="relative max-w-4xl mx-auto px-8 group/nav">
+                
+                <button id="nav-prev" class="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm">
+                    &larr;
+                </button>
+
+                <div id="container-kategori" class="flex items-center gap-6 md:gap-10 overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar px-2" style="-webkit-overflow-scrolling: touch;">
+                    @foreach(['Semua', 'Pakaian', 'Aksesoris', 'Dekorasi', 'Amigurumi', 'Tas & Wadah'] as $kategori)
+                    @php
+                        $slug = strtolower(str_replace([' & ', ' '], ['-', '-'], $kategori));
+                        $isActive = (isset($currentCategory) && $currentCategory == $kategori) || (!isset($currentCategory) && $kategori == 'Semua');
+                    @endphp
+                    <a href="{{ route('katalog', $slug) }}"
+                       class="inline-block text-[11px] font-bold uppercase tracking-widest transition-all {{ $isActive ? 'text-[#001f3f] underline underline-offset-8 decoration-2' : 'text-gray-400 hover:text-[#001f3f]' }}">
+                        {{ $kategori }}
+                    </a>
+                    @endforeach
+                </div>
+
+                <button id="nav-next" class="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm">
+                    &rarr;
+                </button>
+
+                <div class="absolute right-6 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none md:hidden"></div>
             </div>
         </div>
     </div>
 
+    {{-- GRID PRODUK --}}
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-16 mt-6">
         @forelse($produk as $i => $p)
         <div class="group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
@@ -55,8 +70,8 @@
 
             {{-- Modal Detail Produk Berbasis Relasi Variasi --}}
             <div id="modal-produk-{{ $i }}" tabindex="-1" aria-hidden="true"
-                class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-full bg-black/60 backdrop-blur-sm container-modal-produk">
-                <div class="relative p-4 w-full max-w-3xl h-auto">
+                class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/60 backdrop-blur-sm container-modal-produk p-4">
+                <div class="relative w-full max-w-3xl h-auto">
                     <div class="relative bg-white border border-gray-300 p-6 md:p-8 shadow-2xl">
 
                         <form action="{{ route('cart.store') }}" method="POST">
@@ -65,18 +80,16 @@
                             <input type="hidden" name="nama" value="{{ $p->nama }}">
                             <input type="hidden" name="foto" value="{{ asset('images/' . $p->foto) }}">
                             <input type="hidden" name="deskripsi" value="{{ $p->deskripsi }}">
-                            
-                            {{-- Input Hidden Penampung Harga Aktif --}}
                             <input type="hidden" name="harga" class="input-harga-hidden" value="{{ $p->variasis->first()->harga ?? $p->harga }}">
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                                 
-                                {{-- PERUBAHAN UTAMA: Slider Multi Images --}}
+                                {{-- Slider Multi Images --}}
                                 <div class="relative w-full aspect-square overflow-hidden border border-gray-100 bg-gray-50 group">
                                     <div class="flex transition-transform duration-500 ease-in-out h-full" id="slider-{{ $p->id }}">
                                         @if($p->fotos && $p->fotos->count() > 0)
-                                            @foreach($p->fotos as $foto)
-                                                <div class="w-full h-full flex-shrink-0">
+                                            @foreach($p->fotos as $indexFoto => $foto)
+                                                <div class="w-full h-full flex-shrink-0" data-index-foto="{{ $indexFoto }}">
                                                     <img src="{{ asset('images/' . $foto->nama_foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
                                                 </div>
                                             @endforeach
@@ -109,8 +122,6 @@
                                 <div class="flex flex-col">
                                     <div class="mb-4">
                                         <h2 class="text-xl font-bold text-gray-900 mb-1 uppercase tracking-tight">{{ $p->nama }}</h2>
-                                        
-                                        {{-- Display Harga Live --}}
                                         <p class="text-lg font-bold text-[#001f3f] text-display-harga">
                                             Rp {{ number_format($p->variasis->first()->harga ?? $p->harga, 0, ',', '.') }}
                                         </p>
@@ -118,17 +129,26 @@
 
                                     <p class="text-[12px] text-gray-500 leading-relaxed mb-4">{{ $p->deskripsi }}</p>
 
-                                    {{-- Opsi Pilihan Variasi --}}
                                     <div class="mb-4">
                                         <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Pilih Variasi Produk</span>
                                         <div class="flex flex-wrap gap-2">
                                             @forelse($p->variasis as $keyVar => $v)
+                                                {{-- HITUNG INDEX FOTO UNTUK JEMBATAN SLIDER --}}
+                                                @php
+                                                    $fotoIndex = 0;
+                                                    if($p->fotos && $v->foto) {
+                                                        $fotoIndex = $p->fotos->pluck('nama_foto')->search($v->foto);
+                                                        if($fotoIndex === false) { $fotoIndex = 0; }
+                                                    }
+                                                @endphp
+
                                                 <label class="cursor-pointer">
                                                     <input type="radio" name="produk_variasi_id" value="{{ $v->id }}" class="peer hidden radio-variasi" 
-                                                           data-harga="{{ $v->harga }}" 
-                                                           data-stok="{{ $v->stok }}"
-                                                           {{ $keyVar == 0 ? 'checked' : '' }}
-                                                           {{ $v->stok == 0 ? 'disabled' : '' }}>
+                                                    data-harga="{{ $v->harga }}" 
+                                                    data-stok="{{ $v->stok }}"
+                                                    data-index-foto="{{ $fotoIndex }}"
+                                                    {{ $keyVar == 0 ? 'checked' : '' }}
+                                                    {{ $v->stok == 0 ? 'disabled' : '' }}>
                                                     
                                                     <span class="block border border-gray-200 rounded-md px-3 py-1.5 text-[11px] font-medium text-gray-600 peer-checked:border-[#001f3f] peer-checked:text-[#001f3f] peer-checked:bg-blue-50/30 hover:bg-gray-50 transition-all peer-disabled:bg-gray-100 peer-disabled:text-gray-300 peer-disabled:border-gray-200 peer-disabled:cursor-not-allowed">
                                                         {{ $v->ukuran }} - {{ $v->warna }} 
@@ -141,13 +161,11 @@
                                         </div>
                                     </div>
 
-                                    {{-- Live Info Stok Badge --}}
                                     <div class="flex items-center gap-2 mb-4 font-bold text-[10px]">
                                         <span class="text-gray-400 uppercase tracking-widest">Ketersediaan Varian:</span>
                                         <span class="badge-status-stok text-gray-800">Menghitung...</span>
                                     </div>
 
-                                    {{-- Input Jumlah Kuantitas --}}
                                     <div class="mb-6">
                                         <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Jumlah</span>
                                         <div class="flex items-center w-28 border border-gray-300 rounded-full overflow-hidden h-8">
@@ -157,7 +175,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Tombol Action --}}
                                     @if($p->variasis->count() > 0)
                                         <button type="submit" class="w-full btn-submit-keranjang bg-[#001f3f] text-white py-3.5 rounded-full text-center hover:bg-gray-800 transition-all font-bold text-[10px] uppercase tracking-widest shadow-md disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
                                             + Tambah ke Keranjang
@@ -179,7 +196,7 @@
             </div>
         </div>
         @empty
-        <div class="col-span-5 py-20 text-center">
+        <div class="col-span-2 md:col-span-3 lg:col-span-5 py-20 text-center">
             <i class="fa-solid fa-box-open text-4xl text-gray-200 mb-4"></i>
             <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada produk di kategori ini</p>
         </div>
@@ -187,33 +204,35 @@
     </div>
 </div>
 
-{{-- SCRIPT INTERAKTIF JAVASCRIPT LIVE UPDATE HARGA & STOK --}}
+{{-- STYLE HIDE SCROLLBAR --}}
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
 <script>
-    // 1. SCRIPT UNTUK SLIDER MULTIPLE IMAGES
     const currentSlides = {};
 
-    function moveSlide(productId, direction) {
+    // Fungsi utama penggerak slide (bisa dipanggil tombol manual atau klik variasi)
+    function goToSlide(productId, slideIndex) {
         const slider = document.getElementById(`slider-${productId}`);
+        if (!slider) return;
+
         const totalSlides = slider.children.length;
 
-        if (currentSlides[productId] === undefined) {
-            currentSlides[productId] = 0;
-        }
+        // Validasi batasan index
+        if (slideIndex >= totalSlides) slideIndex = 0;
+        if (slideIndex < 0) slideIndex = totalSlides - 1;
 
-        currentSlides[productId] += direction;
+        currentSlides[productId] = slideIndex;
 
-        if (currentSlides[productId] >= totalSlides) {
-            currentSlides[productId] = 0;
-        } else if (currentSlides[productId] < 0) {
-            currentSlides[productId] = totalSlides - 1;
-        }
-
-        const percentage = -(currentSlides[productId] * 100);
+        const percentage = -(slideIndex * 100);
         slider.style.transform = `translateX(${percentage}%)`;
 
+        // Update indikator dot bulat-bulat
         const dots = document.querySelectorAll(`.dot-${productId}`);
         dots.forEach((dot, index) => {
-            if (index === currentSlides[productId]) {
+            if (index === slideIndex) {
                 dot.classList.add('!bg-white', 'w-4');
             } else {
                 dot.classList.remove('!bg-white', 'w-4');
@@ -221,7 +240,24 @@
         });
     }
 
-    // 2. SCRIPT BAWAAN STICKY NAV KATEGORI
+    // Fungsi tombol manual panah kiri-kanan
+    function moveSlide(productId, direction) {
+        if (currentSlides[productId] === undefined) {
+            currentSlides[productId] = 0;
+        }
+        const nextSlide = currentSlides[productId] + direction;
+        goToSlide(productId, nextSlide);
+    }
+
+    // SCRIPT INTERAKSI SLIDER HORIZONTAL MENU KATEGORI
+    document.getElementById('nav-next').addEventListener('click', function() {
+        document.getElementById('container-kategori').scrollLeft += 150;
+    });
+    document.getElementById('nav-prev').addEventListener('click', function() {
+        document.getElementById('container-kategori').scrollLeft -= 150;
+    });
+
+    // LOGIKA LIVE HARGA, STOK, & AUTOMATIC SLIDER ON VARIANT CLICK
     document.addEventListener('DOMContentLoaded', function () {
         const modals = document.querySelectorAll('.container-modal-produk');
         
@@ -232,26 +268,37 @@
             const badgeStok = modal.querySelector('.badge-status-stok');
             const inputQty = modal.querySelector('.input-quantity');
             const btnSubmit = modal.querySelector('.btn-submit-keranjang');
+            
+            // Ambil ID produk dari ID form atau elemen terdekat
+            const hiddenIdInput = modal.querySelector('input[name="id"]');
+            const productId = hiddenIdInput ? hiddenIdInput.value : null;
 
-            function updateModalState() {
+            function updateModalState(isVariantChanged = false) {
                 const selectedRadio = modal.querySelector('.radio-variasi:checked');
                 
                 if (selectedRadio) {
                     const harga = parseInt(selectedRadio.getAttribute('data-harga'));
                     const stok = parseInt(selectedRadio.getAttribute('data-stok'));
+                    const targetFotoIndex = parseInt(selectedRadio.getAttribute('data-index-foto')) || 0;
 
-                    // Ganti nominal harga live & sync hidden input
                     displayHarga.innerText = 'Rp ' + harga.toLocaleString('id-ID');
                     hiddenHarga.value = harga;
 
-                    // Batasi max counter input sesuai stok variasi aktif
-                    inputQty.setAttribute('max', stok);
-                    if (parseInt(inputQty.value) > stok) {
-                        inputQty.value = stok;
+                    // GANTI FOTO SLIDER OTOMATIS KE VARIANT TERPILIH
+                    if (isVariantChanged && productId) {
+                        goToSlide(productId, targetFotoIndex);
                     }
-                    if (stok === 0) inputQty.value = 0;
 
-                    // Update badge informasi stok & status tombol add to cart
+                    inputQty.setAttribute('max', stok);
+                    
+                    if (isVariantChanged) {
+                        inputQty.value = stok > 0 ? 1 : 0;
+                    } else {
+                        if (parseInt(inputQty.value) > stok) inputQty.value = stok;
+                        if (parseInt(inputQty.value) < 1 && stok > 0) inputQty.value = 1;
+                        if (stok === 0) inputQty.value = 0;
+                    }
+
                     if (stok > 0) {
                         badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-green-50 text-green-700 border border-green-100 rounded">Tersedia (${stok} Pcs)</span>`;
                         if(btnSubmit) {
@@ -265,21 +312,34 @@
                             btnSubmit.innerText = 'Stok Varian Habis';
                         }
                     }
-                } else {
-                    if(badgeStok) badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Habis</span>`;
-                    if(btnSubmit) btnSubmit.disabled = true;
                 }
             }
 
+            if (inputQty) {
+                inputQty.addEventListener('input', function() {
+                    const max = parseInt(this.getAttribute('max')) || 0;
+                    let current = parseInt(this.value);
+                    if (current > max) this.value = max;
+                });
+
+                inputQty.addEventListener('blur', function() {
+                    const max = parseInt(this.getAttribute('max')) || 0;
+                    let current = parseInt(this.value);
+                    if (isNaN(current) || current < 1) {
+                        this.value = max > 0 ? 1 : 0;
+                    }
+                });
+            }
+
             radios.forEach(radio => {
-                radio.addEventListener('change', updateModalState);
+                radio.addEventListener('change', () => updateModalState(true));
             });
 
-            // Trigger kalkulasi awal pas modal dibuka
-            updateModalState();
+            // Inisialisasi awal saat modal dibuka (bisa langsung ke index varian default)
+            updateModalState(false); 
         });
 
-        // --- CODE STICKY SENSOR DARI KODE LAMA LU ---
+        // STICKY DETECTOR OBSERVER (Tetap sama seperti punyamu)
         const bgWrapper = document.getElementById('bg-kategori-wrapper');
         const sensor = document.getElementById('sticky-sensor');
         const observer = new IntersectionObserver((entries) => {
@@ -293,6 +353,7 @@
                     bgWrapper.style.left = "50%";
                     bgWrapper.style.marginLeft = "-50vw";
                     bgWrapper.classList.replace('py-6', 'py-3');
+                    bgWrapper.style.width = "100vw";
                 } else {
                     bgWrapper.style.backgroundColor = "transparent";
                     bgWrapper.style.boxShadow = "none";
@@ -309,13 +370,9 @@
     function checkMaxQuantity(button) {
         const input = button.parentNode.querySelector('.input-quantity');
         const max = parseInt(input.getAttribute('max')) || 1;
-        const current = parseInt(input.value);
-        if (current > max) {
-            input.value = max;
-        }
-        if (current < 1 && max > 0) {
-            input.value = 1;
-        }
+        let current = parseInt(input.value);
+        if (current > max) input.value = max;
+        if (current < 1 && max > 0) input.value = 1;
     }
 </script>
 @endsection

@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('produk_variasi', function (Blueprint $table) {
             $table->id();
-            // Menghubungkan ke tabel produk utama lu
-            // Pastiin nama tabel produk lu emang 'produks' atau 'produk' (sesuaiin di constrained)
             $table->foreignId('produk_id')->constrained('produk')->onDelete('cascade');
             
             $table->string('ukuran')->nullable(); // Misal: M
             $table->string('warna')->nullable();  // Misal: Pink
             $table->integer('stok')->default(0);  // Stok khusus buat M + Pink
+            $table->integer('harga')->default(0); // Harga spesifik tiap variasi
+            $table->string('foto')->nullable();   // <-- FOTO SPESIFIK VARIASI DI SINI, ZAR!
             $table->timestamps();
         });
     }

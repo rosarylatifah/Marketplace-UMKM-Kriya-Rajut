@@ -1,46 +1,87 @@
 @extends('layouts.pembeli')
 
 @section('content')
+
+{{-- 1. HERO BANNER SLIDER (OTOMATIS & MANUAL) --}}
 <div class="relative bg-white w-screen left-1/2 -translate-x-1/2 border-b border-gray-100 overflow-hidden mb-12 shadow-sm">
-    <div class="flex flex-col md:flex-row items-center">
-        <div class="md:w-1/2 p-12 md:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:p-20 z-10">
-            <span class="text-[10px] uppercase tracking-[0.5em] text-gray-400 mb-4 block">Est. 2026</span>
-            <h1 class="text-4xl lg:text-5xl font-bold text-[#001f3f] leading-[1.1] mb-6 uppercase tracking-tight">
-                Eksplorasi <br> <span class="text-gray-400 font-light italic">Seni Rajut</span> <br> Modern.
-            </h1>
-            <p class="text-xs text-gray-500 leading-relaxed max-w-xs mb-8 uppercase tracking-widest">
-                Koleksi buatan tangan dengan benang premium untuk gaya hidup minimalis.
-            </p>
-            <a href="/katalog" class="inline-block bg-[#001f3f] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-lg">
-                Lihat Koleksi
-            </a>
+    <div id="hero-slider" class="relative w-full h-[600px] md:h-[500px]">
+        
+        <div class="hero-slide absolute inset-0 w-full h-full flex flex-col md:flex-row items-center transition-opacity duration-1000 opacity-100 z-10">
+            <div class="w-full md:w-1/2 p-12 md:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:p-20 bg-white h-full flex flex-col justify-center">
+                <span class="text-[10px] uppercase tracking-[0.5em] text-gray-400 mb-4 block">Est. 2026</span>
+                <h1 class="text-4xl lg:text-5xl font-bold text-[#001f3f] leading-[1.1] mb-6 uppercase tracking-tight">
+                    Eksplorasi <br> <span class="text-gray-400 font-light italic">Seni Rajut</span> <br> Modern.
+                </h1>
+                <p class="text-xs text-gray-500 leading-relaxed max-w-xs mb-8 uppercase tracking-widest">
+                    Koleksi buatan tangan dengan benang premium untuk gaya hidup minimalis.
+                </p>
+                <div>
+                    <a href="/katalog" class="inline-block bg-[#001f3f] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-lg">
+                        Lihat Koleksi
+                    </a>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 h-1/2 md:h-full relative bg-gray-50">
+                <img src="https://images.unsplash.com/photo-1608408881647-773665673100?q=80&w=1000&auto=format&fit=crop"
+                     class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000">
+                <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white via-white/10 to-transparent"></div>
+            </div>
         </div>
 
-        <div class="md:w-1/2 h-[500px] relative">
-            <img src="https://images.unsplash.com/photo-1608408881647-773665673100?q=80&w=1000&auto=format&fit=crop"
-                 class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000">
-            <div class="absolute inset-0 bg-gradient-to-r from-white via-white/10 to-transparent"></div>
+        <div class="hero-slide absolute inset-0 w-full h-full flex flex-col md:flex-row items-center transition-opacity duration-1000 opacity-0 z-0">
+            <div class="w-full md:w-1/2 p-12 md:pl-[max(2rem,calc((100vw-80rem)/2+2rem))] lg:p-20 bg-white h-full flex flex-col justify-center">
+                <span class="text-[10px] uppercase tracking-[0.5em] text-gray-400 mb-4 block">100% Handmade</span>
+                <h1 class="text-4xl lg:text-5xl font-bold text-[#001f3f] leading-[1.1] mb-6 uppercase tracking-tight">
+                    Dibuat <br> <span class="text-gray-400 font-light italic">Dengan</span> <br> Ketelitian.
+                </h1>
+                <p class="text-xs text-gray-500 leading-relaxed max-w-xs mb-8 uppercase tracking-widest">
+                    Setiap simpul rajutan memiliki cerita unik dan kualitas benang katun terbaik.
+                </p>
+                <div>
+                    <a href="/katalog" class="inline-block bg-[#001f3f] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-lg">
+                        Cari Amigurumi
+                    </a>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 h-1/2 md:h-full relative bg-gray-50">
+                <img src="https://images.unsplash.com/photo-1584992231908-a5ec0df10bc6?q=80&w=1000&auto=format&fit=crop"
+                     class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000">
+                <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white via-white/10 to-transparent"></div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 left-12 md:left-[max(2rem,calc((100vw-80rem)/2+2rem))] z-20 flex gap-2">
+            <button class="dot-hero w-8 h-1 bg-[#001f3f] transition-all duration-300 rounded-full" onclick="setSlide(0)"></button>
+            <button class="dot-hero w-3 h-1 bg-gray-300 transition-all duration-300 rounded-full" onclick="setSlide(1)"></button>
         </div>
     </div>
 </div>
 
+{{-- SECTION TITLE DENGAN NAVIGASI TOMBOL SLIDE PRODUK --}}
 <div class="mb-8 flex items-center justify-between">
     <div>
         <h2 class="text-[14px] font-bold text-[#001f3f] uppercase tracking-[0.3em]">Koleksi Pilihan</h2>
         <div class="h-[2px] w-12 bg-[#001f3f] mt-2"></div>
     </div>
-    <a href="/katalog" class="text-[10px] font-bold text-gray-400 hover:text-[#001f3f] uppercase tracking-widest transition-colors">Lihat Semua Katalog &rarr;</a>
+    <div class="flex items-center gap-4">
+        <div class="hidden md:flex items-center gap-1.5">
+            <button id="slide-prev" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-xs text-gray-400 hover:border-[#001f3f] hover:text-[#001f3f] transition-all bg-white">&larr;</button>
+            <button id="slide-next" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-xs text-gray-400 hover:border-[#001f3f] hover:text-[#001f3f] transition-all bg-white">&rarr;</button>
+        </div>
+        <a href="/katalog" class="text-[10px] font-bold text-gray-400 hover:text-[#001f3f] uppercase tracking-widest transition-colors">Lihat Semua &rarr;</a>
+    </div>
 </div>
 
-<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
+{{-- 2. LIST PRODUK YANG BISA DISLIDE HORIZONTAL --}}
+<div id="produk-slider-container" class="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-6 mb-16 no-scrollbar" style="scroll-behavior: smooth; -webkit-overflow-scrolling: touch;">
     @forelse($produk as $i => $p)
-    <div class="group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
+    <div class="snap-start min-w-[240px] max-w-[240px] md:min-w-[230px] md:max-w-[230px] flex-shrink-0 group bg-white border border-gray-200 p-3 flex flex-col items-center text-center transition-all hover:shadow-md">
         <div class="w-full bg-gray-50 aspect-square mb-4 border border-gray-100 flex items-center justify-center overflow-hidden">
             <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $p->nama }}">
         </div>
 
-        <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">{{ $p->nama }}</h3>
-        <p class="text-[10px] text-gray-400 my-2 italic line-clamp-2 px-1">{{ $p->deskripsi ?? 'Handmade premium quality.' }}</p>
+        <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider line-clamp-1 w-full px-1">{{ $p->nama }}</h3>
+        <p class="text-[10px] text-gray-400 my-2 italic line-clamp-2 px-1 h-8">{{ $p->deskripsi ?? 'Handmade premium quality.' }}</p>
 
         {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
         <p class="text-xs font-bold text-[#001f3f] mb-3">
@@ -65,33 +106,76 @@
                     <input type="hidden" name="nama" value="{{ $p->nama }}">
                     <input type="hidden" name="foto" value="{{ asset('images/' . $p->foto) }}">
                     <input type="hidden" name="deskripsi" value="{{ $p->deskripsi }}">
-                    
-                    {{-- Hidden input buat nampung harga variasi yang aktif biar masuk ke backend cart --}}
                     <input type="hidden" name="harga" class="input-harga-hidden" value="{{ $p->variasis->first()->harga ?? $p->harga }}">
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                        <div class="aspect-square border border-gray-100 bg-gray-50 flex items-center justify-center overflow-hidden">
-                            <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                        
+                        {{-- ================= MODAL MULTI IMAGE CAROUSEL SLIDER ================= --}}
+                        <div class="relative w-full aspect-square overflow-hidden border border-gray-100 bg-gray-50 group">
+                            <div class="flex transition-transform duration-500 ease-in-out h-full inner-slider-container" id="slider-home-{{ $p->id }}" data-current-index="0">
+                                @if($p->fotos && $p->fotos->count() > 0)
+                                    @foreach($p->fotos as $indexFoto => $foto)
+                                        {{-- MODIFIKASI: Tambah data-index-foto agar JavaScript tahu urutan gambarnya --}}
+                                        <div class="w-full h-full flex-shrink-0" data-index-foto="{{ $indexFoto }}">
+                                            <img src="{{ asset('images/' . $foto->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                        </div>
+                                    @endforeach
+                                @else
+                                    {{-- Fallback jika admin tidak mengunggah foto variasi tambahan --}}
+                                    <div class="w-full h-full flex-shrink-0" data-index-foto="0">
+                                        <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Tombol Navigasi Panah Kiri Kanan (Hanya Muncul jika Foto Lebih dari 1) --}}
+                            @if($p->fotos && $p->fotos->count() > 1)
+                                <button type="button" onclick="moveSlideHome('{{ $p->id }}', -1)" 
+                                    class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all z-10 font-bold opacity-0 group-hover:opacity-100">
+                                    &larr;
+                                </button>
+
+                                <button type="button" onclick="moveSlideHome('{{ $p->id }}', 1)" 
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all z-10 font-bold opacity-0 group-hover:opacity-100">
+                                    &rarr;
+                                </button>
+
+                                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/20 px-2 py-1 rounded-full z-10">
+                                    @foreach($p->fotos as $index => $foto)
+                                        <span class="dot-home-{{ $p->id }} w-2 h-2 rounded-full bg-white/50 transition-all {{ $index === 0 ? '!bg-white w-4' : '' }}"></span>
+                                    @endforeach
+                                </div>
+                            @endif
                         </div>
+                        {{-- ================================================================================= --}}
+
                         <div class="flex flex-col">
                             <h2 class="text-xl font-bold uppercase tracking-tight text-gray-900 mb-1">{{ $p->nama }}</h2>
                             
-                            {{-- Harga Dinamis (Bakal berubah via JavaScript di bawah) --}}
                             <p class="text-lg font-bold text-[#001f3f] mb-4 text-display-harga">
                                 Rp {{ number_format($p->variasis->first()->harga ?? $p->harga, 0, ',', '.') }}
                             </p>
                             
                             <p class="text-[12px] text-gray-500 leading-relaxed mb-4">{{ $p->deskripsi }}</p>
 
-                            {{-- Pilihan Variasi Gabungan Ukuran & Warna --}}
                             <div class="mb-4">
                                 <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Pilih Variasi Produk</span>
                                 <div class="flex flex-wrap gap-2">
                                     @forelse($p->variasis as $keyVar => $v)
+                                        @php
+                                            // MODIFIKASI: Cari tahu foto varian ini ada di index urutan ke berapa di galeri produk
+                                            $fotoIndex = 0;
+                                            if($p->fotos && $v->foto_varian) {
+                                                $fotoIndex = $p->fotos->pluck('foto')->search($v->foto_varian);
+                                                if($fotoIndex === false) { $fotoIndex = 0; }
+                                            }
+                                        @endphp
                                         <label class="cursor-pointer label-pilihan-variasi">
+                                            {{-- MODIFIKASI: Tambahkan atribut data-index-foto --}}
                                             <input type="radio" name="produk_variasi_id" value="{{ $v->id }}" class="peer hidden radio-variasi" 
                                                    data-harga="{{ $v->harga }}" 
                                                    data-stok="{{ $v->stok }}"
+                                                   data-index-foto="{{ $fotoIndex }}"
                                                    {{ $keyVar == 0 ? 'checked' : '' }}
                                                    {{ $v->stok == 0 ? 'disabled' : '' }}>
                                             
@@ -102,17 +186,15 @@
                                         </label>
                                     @empty
                                         <span class="text-xs text-amber-500 font-bold">Variasi belum diatur oleh admin.</span>
-                                    @endforelse
+                                    @endforelse {{-- <--- Ganti jadi ini --}}
                                 </div>
                             </div>
 
-                            {{-- Live Badge Info Stok Tergantung Varian --}}
                             <div class="flex items-center gap-2 mb-4 font-bold text-[10px]">
                                 <span class="text-gray-400 uppercase tracking-widest">Ketersediaan Varian:</span>
                                 <span class="badge-status-stok text-gray-800">Menghitung...</span>
                             </div>
 
-                            {{-- Pengatur Jumlah Beli --}}
                             <div class="mb-6">
                                 <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Jumlah</span>
                                 <div class="flex items-center w-28 border border-gray-300 rounded-full overflow-hidden h-8">
@@ -122,7 +204,6 @@
                                 </div>
                             </div>
 
-                            {{-- Tombol Submit --}}
                             <button type="submit" class="w-full btn-submit-keranjang bg-[#001f3f] text-white py-3.5 rounded-full text-center hover:bg-gray-800 transition-all font-bold text-[10px] uppercase tracking-widest shadow-md disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed">
                                 + Tambah ke Keranjang
                             </button>
@@ -136,17 +217,109 @@
         </div>
     </div>
     @empty
-    <div class="col-span-5 py-20 text-center">
+    <div class="w-full py-20 text-center">
         <i class="fa-solid fa-box-open text-4xl text-gray-200 mb-4"></i>
         <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada produk tersedia</p>
     </div>
     @endforelse
 </div>
 
-{{-- JAVASCRIPT LIVE UPDATE HARGA & STOK PER VARIAN --}}
+{{-- CSS TAMBAHAN BUAT NGILANGIN SCROLLBAR JALUR BAWAH DI SLIDER --}}
+<style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+{{-- SCRIPT SLIDER (HERO BANNER & PRODUK) --}}
 <script>
+    // --- JAVASCRIPT LOGIC BANNER SLIDER ATAS ---
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.dot-hero');
+    const totalSlides = slides.length;
+
+    function showSlide(index) {
+        slides.forEach((slide, i) => {
+            if (i === index) {
+                slide.classList.replace('opacity-0', 'opacity-100');
+                slide.classList.add('z-10');
+                slide.classList.remove('z-0');
+            } else {
+                slide.classList.replace('opacity-100', 'opacity-0');
+                slide.classList.add('z-0');
+                slide.classList.remove('z-10');
+            }
+        });
+
+        dots.forEach((dot, i) => {
+            if (i === index) {
+                dot.classList.replace('w-3', 'w-8');
+                dot.classList.replace('bg-gray-300', 'bg-[#001f3f]');
+            } else {
+                dot.classList.replace('w-8', 'w-3');
+                dot.classList.replace('bg-[#001f3f]', 'bg-gray-300');
+            }
+        });
+        currentSlide = index;
+    }
+
+    function nextSlide() {
+        let next = (currentSlide + 1) % totalSlides;
+        showSlide(next);
+    }
+
+    function setSlide(index) {
+        showSlide(index);
+        clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 5000); 
+    }
+
+    let slideInterval = setInterval(nextSlide, 5000); 
+
+    // --- JAVASCRIPT LOGIC SCROLL HORIZONTAL PRODUK ---
+    document.getElementById('slide-next').addEventListener('click', function() {
+        const container = document.getElementById('produk-slider-container');
+        container.scrollLeft += 260; 
+    });
+
+    document.getElementById('slide-prev').addEventListener('click', function() {
+        const container = document.getElementById('produk-slider-container');
+        container.scrollLeft -= 260; 
+    });
+
+    // ================= MODIFIKASI: FUNGSI UTAMA PENGGERAK SLIDER FOTO DI MODAL =================
+    function goToModalSlide(produkId, currentIndex) {
+        const slider = document.getElementById('slider-home-' + produkId);
+        if (!slider) return;
+
+        const imageCount = slider.children.length;
+
+        if (currentIndex >= imageCount) currentIndex = 0;
+        if (currentIndex < 0) currentIndex = imageCount - 1;
+
+        slider.setAttribute('data-current-index', currentIndex);
+        slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+
+        // Update indikator baris dot bawah slider modal
+        const dotsModal = document.querySelectorAll(`.dot-home-${produkId}`);
+        dotsModal.forEach((dot, idx) => {
+            if (idx === currentIndex) {
+                dot.classList.add('!bg-white', 'w-4');
+            } else {
+                dot.classList.remove('!bg-white', 'w-4');
+            }
+        });
+    }
+
+    // Tombol manual panah kiri kanan modal
+    function moveSlideHome(produkId, direction) {
+        const slider = document.getElementById('slider-home-' + produkId);
+        let currentIndex = parseInt(slider.getAttribute('data-current-index')) || 0;
+        goToModalSlide(produkId, currentIndex + direction);
+    }
+
+    // --- JAVASCRIPT LIVE UPDATE HARGA, STOK, & AUTO SLIDE PAS KLIK VARIASI ---
     document.addEventListener('DOMContentLoaded', function () {
-        // Handle logika dinamis untuk setiap modal produk
         const modals = document.querySelectorAll('.container-modal-produk');
         
         modals.forEach(modal => {
@@ -156,64 +329,89 @@
             const badgeStok = modal.querySelector('.badge-status-stok');
             const inputQty = modal.querySelector('.input-quantity');
             const btnSubmit = modal.querySelector('.btn-submit-keranjang');
+            
+            // Tangkap ID produk dari input hidden id di form modal
+            const hiddenIdInput = modal.querySelector('input[name="id"]');
+            const produkId = hiddenIdInput ? hiddenIdInput.value : null;
 
-            function updateModalState() {
-                // Cari radio button variasi mana yang lagi ke-check aktif
+            function updateModalState(isVariantChanged = false) {
                 const selectedRadio = modal.querySelector('.radio-variasi:checked');
                 
                 if (selectedRadio) {
                     const harga = parseInt(selectedRadio.getAttribute('data-harga'));
                     const stok = parseInt(selectedRadio.getAttribute('data-stok'));
+                    const targetFotoIndex = parseInt(selectedRadio.getAttribute('data-index-foto')) || 0;
 
-                    // 1. Ganti tampilan harga live di layar & sync input hidden
                     displayHarga.innerText = 'Rp ' + harga.toLocaleString('id-ID');
                     hiddenHarga.value = harga;
 
-                    // 2. Set rule pembatasan angka maksimal input kuantitas belanja
-                    inputQty.setAttribute('max', stok);
-                    if (parseInt(inputQty.value) > stok) {
-                        inputQty.value = stok;
+                    // FITUR BARU: Geser foto otomatis ke varian yang dicari pas diklik pembeli
+                    if (isVariantChanged && produkId) {
+                        goToModalSlide(produkId, targetFotoIndex);
                     }
-                    if (stok === 0) inputQty.value = 0;
 
-                    // 3. Update Text Badge Stok Varian
+                    inputQty.setAttribute('max', stok);
+                    
+                    // OPTIMASI UX: Kalau variasi diganti, kembalikan qty ke 1
+                    if (isVariantChanged) {
+                        inputQty.value = stok > 0 ? 1 : 0;
+                    } else {
+                        if (parseInt(inputQty.value) > stok) inputQty.value = stok;
+                        if (parseInt(inputQty.value) < 1 && stok > 0) inputQty.value = 1;
+                        if (stok === 0) inputQty.value = 0;
+                    }
+
                     if (stok > 0) {
                         badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-green-50 text-green-700 border border-green-100 rounded">Tersedia (${stok} Pcs)</span>`;
-                        btnSubmit.disabled = false;
-                        btnSubmit.innerText = '+ Tambah ke Keranjang';
+                        if (btnSubmit) {
+                            btnSubmit.disabled = false;
+                            btnSubmit.innerText = '+ Tambah ke Keranjang';
+                        }
                     } else {
                         badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Varian Habis</span>`;
-                        btnSubmit.disabled = true;
-                        btnSubmit.innerText = 'Stok Varian Habis';
+                        if (btnSubmit) {
+                            btnSubmit.disabled = true;
+                            btnSubmit.innerText = 'Stok Varian Habis';
+                        }
                     }
                 } else {
-                    // Fallback kalau produk bener-bener gak punya variasi sama sekali
                     badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Habis</span>`;
-                    btnSubmit.disabled = true;
+                    if (btnSubmit) btnSubmit.disabled = true;
                 }
             }
 
-            // Pasang event handler klik ke seluruh opsi variasi di dalam modal ini
+            // Validasi input ngetik manual di quantity
+            if (inputQty) {
+                inputQty.addEventListener('input', function() {
+                    const max = parseInt(this.getAttribute('max')) || 0;
+                    let current = parseInt(this.value);
+                    if (current > max) this.value = max;
+                });
+
+                inputQty.addEventListener('blur', function() {
+                    const max = parseInt(this.getAttribute('max')) || 0;
+                    let current = parseInt(this.value);
+                    if (isNaN(current) || current < 1) {
+                        this.value = max > 0 ? 1 : 0;
+                    }
+                });
+            }
+
             radios.forEach(radio => {
-                radio.addEventListener('change', updateModalState);
+                radio.addEventListener('change', () => updateModalState(true));
             });
 
-            // Jalankan trigger kalkulasi pertama kali pas modal ke-load
-            updateModalState();
+            // Jalankan inisialisasi awal modal tanpa mentrigger pergeseran slider
+            updateModalState(false);
         });
     });
 
-    // Validasi pencegahan manual via keyboard input quantity melebihi batas stok varian
     function checkMaxQuantity(button) {
         const input = button.parentNode.querySelector('.input-quantity');
         const max = parseInt(input.getAttribute('max')) || 1;
         const current = parseInt(input.value);
-        if (current > max) {
-            input.value = max;
-        }
-        if (current < 1 && max > 0) {
-            input.value = 1;
-        }
+        if (current > max) input.value = max;
+        if (current < 1 && max > 0) input.value = 1;
     }
 </script>
 @endsection

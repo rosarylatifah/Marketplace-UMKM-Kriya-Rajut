@@ -9,17 +9,19 @@ class Produk extends Model
 {
     use HasFactory;
 
-    // Ini biar Laravel tau nama tabelnya 'produk'
     protected $table = 'produk';
-    protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto']; // Kolom 'foto' lama kita biarkan sebagai foto utama/thumbnail
 
-    // Mass Assignment - Biar bisa input data sekaligus pake ::create()
     protected $fillable = ['nama', 'kategori', 'stok', 'harga', 'deskripsi', 'foto', 'ukuran', 'warna'];
 
-    // ================= KODE BARU: RELASI ONE-TO-MANY KE TABEL VARIASI =================
-    // Fungsi ini biar Produk bisa langsung manggil variasi-variasinya
+    // Relasi ke Variasi (Asli)
     public function variasis()
     {
         return $this->hasMany(ProdukVariasi::class, 'produk_id');
+    }
+
+    // RELASI ALIAS: Biar di Blade pembeli, panggilah $p->fotos tetap jalan mendeteksi foto-foto dari variasi!
+    public function fotos()
+    {
+        return $this->hasMany(ProdukVariasi::class, 'produk_id')->whereNotNull('foto');
     }
 }
