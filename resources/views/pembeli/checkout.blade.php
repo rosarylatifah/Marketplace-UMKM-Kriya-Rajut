@@ -14,7 +14,6 @@
         <i class="fa-solid fa-arrow-left-long transition-transform group-hover:-translate-x-1"></i> Kembali ke Keranjang
     </a>
 
-    <!-- FORM START: Diarahkan ke route prosesCheckout -->
     <form id="form-checkout" action="{{ route('checkout.proses') }}" method="POST">
         <input type="hidden" name="ongkir" id="input-ongkir-hidden" value="0">
         @csrf
@@ -57,22 +56,23 @@
                             <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">
                                 Alamat Lengkap <span class="text-red-400">*</span>
                             </label>
-                            <textarea name="alamat" id="input-alamat" class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-medium resize-none" rows="2" placeholder="Nama jalan, nomor rumah, kec/kel"></textarea>
+                            <textarea name="alamat" id="input-alamat" class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-3 px-0 transition-all duration-300 font-medium resize-none" rows="2" placeholder="Nama jalan, nomor rumah, kec/kel (Wilayah Batam)"></textarea>
                             <p id="err-alamat" class="hidden text-[9px] text-red-400 mt-1 uppercase tracking-widest">Alamat wajib diisi</p>
                         </div>
 
                         <div>
                             <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">
-                                Kota Tujuan <span class="text-red-400">*</span>
+                                Opsi Pengantaran <span class="text-red-400">*</span>
                             </label>
-                            <select name="kota" id="select-kota" onchange="updateOngkir()"
+                            <select name="opsi_pengantaran" id="select-opsi-pengantaran" onchange="updateOngkir()"
                                 class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer">
-                                <option value="" selected disabled>Pilih Kota</option>
-                                <option value="15000">Batam (Rp 15.000)</option>
-                                <option value="25000">Jakarta (Rp 25.000)</option>
-                                <option value="32000">Yogyakarta (Rp 32.000)</option>
+                                <option value="" selected disabled>Pilih Opsi Pengantaran</option>
+                                <option value="kurir_lokal" data-ongkir="10000">Kurir Lokal Batam (Maks 1kg) - Rp 10.000</option>
+                                <option value="ambil_sendiri" data-ongkir="0">Ambil Produk di Tempat - Rp 0</option>
+                                <option value="custom_shipment" data-ongkir="0">Custom Shipment (Diskusi Kurir) - Rp 0</option>
                             </select>
-                            <p id="err-kota" class="hidden text-[9px] text-red-400 mt-1 uppercase tracking-widest">Kota tujuan wajib dipilih</p>
+                            <p id="err-opsi" class="hidden text-[9px] text-red-400 mt-1 uppercase tracking-widest">Opsi pengantaran wajib dipilih</p>
+                            <p id="keterangan-opsi" class="hidden text-[10px] font-medium mt-2 leading-relaxed"></p>
                         </div>
 
                         <div>
@@ -127,6 +127,10 @@
                         <span class="text-gray-400 font-medium">Ongkos Kirim</span>
                         <span id="ongkir-display" class="font-bold text-gray-800">Rp 0</span>
                     </div>
+                    
+                    <div id="catatan-ongkir-box" class="hidden bg-gray-50 border border-gray-100 p-3 text-[9px] uppercase tracking-wider text-gray-500 leading-relaxed rounded-sm transition-all duration-300">
+                    </div>
+
                     <div class="flex justify-between pt-6 border-t border-gray-100">
                         <div class="flex flex-col gap-1">
                             <span class="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Total Pembayaran</span>
@@ -166,31 +170,57 @@
         }
     }
 
-function updateOngkir() {
-    const select = document.getElementById('select-kota');
-    const ongkirDisplay = document.getElementById('ongkir-display');
-    const totalDisplay = document.getElementById('total-bayar');
-    const subtotal = parseInt(document.getElementById('subtotal-produk').getAttribute('data-harga'));
-    
-    const ongkirBaru = parseInt(select.value) || 0;
-    const totalBaru = subtotal + ongkirBaru;
+    function updateOngkir() {
+        const select = document.getElementById('select-opsi-pengantaran');
+        const ongkirDisplay = document.getElementById('ongkir-display');
+        const totalDisplay = document.getElementById('total-bayar');
+        const keteranganOpsi = document.getElementById('keterangan-opsi');
+        const catatanBox = document.getElementById('catatan-ongkir-box');
+        
+        const subtotal = parseInt(document.getElementById('subtotal-produk').getAttribute('data-harga'));
+        
+        // Ambil nominal ongkir dari attribute data-ongkir option terpilih
+        const selectedOption = select.options[select.selectedIndex];
+        const ongkirBaru = parseInt(selectedOption.getAttribute('data-ongkir')) || 0;
+        const value = select.value;
+        
+        const totalBaru = subtotal + ongkirBaru;
 
-    // Update tampilan
-    ongkirDisplay.innerText = 'Rp ' + ongkirBaru.toLocaleString('id-ID');
-    totalDisplay.innerText = 'Rp ' + totalBaru.toLocaleString('id-ID');
+        // Reset state info tambahan
+        keteranganOpsi.classList.add('hidden');
+        catatanBox.classList.add('hidden');
+        keteranganOpsi.className = "text-[10px] font-medium mt-2 leading-relaxed"; 
 
-    // ISI INPUT HIDDEN SUPAYA TERKIRIM KE CONTROLLER
-    document.getElementById('input-ongkir-hidden').value = ongkirBaru;
-}
+        // Logika teks info berdasarkan opsi pengantaran
+        if (value === 'kurir_lokal') {
+            catatanBox.innerHTML = "* Pengiriman khusus wilayah kota batam. Sistem otomatis menambahkan tarif flat kurir lokal.";
+            catatanBox.classList.remove('hidden');
+        } else if (value === 'ambil_sendiri') {
+            keteranganOpsi.innerHTML = "✓ Silakan ambil di tempat. Hubungi admin setelah order selesai untuk alamat lengkap.";
+            keteranganOpsi.classList.add('text-green-600', 'block');
+        } else if (value === 'custom_shipment') {
+            keteranganOpsi.innerHTML = "⚠️ Wajib: Silakan hubungi penjual via WhatsApp untuk mendiskusikan biaya pengiriman di luar sistem.";
+            keteranganOpsi.classList.add('text-amber-600', 'block');
+            catatanBox.innerHTML = "* Ongkos kirim riil akan dibayarkan secara terpisah di luar transaksi website ini.";
+            catatanBox.classList.remove('hidden');
+        }
+
+        // Update nominal di rincian
+        ongkirDisplay.innerText = 'Rp ' + ongkirBaru.toLocaleString('id-ID');
+        totalDisplay.innerText = 'Rp ' + totalBaru.toLocaleString('id-ID');
+
+        // ISI INPUT HIDDEN SUPAYA TERKIRIM KE CONTROLLER
+        document.getElementById('input-ongkir-hidden').value = ongkirBaru;
+    }
 
     function validasiDanLanjut() {
         const fields = [
-            { id: 'input-nama',      errId: 'err-nama' },
-            { id: 'input-telepon',   errId: 'err-telepon' },
-            { id: 'input-email',     errId: 'err-email' },
-            { id: 'input-alamat',    errId: 'err-alamat' },
-            { id: 'select-kota',     errId: 'err-kota' },
-            { id: 'select-pembayaran', errId: 'err-pembayaran' },
+            { id: 'input-nama',              errId: 'err-nama' },
+            { id: 'input-telepon',           errId: 'err-telepon' },
+            { id: 'input-email',             errId: 'err-email' },
+            { id: 'input-alamat',            errId: 'err-alamat' },
+            { id: 'select-opsi-pengantaran', errId: 'err-opsi' },
+            { id: 'select-pembayaran',       errId: 'err-pembayaran' },
         ];
 
         let valid = true;
@@ -216,7 +246,6 @@ function updateOngkir() {
             return;
         }
 
-        // Simpan metode pembayaran ke session storage (opsional)
         const metodePembayaran = document.getElementById('select-pembayaran').value;
         sessionStorage.setItem('metodePembayaran', metodePembayaran);
 

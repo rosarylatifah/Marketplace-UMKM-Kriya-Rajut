@@ -38,13 +38,13 @@
                         <a href="/lacak-pesanan" class="block py-2 text-[11px] uppercase tracking-[0.2em] transition-all {{ request()->is('lacak-pesanan*') ? 'text-[#001f3f] font-bold border-b-2 border-[#001f3f]' : 'text-gray-500 hover:text-[#001f3f]' }}">Lacak</a>
                     </li>
                     <li class="relative p-2">
-                        <a href="{{ route('keranjang') }}" class="group flex items-center">
-                            <i class="fa-solid fa-bag-shopping text-lg {{ request()->is('keranjang*') ? 'text-pink-600' : 'text-gray-700 group-hover:text-[#001f3f]' }} transition-colors"></i>
-                            <span class="absolute top-1 right-1 flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#001f3f] opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-[#001f3f]"></span>
-                            </span>
-                        </a>
+<a href="/keranjang" class="group flex items-center">
+    <i class="fa-solid fa-bag-shopping text-lg {{ request()->is('keranjang*') ? 'text-pink-600' : 'text-gray-700 group-hover:text-[#001f3f]' }}"></i>
+    <span class="absolute top-1 right-1 flex h-2 w-2">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#001f3f] opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-[#001f3f]"></span>
+    </span>
+</a>
                     </li>
                 </ul>
             </div>

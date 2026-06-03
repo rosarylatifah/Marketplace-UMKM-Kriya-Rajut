@@ -9,7 +9,12 @@ use Illuminate\Support\Str;
 
 class ProdukController extends Controller 
 {
-    // Halaman utama kelola produk admin & katalog pembeli
+    /**
+     * FR-09: Pelanggan dapat melihat katalog produk tanpa perlu login.
+     * FR-10: Pelanggan dapat mencari produk berdasarkan keyword.
+     * Alur PBO: Mengambil kumpulan objek (Collection) dari class Produk 
+     * dengan menerapkan filter kategori dan pencarian string (LIKE).
+     */
     public function index($category = null)
     {
         $categories = [
@@ -25,37 +30,77 @@ class ProdukController extends Controller
 
         // SISI ADMIN
         if (request()->is('admin/*')) {
-            $produk = Produk::with(['variasis', 'fotos'])->get(); // Tambah with biar admin ga ngebug
+            $produk = Produk::with(['variasis', 'fotos'])->get(); 
             return view('admin.kelola_produk', compact('produk'));
         }
 
-        // SISI PEMBELI (KATALOG)
-        if ($currentCategory == 'Semua') {
-            // Ditambahkan with() biar foto-foto slide pembeli muncul
-            $produk = Produk::with(['variasis', 'fotos'])->get(); 
-        } else {
-            // Ditambahkan with() biar foto-foto slide pembeli muncul
-            $produk = Produk::with(['variasis', 'fotos'])->where('kategori', strtoupper($currentCategory))->get();
+        // SISI PEMBELI (KATALOG) - Query cerdas & fleksibel
+        $query = Produk::with(['variasis', 'fotos']);
+
+        // 1. Ambil keyword pencarian (jika ada)
+        $keyword = request()->search;
+
+        // 2. Kombinasi Filter Kategori & Pencarian Relevan
+        if ($currentCategory !== 'Semua') {
+            $query->where('kategori', 'LIKE', "%{$currentCategory}%");
         }
+
+        // 3. FITUR PENCARIAN RELEVAN (Mencari kemiripan kata di nama, deskripsi, atau kategori)
+        if (!empty($keyword)) {
+            $words = array_filter(explode(' ', preg_replace('/\s+/', ' ', trim($keyword))));
+
+            $query->where(function($q) use ($words) {
+                foreach ($words as $word) {
+                    $q->where(function($subQ) use ($word) {
+                        $subQ->where('nama', 'LIKE', "%{$word}%")
+                             ->orWhere('deskripsi', 'LIKE', "%{$word}%")
+                             ->orWhere('kategori', 'LIKE', "%{$word}%");
+                    });
+                }
+            });
+        }
+
+        // 4. Eksekusi ambil data hasil filter & pencarian
+        $produk = $query->get();
 
         return view('pembeli.katalog', compact('currentCategory', 'produk'));
     }
 
-    // Fungsi jembatan biar halaman katalog pembeli ga error
+    /**
+     * Fungsi jembatan untuk mengarahkan rute katalog pembeli ke fungsi index.
+     */
     public function katalog($category = null)
     {
         return $this->index($category);
     }
 
+    /**
+     * FR-10: Pelanggan dapat melihat detail produk.
+     * Alur PBO: Mengambil satu objek data (instance) dari class Produk berdasarkan ID
+     * beserta relasi variasinya (Eager Loading) untuk ditampilkan ke halaman detail pembeli.
+     */
+    public function show($id)
+    {
+        $produk = Produk::with('variasis')->findOrFail($id);
+        return view('pembeli.detail_produk', compact('produk'));
+    }
+
+    /**
+     * Menampilkan halaman form tambah produk untuk admin.
+     */
     public function create()
     {
         return view('admin.create'); 
     }
 
-    // ================= LOGIKA STORE PRO (FOTO MASUK DI TIAP VARIASI) =================
+    /**
+     * SISI ADMIN: Menyimpan data produk baru beserta variasi dan filenya.
+     * Alur PBO: Enkapsulasi data input melalui class Request, validasi, 
+     * instansiasi objek model Produk, dan penyimpanan massal (Mass Assignment).
+     */
     public function store(Request $request)
     {
-        // 1. Validasi input umum & array variasi
+        // 1. Validasi input umum & array variasi baru
         $request->validate([
             'nama' => 'required|string|max:255',
             'kategori' => 'required',
@@ -67,33 +112,30 @@ class ProdukController extends Controller
             'variasi.*.foto' => 'required|image|mimes:jpeg,png,jpg|max:2048', 
         ]);
 
-        // 2. Hitung otomatis total stok & ambil harga dasar dari variasi pertama
+        // 2. Hitung otomatis total stok & ambil harga dasar variasi pertama
         $totalStok = 0;
         foreach ($request->variasi as $v) {
             $totalStok += (int) $v['stok'];
         }
-        $hargaDefault = $request->variasi[0]['harga'] ?? 0;
+        $firstKey = array_key_first($request->variasi);
+        $hargaDefault = $request->variasi[$firstKey]['harga'] ?? 0;
 
-        // 3. Simpan dulu data variasi & upload semua fotonya secara berurutan
+        // 3. Upload semua foto variasi secara berurutan ke public/images (Proses Sekali)
         $namaFotoVarianBaru = [];
         foreach ($request->variasi as $index => $item) {
             if ($request->hasFile("variasi.{$index}.foto")) {
                 $fileVarian = $request->file("variasi.{$index}.foto");
                 $namaFotoVarian = time() . "_varian_{$index}." . $fileVarian->getClientOriginalExtension();
-                
-                // Pindahkan file asli ke folder public/images
                 $fileVarian->move(public_path('images'), $namaFotoVarian);
-                
-                // Simpan nama filenya ke array buat kita pakai nanti
                 $namaFotoVarianBaru[$index] = $namaFotoVarian;
             }
         }
 
-        // 4. Ambil foto dari variasi pertama buat dijadikan thumbnail utama produk induk
+        // 4. Ambil foto dari variasi urutan pertama buat dijadikan thumbnail produk induk
         $fotoUtama = null;
-        if (isset($namaFotoVarianBaru[0])) {
-            $fotoUtama = time() . '_utama.' . pathinfo($namaFotoVarianBaru[0], PATHINFO_EXTENSION);
-            copy(public_path('images/' . $namaFotoVarianBaru[0]), public_path('images/' . $fotoUtama));
+        if (isset($namaFotoVarianBaru[$firstKey])) {
+            $fotoUtama = time() . '_utama.' . pathinfo($namaFotoVarianBaru[$firstKey], PATHINFO_EXTENSION);
+            copy(public_path('images/' . $namaFotoVarianBaru[$firstKey]), public_path('images/' . $fotoUtama));
         }
 
         // 5. Simpan identitas produk induk ke tabel 'produk'
@@ -108,32 +150,38 @@ class ProdukController extends Controller
             'warna' => null,  
         ]);
 
-        // 6. Sekarang baru kita simpan data variasinya ke database
+        // 6. Simpan semua data variasi murni baru ke database
         foreach ($request->variasi as $index => $item) {
+            $namaFotoBaru = $namaFotoVarianBaru[$index] ?? null;
+
             ProdukVariasi::create([
                 'produk_id' => $produk->id,
                 'ukuran' => $item['ukuran'],
                 'warna' => $item['warna'],
                 'stok' => $item['stok'],
                 'harga' => $item['harga'],
-                'foto' => $namaFotoVarianBaru[$index] ?? null,
+                'foto' => $namaFotoBaru,
             ]);
         }
 
-        return redirect()->route('admin.produk.index')->with('success', 'Produk dan Variasi berfoto berhasil disimpan, Zar!');
+        return redirect()->route('admin.produk.index')->with('success', 'Produk baru dan seluruh variasi berhasil ditambahkan!');
     }
 
+    /**
+     * SISI ADMIN: Menampilkan halaman form edit produk beserta variasi lamanya.
+     */
     public function edit($id)
     {
-        // Pastikan relasi variasis ikut dipanggil biar form edit bisa nampilin variasi lamanya
         $produk = Produk::with('variasis')->findOrFail($id);
         return view('admin.produk_edit', compact('produk'));
     }
 
-    // ================= LOGIKA UPDATE PRO (SINKRONISASI VARIASI & FOTO) =================
+    /**
+     * SISI ADMIN: Memperbarui data produk lama beserta variasi dinamisnya.
+     */
     public function update(Request $request, $id)
     {
-        // 1. Validasi Input Dasar
+        // 1. Validasi input (foto dibuat nullable/opsional saat proses edit)
         $request->validate([
             'nama' => 'required|string|max:255',
             'kategori' => 'required',
@@ -147,49 +195,42 @@ class ProdukController extends Controller
 
         $produk = Produk::findOrFail($id);
 
-        // 2. Kumpulkan ID variasi yang dikirim dari form biar tau mana yang dipertahankan
-        $idVariasiForm = [];
-        foreach ($request->variasi as $item) {
-            if (isset($item['id'])) {
-                $idVariasiForm[] = $item['id'];
-            }
-        }
-
-        // 3. Cari dan Hapus variasi di DB yang GAK dikirim dari form (variasi yang dihapus admin lewat tombol trash)
-        $variasiDihapus = ProdukVariasi::where('produk_id', $produk->id)->whereNotIn('id', $idVariasiForm)->get();
-        foreach ($variasiDihapus as $vd) {
-            if ($vd->foto && file_exists(public_path('images/' . $vd->foto))) {
-                @unlink(public_path('images/' . $vd->foto)); // Hapus file fisiknya
-            }
-            $vd->delete(); // Hapus data di DB
-        }
-
-        // 4. Proses Update atau Create Variasi satu-per-satu
+        // 2. Hitung otomatis total stok & harga default dari data modifikasi terbaru
         $totalStok = 0;
-        $hargaDefault = 0;
+        foreach ($request->variasi as $v) {
+            $totalStok += (int) $v['stok'];
+        }
+        $firstKey = array_key_first($request->variasi);
+        $hargaDefault = $request->variasi[$firstKey]['harga'] ?? 0;
+
+        // 3. Upload semua file foto variasi baru yang masuk (Proses Sekali di Awal)
+        $namaFotoVarianUploaded = [];
+        foreach ($request->variasi as $index => $item) {
+            if ($request->hasFile("variasi.{$index}.foto")) {
+                $fileVarian = $request->file("variasi.{$index}.foto");
+                $namaFotoVarian = time() . "_varian_{$index}." . $fileVarian->getClientOriginalExtension();
+                $fileVarian->move(public_path('images'), $namaFotoVarian);
+                $namaFotoVarianUploaded[$index] = $namaFotoVarian;
+            }
+        }
+
+        // 4. Proses Sinkronisasi Relasi Variasi (Update Lama vs Bikin Baru)
         $fotoVarianPertama = null;
+        $idVariasiYangDiterima = [];
 
         foreach ($request->variasi as $index => $item) {
-            $totalStok += (int) $item['stok'];
-            if ($index === array_key_first($request->variasi)) {
-                $hargaDefault = $item['harga'];
-            }
-
-            // Cek apakah variasi ini data lama atau baru dibuat
             if (isset($item['id'])) {
-                // UPDATE VARIASI LAMA
+                // UPDATE DATA VARIASI LAMA
                 $varian = ProdukVariasi::findOrFail($item['id']);
-                $namaFoto = $varian->foto; // Ambil nama foto lama dulu sebagai cadangan
+                $namaFoto = $varian->foto; 
+                $idVariasiYangDiterima[] = $varian->id;
 
-                if ($request->hasFile("variasi.{$index}.foto")) {
-                    // Hapus foto lama kalau ada gantinya
+                // Jika ada file foto baru diupload untuk variasi lama ini
+                if (isset($namaFotoVarianUploaded[$index])) {
                     if ($varian->foto && file_exists(public_path('images/' . $varian->foto))) {
                         @unlink(public_path('images/' . $varian->foto));
                     }
-                    // Upload foto baru
-                    $file = $request->file("variasi.{$index}.foto");
-                    $namaFoto = time() . "_varian_{$index}." . $file->getClientOriginalExtension();
-                    $file->move(public_path('images'), $namaFoto);
+                    $namaFoto = $namaFotoVarianUploaded[$index];
                 }
 
                 $varian->update([
@@ -200,17 +241,12 @@ class ProdukController extends Controller
                     'foto' => $namaFoto,
                 ]);
 
-                if ($index === array_key_first($request->variasi)) {
+                if ($index === $firstKey) {
                     $fotoVarianPertama = $namaFoto;
                 }
             } else {
-                // BUAT VARIASI BARU (Jika admin klik + Tambah Varian pas edit)
-                $namaFotoBaru = null;
-                if ($request->hasFile("variasi.{$index}.foto")) {
-                    $file = $request->file("variasi.{$index}.foto");
-                    $namaFotoBaru = time() . "_varian_{$index}." . $file->getClientOriginalExtension();
-                    $file->move(public_path('images'), $namaFotoBaru);
-                }
+                // BUAT VARIASI MURNI BARU (Klik tombol + Tambah Varian di Form Edit)
+                $namaFotoBaru = $namaFotoVarianUploaded[$index] ?? null;
 
                 $varianBaru = ProdukVariasi::create([
                     'produk_id' => $produk->id,
@@ -220,21 +256,24 @@ class ProdukController extends Controller
                     'harga' => $item['harga'],
                     'foto' => $namaFotoBaru,
                 ]);
+                
+                $idVariasiYangDiterima[] = $varianBaru->id;
 
-                if ($index === array_key_first($request->variasi)) {
+                if ($index === $firstKey) {
                     $fotoVarianPertama = $namaFotoBaru;
                 }
             }
         }
 
-        // 5. Update foto utama produk induk pake foto variasi urutan pertama
+        // Menghapus data variasi lama di DB jika admin mengklik tombol trash-can di view
+        $produk->variasis()->whereNotIn('id', $idVariasiYangDiterima)->delete();
+
+        // 5. Perbarui duplikasi foto utama produk induk pakai aset variasi ke-1
         $fotoUtama = $produk->foto;
         if ($fotoVarianPertama) {
-            // Hapus foto utama lama biar ga menuhin memori
             if ($produk->foto && file_exists(public_path('images/' . $produk->foto))) {
                 @unlink(public_path('images/' . $produk->foto));
             }
-            // Duplikat foto varian pertama buat jadi foto utama produk induk
             $fotoUtama = time() . '_utama.' . pathinfo($fotoVarianPertama, PATHINFO_EXTENSION);
             copy(public_path('images/' . $fotoVarianPertama), public_path('images/' . $fotoUtama));
         }
@@ -249,36 +288,37 @@ class ProdukController extends Controller
             'foto' => $fotoUtama,
         ]);
 
-        return redirect()->route('admin.produk.index')->with('success', 'Data produk dan seluruh variasi berhasil diperbarui, Zar!');
+        return redirect()->route('admin.produk.index')->with('success', 'Data produk dan seluruh variasi berhasil diperbarui!');
     }
 
+    /**
+     * Menampilkan halaman home pelanggan dengan seluruh data produk.
+     */
     public function home()
     {
         $produk = Produk::all(); 
         return view('pembeli.home', compact('produk')); 
     }
     
-    // ================= FUNGSI HAPUS DATA PRODUK =================
+    /**
+     * SISI ADMIN: Menghapus produk secara permanen beserta filenya.
+     */
     public function destroy($id)
     {
-        // 1. Cari data produk yang mau dihapus beserta variasinya
         $produk = Produk::with('variasis')->findOrFail($id);
 
-        // 2. Hapus file foto variasi secara fisik dari folder public/images biar ga menuhin laptop
         foreach ($produk->variasis as $varian) {
             if ($varian->foto && file_exists(public_path('images/' . $varian->foto))) {
                 @unlink(public_path('images/' . $varian->foto));
             }
         }
 
-        // 3. Hapus file foto utama produk secara fisik
         if ($produk->foto && file_exists(public_path('images/' . $produk->foto))) {
             @unlink(public_path('images/' . $produk->foto));
         }
 
-        // 4. Hapus data dari database (Variasi otomatis ikut terhapus karena onDelete('cascade') di migration)
         $produk->delete();
 
-        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus bersih, Zar!');
+        return redirect()->route('admin.produk.index')->with('success', 'Produk berhasil dihapus bersih!');
     }
 }

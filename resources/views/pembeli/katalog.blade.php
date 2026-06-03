@@ -9,6 +9,29 @@
         <p class="text-[10px] text-gray-400 mt-2 uppercase tracking-widest">— Koleksi Rajutan Tangan —</p>
     </div>
 
+    {{-- FITUR PENCARIAN PRODUK KRIYA RAJUT --}}
+<div class="max-w-md mx-auto mb-6 px-4">
+    <form action="{{ url()->current() }}" method="GET" class="relative flex items-center border-b border-gray-300 focus-within:border-[#001f3f] transition-colors py-1">
+        
+        <input type="text" name="search" value="{{ request('search') }}" 
+               placeholder="Cari produk rajutan..." 
+               class="w-full bg-transparent border-none p-0 text-xs font-medium uppercase tracking-widest text-gray-700 placeholder-gray-400 focus:ring-0">
+        
+        {{-- Tombol Reset (X) jika user sedang mencari sesuatu --}}
+        @if(request('search'))
+            <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="text-gray-400 hover:text-red-500 mr-2 text-xs">
+                ✕
+            </a>
+        @endif
+
+        <button type="submit" class="text-gray-400 hover:text-[#001f3f] transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+        </button>
+    </form>
+</div>
+
     <div id="sticky-sensor" class="h-px w-full"></div>
 
     {{-- KATEGORI NAV DENGAN FITUR SLIDER HORIZONTAL --}}
@@ -52,7 +75,7 @@
             </div>
 
             <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">{{ $p->nama }}</h3>
-            <p class="text-[10px] text-gray-400 my-2 italic px-2 leading-relaxed line-clamp-2">{{ $p->deskripsi ?? 'Handmade premium quality.' }}</p>
+            <p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>        {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
 
             {{-- Tampilan Harga Termurah "Mulai Dari" --}}
             <p class="text-xs font-bold text-[#001f3f] mb-3">
@@ -90,7 +113,7 @@
                                         @if($p->fotos && $p->fotos->count() > 0)
                                             @foreach($p->fotos as $indexFoto => $foto)
                                                 <div class="w-full h-full flex-shrink-0" data-index-foto="{{ $indexFoto }}">
-                                                    <img src="{{ asset('images/' . $foto->nama_foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
+                                                    <img src="{{ asset('images/' . $foto->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
                                                 </div>
                                             @endforeach
                                         @else
@@ -127,7 +150,7 @@
                                         </p>
                                     </div>
 
-                                    <p class="text-[12px] text-gray-500 leading-relaxed mb-4">{{ $p->deskripsi }}</p>
+                                    <p class="text-[12px] text-gray-500 leading-relaxed mb-4 whitespace-pre-line">{{ $p->deskripsi }}</p>
 
                                     <div class="mb-4">
                                         <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Pilih Variasi Produk</span>
@@ -137,7 +160,7 @@
                                                 @php
                                                     $fotoIndex = 0;
                                                     if($p->fotos && $v->foto) {
-                                                        $fotoIndex = $p->fotos->pluck('nama_foto')->search($v->foto);
+                                                        $fotoIndex = $p->fotos->pluck('foto')->search($v->foto);
                                                         if($fotoIndex === false) { $fotoIndex = 0; }
                                                     }
                                                 @endphp
@@ -196,11 +219,20 @@
             </div>
         </div>
         @empty
-        <div class="col-span-2 md:col-span-3 lg:col-span-5 py-20 text-center">
-            <i class="fa-solid fa-box-open text-4xl text-gray-200 mb-4"></i>
-            <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada produk di kategori ini</p>
-        </div>
-        @endforelse
+<div class="col-span-2 md:col-span-3 lg:col-span-5 py-20 text-center">
+    <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">
+        {{ request('search') ? 'Produk "'.request('search').'" tidak ditemukan' : 'Belum ada produk di kategori ini' }}
+    </p>
+    @if(request('search'))
+        <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="inline-block mt-4 text-[10px] text-[#001f3f] underline underline-offset-4 font-bold uppercase tracking-widest hover:text-gray-600">
+            Kembali ke Semua Produk
+        </a>
+    @endif
+</div>
+@endforelse
     </div>
 </div>
 
@@ -213,14 +245,13 @@
 <script>
     const currentSlides = {};
 
-    // Fungsi utama penggerak slide (bisa dipanggil tombol manual atau klik variasi)
+    // Fungsi utama penggerak slide
     function goToSlide(productId, slideIndex) {
         const slider = document.getElementById(`slider-${productId}`);
         if (!slider) return;
 
         const totalSlides = slider.children.length;
 
-        // Validasi batasan index
         if (slideIndex >= totalSlides) slideIndex = 0;
         if (slideIndex < 0) slideIndex = totalSlides - 1;
 
@@ -229,7 +260,6 @@
         const percentage = -(slideIndex * 100);
         slider.style.transform = `translateX(${percentage}%)`;
 
-        // Update indikator dot bulat-bulat
         const dots = document.querySelectorAll(`.dot-${productId}`);
         dots.forEach((dot, index) => {
             if (index === slideIndex) {
@@ -247,6 +277,19 @@
         }
         const nextSlide = currentSlides[productId] + direction;
         goToSlide(productId, nextSlide);
+    }
+
+    // Fungsi validasi batas kuantitas input (Global scope agar bisa dipanggil dari HTML inline)
+    function checkMaxQuantity(button) {
+        const input = button.parentNode.querySelector('.input-quantity');
+        const max = parseInt(input.getAttribute('max')) || 1;
+        let current = parseInt(input.value);
+        
+        if (isNaN(current) || current < 1) {
+            input.value = max > 0 ? 1 : 0;
+        } else if (current > max) {
+            input.value = max;
+        }
     }
 
     // SCRIPT INTERAKSI SLIDER HORIZONTAL MENU KATEGORI
@@ -269,7 +312,6 @@
             const inputQty = modal.querySelector('.input-quantity');
             const btnSubmit = modal.querySelector('.btn-submit-keranjang');
             
-            // Ambil ID produk dari ID form atau elemen terdekat
             const hiddenIdInput = modal.querySelector('input[name="id"]');
             const productId = hiddenIdInput ? hiddenIdInput.value : null;
 
@@ -284,7 +326,6 @@
                     displayHarga.innerText = 'Rp ' + harga.toLocaleString('id-ID');
                     hiddenHarga.value = harga;
 
-                    // GANTI FOTO SLIDER OTOMATIS KE VARIANT TERPILIH
                     if (isVariantChanged && productId) {
                         goToSlide(productId, targetFotoIndex);
                     }
@@ -294,8 +335,9 @@
                     if (isVariantChanged) {
                         inputQty.value = stok > 0 ? 1 : 0;
                     } else {
-                        if (parseInt(inputQty.value) > stok) inputQty.value = stok;
-                        if (parseInt(inputQty.value) < 1 && stok > 0) inputQty.value = 1;
+                        let currentVal = parseInt(inputQty.value);
+                        if (currentVal > stok) inputQty.value = stok;
+                        if ((isNaN(currentVal) || currentVal < 1) && stok > 0) inputQty.value = 1;
                         if (stok === 0) inputQty.value = 0;
                     }
 
@@ -335,11 +377,10 @@
                 radio.addEventListener('change', () => updateModalState(true));
             });
 
-            // Inisialisasi awal saat modal dibuka (bisa langsung ke index varian default)
             updateModalState(false); 
         });
 
-        // STICKY DETECTOR OBSERVER (Tetap sama seperti punyamu)
+        // STICKY DETECTOR OBSERVER
         const bgWrapper = document.getElementById('bg-kategori-wrapper');
         const sensor = document.getElementById('sticky-sensor');
         const observer = new IntersectionObserver((entries) => {
@@ -353,7 +394,6 @@
                     bgWrapper.style.left = "50%";
                     bgWrapper.style.marginLeft = "-50vw";
                     bgWrapper.classList.replace('py-6', 'py-3');
-                    bgWrapper.style.width = "100vw";
                 } else {
                     bgWrapper.style.backgroundColor = "transparent";
                     bgWrapper.style.boxShadow = "none";
@@ -366,13 +406,5 @@
         }, { rootMargin: '-70px 0px 0px 0px', threshold: [0, 1] });
         if(sensor) observer.observe(sensor);
     });
-
-    function checkMaxQuantity(button) {
-        const input = button.parentNode.querySelector('.input-quantity');
-        const max = parseInt(input.getAttribute('max')) || 1;
-        let current = parseInt(input.value);
-        if (current > max) input.value = max;
-        if (current < 1 && max > 0) input.value = 1;
-    }
 </script>
 @endsection

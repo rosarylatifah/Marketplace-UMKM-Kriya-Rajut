@@ -9,17 +9,31 @@ use App\Models\Pesanan;
 
 class CartController extends Controller
 {
+    /**
+     * Menampilkan halaman keranjang belanja pelanggan.
+     * Alur PBO: Mengambil representasi state object data keranjang 
+     * yang disimpan sementara di dalam Session State.
+     */
     public function index()
     {
         return view('pembeli.keranjang');
     }
 
+    /**
+     * Menampilkan katalog berdasarkan kategori.
+     */
     public function katalog($category = 'Semua')
     {
         $currentCategory = ucfirst($category);
         return view('pembeli.katalog', compact('currentCategory'));
     }
 
+    /**
+     * FR-11: Pelanggan dapat menambahkan produk ke dalam keranjang belanja.
+     * Alur PBO: Menerima kumpulan data dari HTTP Request (Encapsulation), 
+     * menyusunnya menjadi array terstruktur dengan key unik gabungan ID Produk & Variasi,
+     * kemudian menyimpannya ke dalam Session array tanpa persistent DB storage terlebih dahulu.
+     */
     public function store(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -29,10 +43,11 @@ class CartController extends Controller
         $variasiId = $request->produk_variasi_id;
         $cartKey = $request->id . '-' . $variasiId;
 
-        // Ambil info variasi buat dapetin teks ukuran & warna
+        // Ambil info variasi buat dapetin teks ukuran & warna melalui pencarian Object Model
         $variasi = ProdukVariasi::find($variasiId);
         $varianInfo = $variasi ? ' (' . $variasi->ukuran . ' - ' . $variasi->warna . ')' : '';
 
+        // Jika item dengan key tersebut sudah ada di keranjang, akumulasikan quantity-nya (Polimorfisme State)
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $request->quantity;
         } else {
@@ -53,12 +68,18 @@ class CartController extends Controller
             ->with('success', 'Produk berhasil ditambah ke keranjang!');
     }
 
+    /**
+     * Menampilkan halaman formulir checkout data diri.
+     */
     public function checkout()
     {
         $cart = session()->get('cart', []);
         return view('pembeli.checkout', compact('cart'));
     }
 
+    /**
+     * Memperbarui kuantitas produk yang ada di dalam keranjang belanja via AJAX Request.
+     */
     public function update(Request $request)
     {
         if($request->id && $request->quantity){
@@ -69,6 +90,9 @@ class CartController extends Controller
         }
     }
 
+    /**
+     * Menghapus salah satu item produk dari keranjang belanja via AJAX Request.
+     */
     public function remove(Request $request)
     {
         if($request->id) {
@@ -81,6 +105,9 @@ class CartController extends Controller
         }
     }
 
+    /**
+     * Melacak status pesanan pelanggan berdasarkan Email dan ID Pesanan.
+     */
     public function statusPesanan(Request $request)
     {
         if (!$request->email && !$request->kode) {
@@ -99,6 +126,9 @@ class CartController extends Controller
         return view('pembeli.status', compact('pesanan'));
     }
 
+    /**
+     * FR-12: Pelanggan dapat melakukan proses checkout dengan mengisi data diri.
+     */
     public function prosesCheckout(Request $request)
     {
         $cart = session()->get('cart', []);
@@ -108,68 +138,139 @@ class CartController extends Controller
                 ->with('error', 'Keranjang kamu kosong!');
         }
 
+        // Validasi input data diri pelanggan beserta opsi pengantaran baru se-Batam
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'alamat' => 'required|string',
+            'opsi_pengantaran' => 'required|string|in:kurir_lokal,ambil_sendiri,custom_shipment',
+            'metode_pembayaran' => 'required|string',
+        ]);
+
         $idPesanan = 'ORD-' . time();
         $subtotal = 0;
         $nama_barang = [];
 
-        // DB Transaction dipasang biar aman pas looping potong stok database
-        \DB::transaction(function () use ($cart, &$subtotal, &$nama_barang) {
-            foreach($cart as $item) {
-                $subtotal += $item['harga'] * $item['quantity'];
-                $nama_barang[] = $item['nama'] . ' (x' . $item['quantity'] . ')';
+        // DB Transaction dipasang biar aman pas looping potong stok database (Atomicity)
+        try {
+            \DB::transaction(function () use ($cart, &$subtotal, &$nama_barang) {
+                foreach($cart as $item) {
+                    $subtotal += $item['harga'] * $item['quantity'];
+                    $nama_barang[] = $item['nama'] . ' (x' . $item['quantity'] . ')';
 
-                // ================= LOGIKA BARU: POTONG STOK DI TABEL VARIASI =================
-                if (isset($item['produk_variasi_id'])) {
-                    $variasi = ProdukVariasi::find($item['produk_variasi_id']);
+                    // ================= PROSES PBO: POTONG STOK DI TABEL VARIASI =================
+                    if (isset($item['produk_variasi_id'])) {
+                        $variasi = ProdukVariasi::find($item['produk_variasi_id']);
 
-                    if($variasi) {
-                        // Antisipasi jika pembeli checkout melebihi stok yang ada saat itu
-                        if ($variasi->stok < $item['quantity']) {
-                            throw new \Exception("Maaf, stok variasi untuk " . $item['nama'] . " tidak mencukupi.");
+                        if($variasi) {
+                            if ($variasi->stok < $item['quantity']) {
+                                throw new \Exception("Maaf, stok variasi untuk " . $item['nama'] . " tidak mencukupi.");
+                            }
+
+                            $variasi->stok -= $item['quantity'];
+                            $variasi->save();
                         }
-
-                        // Kurangi stok di tabel produk_variasis
-                        $variasi->stok -= $item['quantity'];
-                        $variasi->save();
                     }
                 }
-                // =============================================================================
-            }
-        });
+            });
+        } catch (\Exception $e) {
+            return redirect()->route('pembeli.keranjang')->with('error', $e->getMessage());
+        }
 
-        $ongkir = $request->input('ongkir', 0);
+        // ================= LOGIKA AMAN PENENTUAN ONGKIR (IDE 2) =================
+        $opsi = $request->input('opsi_pengantaran');
+        $ongkir = 0;
+
+        if ($opsi === 'kurir_lokal') {
+            $ongkir = 10000; // Flat Rp 10.000 se-Batam
+        } elseif ($opsi === 'ambil_sendiri' || $opsi === 'custom_shipment') {
+            $ongkir = 0;
+        }
+
         $total = $subtotal + $ongkir;
 
-        // Simpan pesanan ke database
+        // Instansiasi mass assignment data baru ke tabel 'pesanan'
         Pesanan::create([
             'id_pesanan'   => $idPesanan,
-            'nama_pembeli' => $request->input('nama', 'Pembeli'),
-            'email'        => $request->input('email', ''),
+            'nama_pembeli' => $request->input('nama'),
+            'email'        => $request->input('email'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,
             'status'       => 'SEDANG DIPROSES',
         ]);
 
-        // Simpan info pesanan ke session buat halaman pembayaran
+        // Simpan info invoice pesanan ke session buat halaman konfirmasi pembayaran
         session(['pesanan_info' => [
             'id_pesanan'   => $idPesanan,
-            'nama_pembeli' => $request->input('nama', 'Pembeli'),
-            'email'        => $request->input('email', ''),
-            'alamat'       => $request->input('alamat', ''),
+            'nama_pembeli' => $request->input('nama'),
+            'email'        => $request->input('email'),
+            'alamat'       => $request->input('alamat'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,
+            'opsi_kirim'   => $opsi,
             'metode'       => $request->input('metode_pembayaran', 'Transfer Bank'),
         ]]);
 
         session()->put('pesanan_terakhir', $cart);
         session()->put('ongkir', $ongkir);
 
-        // Kosongkan keranjang setelah berhasil checkout
+        // State Management: Kosongkan data di dalam session keranjang setelah berhasil checkout
         session()->forget('cart');
 
         return redirect('/pembayaran')
             ->with('success', 'Silakan selesaikan pembayaran.');
+    }
+
+    /**
+     * FITUR BARU: Membatalkan pesanan dari sisi pembeli dan mengembalikan stok produk variasi.
+     * Alur PBO: Menjaga integritas data state menggunakan DB Transaction, 
+     * mengembalikan kuantitas stok ke Object Model ProdukVariasi, lalu mengubah status entitas pesanan.
+     */
+    public function batalkanPesanan(Request $request)
+    {
+        $idPesanan = $request->input('id_pesanan');
+        
+        // Cari entitas objek pesanan berdasarkan ID
+        $pesanan = Pesanan::where('id_pesanan', $idPesanan)->first();
+
+        if (!$pesanan) {
+            return redirect()->back()->with('error', 'Data pesanan tidak ditemukan.');
+        }
+
+        // Syarat mutlak pembatalan: Status harus berupa 'SEDANG DIPROSES'
+        if ($pesanan->status !== 'SEDANG DIPROSES') {
+            return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses lebih lanjut oleh admin.');
+        }
+
+        // Ambil data item keranjang terakhir dari session untuk mengembalikan stok variasi produk
+        $lastCart = session()->get('pesanan_terakhir', []);
+
+        try {
+            \DB::transaction(function () use ($pesanan, $lastCart) {
+                // 1. Loop item untuk mengembalikan stok variasi barang ke database
+                if (!empty($lastCart)) {
+                    foreach ($lastCart as $item) {
+                        if (isset($item['produk_variasi_id'])) {
+                            $variasi = ProdukVariasi::find($item['produk_variasi_id']);
+                            if ($variasi) {
+                                // Tambahkan kembali stok yang sempat dikurangi saat checkout
+                                $variasi->stok += $item['quantity'];
+                                $variasi->save();
+                            }
+                        }
+                    }
+                }
+
+                // 2. Ubah state status pesanan di database menjadi DIBATALKAN
+                $pesanan->status = 'DIBATALKAN';
+                $pesanan->save();
+            });
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal membatalkan pesanan: ' . $e->getMessage());
+        }
+
+        return redirect()->back()->with('success', 'Pesanan  berhasil dibatalkan. Mohon hubungi penjual untuk pengembalian dana.');
     }
 }

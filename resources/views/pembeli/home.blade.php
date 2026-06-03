@@ -81,9 +81,7 @@
         </div>
 
         <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider line-clamp-1 w-full px-1">{{ $p->nama }}</h3>
-        <p class="text-[10px] text-gray-400 my-2 italic line-clamp-2 px-1 h-8">{{ $p->deskripsi ?? 'Handmade premium quality.' }}</p>
-
-        {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
+<p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>        {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
         <p class="text-xs font-bold text-[#001f3f] mb-3">
             @if($p->variasis->count() > 0)
                 Rp {{ number_format($p->variasis->min('harga'), 0, ',', '.') }}
@@ -156,7 +154,7 @@
                                 Rp {{ number_format($p->variasis->first()->harga ?? $p->harga, 0, ',', '.') }}
                             </p>
                             
-                            <p class="text-[12px] text-gray-500 leading-relaxed mb-4">{{ $p->deskripsi }}</p>
+                            <p class="text-[12px] text-gray-500 leading-relaxed mb-4 whitespace-pre-line">{{ $p->deskripsi }}</p>
 
                             <div class="mb-4">
                                 <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Pilih Variasi Produk</span>
@@ -216,11 +214,20 @@
             </div>
         </div>
     </div>
-    @empty
-    <div class="w-full py-20 text-center">
-        <i class="fa-solid fa-box-open text-4xl text-gray-200 mb-4"></i>
-        <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada produk tersedia</p>
-    </div>
+@empty
+        <div class="col-span-2 md:col-span-3 lg:col-span-5 w-full flex flex-col items-center justify-center py-24 text-center">
+            <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-[11px] text-gray-400 uppercase tracking-widest font-semibold">
+                {{ request('search') ? 'Produk "'.request('search').'" tidak ditemukan' : 'Belum ada produk yang ditambahkan' }}
+            </p>
+            @if(request('search'))
+                <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="inline-block mt-4 text-[10px] text-[#001f3f] underline underline-offset-4 font-bold uppercase tracking-widest hover:text-gray-600">
+                    Kembali ke Semua Produk
+                </a>
+            @endif
+        </div>
     @endforelse
 </div>
 
