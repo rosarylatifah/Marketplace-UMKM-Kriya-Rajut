@@ -59,7 +59,7 @@ Route::view('/berhasil', 'pembeli.berhasil');
 
 /*
 |--------------------------------------------------------------------------
-| Tampilan Admin (Penjual) - Dibungkus Prefix 'admin'
+| Tampilan Admin (Penjual) 
 |--------------------------------------------------------------------------
 */
 
