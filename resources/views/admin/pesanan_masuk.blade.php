@@ -35,6 +35,7 @@
                     <th class="px-8 py-4">Nama Pembeli</th>
                     <th class="px-8 py-4 text-center">Detail Barang</th>
                     <th class="px-8 py-4">Total</th>
+                    <th class="px-8 py-4 text-center">Bukti</th>
                     <th class="px-8 py-4">Status</th>
                     <th class="px-8 py-4 text-center">Aksi</th>
                 </tr>
@@ -58,41 +59,29 @@
                         {{ $p->nama_pembeli }}
                     </td>
 
-                    {{-- 3. Detail Barang (Fix Multi-Produk Borongan) --}}
+                    {{-- 3. Detail Barang --}}
                     <td class="px-6 py-4 vertical-align-middle">
                         <div class="flex flex-col gap-3 items-center justify-center">
                             @php
-                                // Memecah string produk jika pembeli membeli lebih dari 1 jenis barang (dipisahkan koma)
                                 $items = explode(',', $p->nama_barang);
                             @endphp
 
                             @foreach($items as $item)
                                 @php
-                                    $item = trim($item); // Bersihkan spasi di awal/akhir
-                                    
-                                    // 1. Ambil Nama Produk Utama
+                                    $item = trim($item);
                                     $nama_produk = Str::contains($item, '(') ? trim(Str::before($item, '(')) : $item;
-                                    
-                                    // 2. Ambil Kuantitas (Mencari pola x1, x2, dst)
                                     $qty = '1';
                                     if (Str::contains($item, '(x')) {
                                         $qty = Str::between($item, '(x', ')');
                                     } elseif (Str::contains($item, 'x')) {
                                         $qty = trim(Str::afterLast($item, 'x'));
                                     }
-                                    
-                                    // 3. Ambil Variasi & Bersihkan dari Karakter Sampah (Kurung Nyasar / Qty)
                                     $variasi = null;
                                     if (Str::contains($item, '(')) {
-                                        // Ambil string di dalam kurung pertama
                                         $variasi = Str::between($item, '(', ')');
-                                        
-                                        // Jaga-jaga kalau string masih mengandung kurung tutup akibat explode multi-produk
                                         if (Str::contains($variasi, ')')) {
                                             $variasi = Str::before($variasi, ')');
                                         }
-                                        
-                                        // Bersihkan kalau teks kuantitas ikut kesedot masuk ke variasi
                                         if (Str::contains($variasi, 'x')) {
                                             $variasi = trim(Str::before($variasi, 'x'));
                                         }
@@ -101,26 +90,20 @@
                                 @endphp
 
                                 <div class="flex items-center gap-3 w-full max-w-[280px] bg-gray-50/50 p-2 rounded-lg border border-gray-100">
-                                    {{-- Logo Inisial Bulat --}}
                                     <div class="w-8 h-8 bg-[#001f3f] text-white rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-bold uppercase tracking-wider">
                                         {{ strtoupper(substr($nama_produk, 0, 2)) }}
                                     </div>
-
-                                    {{-- Detail Konten Produk --}}
                                     <div class="flex flex-col flex-1 min-w-0 text-left">
                                         <span class="text-[11px] font-bold text-gray-800 uppercase tracking-wide truncate">
                                             {{ $nama_produk }}
                                         </span>
-                                        
                                         <div class="flex items-center gap-1.5 mt-0.5 flex-wrap">
                                             @if($variasi && !empty(trim($variasi)))
                                                 <span class="inline-block bg-white text-gray-500 text-[8px] font-medium px-1.5 py-0.5 rounded border border-gray-200 uppercase tracking-tight max-w-[120px] truncate">
                                                     {{ trim($variasi) }}
                                                 </span>
                                             @endif
-                                            <span class="text-[10px] font-bold text-[#001f3f]">
-                                                x{{ $qty }}
-                                            </span>
+                                            <span class="text-[10px] font-bold text-[#001f3f]">x{{ $qty }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -133,7 +116,19 @@
                         Rp{{ number_format($p->total, 0, ',', '.') }}
                     </td>
 
-                    {{-- 5. Status Dropdown --}}
+                    {{-- 5. Bukti Pembayaran --}}
+                    <td class="px-8 py-4 text-center vertical-align-middle">
+                        @if($p->bukti_pembayaran)
+                            <button onclick="lihatBukti('{{ asset('images/bukti/' . $p->bukti_pembayaran) }}')"
+                                class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-[#001f3f] hover:bg-[#F3F5F1] border border-gray-200 px-3 py-2 rounded-lg transition-all duration-150 mx-auto">
+                                <i class="fa-solid fa-image text-xs"></i> Lihat
+                            </button>
+                        @else
+                            <span class="text-[10px] text-gray-300 uppercase tracking-widest">Belum ada</span>
+                        @endif
+                    </td>
+
+                    {{-- 6. Status Dropdown --}}
                     <td class="px-8 py-4 vertical-align-middle">
                         <form action="{{ route('pesanan.update', $p->id) }}" method="POST" id="form-status-{{ $p->id }}">
                             @csrf
@@ -150,7 +145,7 @@
                         </form>
                     </td>
 
-                    {{-- 6. Aksi Hapus --}}
+                    {{-- 7. Aksi Hapus --}}
                     <td class="px-8 py-4 vertical-align-middle">
                         <div class="flex items-center justify-center">
                             <form action="{{ route('pesanan.hapus', $p->id) }}" method="POST" class="inline">
@@ -167,7 +162,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-8 py-16 text-center">
+                    <td colspan="7" class="px-8 py-16 text-center">
                         <div class="flex flex-col items-center gap-3">
                             <i class="fa-solid fa-inbox text-3xl text-gray-200"></i>
                             <p class="text-sm text-gray-400 uppercase tracking-widest">Tidak ada pesanan masuk</p>
@@ -180,5 +175,52 @@
     </div>
 
 </div>
+
+{{-- Modal Bukti Pembayaran --}}
+<div id="modal-bukti" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="relative bg-white rounded-xl shadow-2xl max-w-lg w-full p-6">
+        <div class="flex justify-between items-center mb-4 border-b border-gray-100 pb-4">
+            <div>
+                <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-1">Bukti Transfer</p>
+                <h3 class="text-sm font-bold text-[#001f3f] uppercase tracking-widest">Bukti Pembayaran</h3>
+            </div>
+            <button onclick="tutupBukti()" class="text-gray-400 hover:text-red-500 transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <div class="bg-[#F3F5F1] rounded-lg overflow-hidden flex items-center justify-center min-h-64">
+            <img id="img-bukti" src="" alt="Bukti Pembayaran" class="max-w-full max-h-96 object-contain rounded-lg">
+        </div>
+
+        <div class="mt-4 flex gap-3">
+            <a id="link-bukti" href="" target="_blank"
+                class="flex-1 flex items-center justify-center gap-2 bg-[#001f3f] hover:bg-[#003366] text-white font-bold uppercase tracking-widest text-[10px] py-3 rounded-full transition-all duration-150">
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i> Buka di Tab Baru
+            </a>
+            <button onclick="tutupBukti()"
+                class="flex-1 text-[10px] font-bold uppercase tracking-widest text-[#001f3f] border border-gray-200 hover:bg-[#F3F5F1] py-3 rounded-full transition-all duration-150">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+function lihatBukti(url) {
+    document.getElementById('img-bukti').src = url;
+    document.getElementById('link-bukti').href = url;
+    document.getElementById('modal-bukti').classList.remove('hidden');
+}
+
+function tutupBukti() {
+    document.getElementById('modal-bukti').classList.add('hidden');
+    document.getElementById('img-bukti').src = '';
+}
+
+document.getElementById('modal-bukti').addEventListener('click', function(e) {
+    if (e.target === this) tutupBukti();
+});
+</script>
 
 @endsection

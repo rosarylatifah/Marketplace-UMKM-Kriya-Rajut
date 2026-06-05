@@ -59,8 +59,14 @@
                     {{-- Status Pesanan Dinamis --}}
                     <div class="mt-4 flex items-center gap-2">
                         @if($pesanan->status === 'SEDANG DIPROSES')
-                            <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                            <p class="text-[10px] font-bold text-emerald-500 italic tracking-widest uppercase">Sedang diproses</p>
+                            <div class="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse"></div>
+                            <p class="text-[10px] font-bold text-amber-500 italic tracking-widest uppercase">Sedang diproses</p>
+                        @elseif($pesanan->status === 'DALAM PERJALANAN')
+                            <div class="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse"></div>
+                            <p class="text-[10px] font-bold text-blue-500 italic tracking-widest uppercase">Dalam Perjalanan</p>
+                        @elseif($pesanan->status === 'SELESAI')
+                            <div class="h-1.5 w-1.5 rounded-full bg-emerald-500"></div>
+                            <p class="text-[10px] font-bold text-emerald-500 italic tracking-widest uppercase">Pesanan Selesai</p>
                         @elseif($pesanan->status === 'DIBATALKAN')
                             <div class="h-1.5 w-1.5 rounded-full bg-red-500"></div>
                             <p class="text-[10px] font-bold text-red-500 italic tracking-widest uppercase">Pesanan Dibatalkan</p>
@@ -79,13 +85,34 @@
                         Kontak Penjual
                     </a>
 
-                    {{-- TOMBOL BATALKAN PESANAN: Hanya muncul jika status masih SEDANG DIPROSES --}}
+                    {{-- SEDANG DIPROSES: Tombol Batalkan --}}
                     @if($pesanan->status === 'SEDANG DIPROSES')
                         <button type="button" onclick="konfirmasiPembatalan('{{ $pesanan->id_pesanan }}')"
                             class="flex items-center justify-center gap-2 border border-red-200 bg-red-50 hover:bg-red-100 px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-red-600 transition-all w-full text-center cursor-pointer">
+                            <i class="fa-solid fa-xmark text-xs"></i>
                             Batalkan Pesanan
                         </button>
+
+                    {{-- DALAM PERJALANAN: Tombol Konfirmasi Diterima --}}
+                    @elseif($pesanan->status === 'DALAM PERJALANAN')
+                        <form action="{{ route('pesanan.konfirmasi', $pesanan->id) }}" method="POST"
+                            onsubmit="return confirm('Konfirmasi pesanan sudah diterima? Tindakan ini tidak bisa dibatalkan.')">
+                            @csrf
+                            <button type="submit"
+                                class="flex items-center justify-center gap-2 border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-emerald-600 transition-all w-full text-center cursor-pointer">
+                                <i class="fa-solid fa-circle-check text-xs"></i>
+                                Konfirmasi Diterima
+                            </button>
+                        </form>
+
+                    {{-- SELESAI: Pesanan sudah selesai --}}
+                    @elseif($pesanan->status === 'SELESAI')
+                        <div class="flex items-center justify-center gap-2 border border-emerald-200 bg-emerald-50 px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest text-emerald-600 w-full text-center">
+                            <i class="fa-solid fa-circle-check text-xs"></i>
+                            Pesanan Diterima
+                        </div>
                     @endif
+
                 </div>
             </div>
         @else
@@ -182,7 +209,6 @@
         document.getElementById('modal-detail').classList.add('hidden');
     }
 
-    // Fungsi konfirmasi popup pembatalan pesanan
     function konfirmasiPembatalan(idPesanan) {
         if (confirm("Apakah kamu yakin ingin membatalkan pesanan " + idPesanan + "?\nTindakan ini akan mengembalikan stok produk.")) {
             document.getElementById('input-batal-id').value = idPesanan;

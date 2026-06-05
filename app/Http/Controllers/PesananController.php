@@ -128,4 +128,31 @@ class PesananController extends Controller
 
         return view('pembeli.status', compact('pesanan'));
     }
+
+    public function uploadBukti(Request $request)
+    {
+        $request->validate([
+            'bukti_pembayaran' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'id_pesanan' => 'required',
+        ]);
+
+        $pesanan = Pesanan::where('id_pesanan', $request->id_pesanan)->firstOrFail();
+
+        $namaFile = time() . '_bukti.' . $request->bukti_pembayaran->extension();
+        $request->bukti_pembayaran->move(public_path('images/bukti'), $namaFile);
+
+        $pesanan->bukti_pembayaran = $namaFile;
+        $pesanan->save();
+
+        return redirect('/berhasil')->with('success', 'Bukti pembayaran berhasil dikirim!');
+    }
+
+    public function konfirmasiDiterima($id)
+    {
+        $pesanan = Pesanan::findOrFail($id);
+        $pesanan->status = 'SELESAI';
+        $pesanan->save();
+
+        return redirect()->back()->with('success', 'Terima kasih! Pesanan telah dikonfirmasi diterima.');
+    }
 }

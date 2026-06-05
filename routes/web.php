@@ -56,6 +56,9 @@ Route::post('/proses-checkout', [CartController::class, 'prosesCheckout'])->name
 Route::view('/pembayaran', 'pembeli.pembayaran');
 Route::view('/berhasil', 'pembeli.berhasil');
 
+Route::post('/upload-bukti', [PesananController::class, 'uploadBukti'])->name('bukti.upload');
+Route::post('/konfirmasi-pesanan/{id}', [App\Http\Controllers\PesananController::class, 'konfirmasiDiterima'])->name('pesanan.konfirmasi');
+
 
 /*
 |--------------------------------------------------------------------------
