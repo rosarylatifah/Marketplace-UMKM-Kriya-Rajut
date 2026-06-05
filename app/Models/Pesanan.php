@@ -28,5 +28,6 @@ class Pesanan extends Model
         'total',
         'ongkir',
         'status',
+        'bukti_pembayaran',
     ];
 }
