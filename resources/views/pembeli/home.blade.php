@@ -22,8 +22,7 @@
                 </div>
             </div>
             <div class="w-full md:w-1/2 h-1/2 md:h-full relative bg-gray-50">
-                <img src="https://images.unsplash.com/photo-1608408881647-773665673100?q=80&w=1000&auto=format&fit=crop"
-                     class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000">
+                <img src="{{ asset('images/hero1.jpg') }}" class="w-full h-full object-cover brightness-90 hover:grayscale-0 transition-all duration-1000">
                 <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white via-white/10 to-transparent"></div>
             </div>
         </div>
@@ -39,13 +38,12 @@
                 </p>
                 <div>
                     <a href="/katalog" class="inline-block bg-[#001f3f] text-white px-10 py-4 rounded-full text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-lg">
-                        Cari Amigurumi
+                        Lihat Koleksi
                     </a>
                 </div>
             </div>
             <div class="w-full md:w-1/2 h-1/2 md:h-full relative bg-gray-50">
-                <img src="https://images.unsplash.com/photo-1584992231908-a5ec0df10bc6?q=80&w=1000&auto=format&fit=crop"
-                     class="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-1000">
+                <img src="{{ asset('images/hero2.jpg') }}" class="w-full h-full object-cover brightness-90 hover:grayscale-0 transition-all duration-1000">
                 <div class="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-white via-white/10 to-transparent"></div>
             </div>
         </div>
@@ -64,10 +62,6 @@
         <div class="h-[2px] w-12 bg-[#001f3f] mt-2"></div>
     </div>
     <div class="flex items-center gap-4">
-        <div class="hidden md:flex items-center gap-1.5">
-            <button id="slide-prev" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-xs text-gray-400 hover:border-[#001f3f] hover:text-[#001f3f] transition-all bg-white">&larr;</button>
-            <button id="slide-next" class="w-7 h-7 rounded-full border border-gray-200 flex items-center justify-center text-xs text-gray-400 hover:border-[#001f3f] hover:text-[#001f3f] transition-all bg-white">&rarr;</button>
-        </div>
         <a href="/katalog" class="text-[10px] font-bold text-gray-400 hover:text-[#001f3f] uppercase tracking-widest transition-colors">Lihat Semua &rarr;</a>
     </div>
 </div>
@@ -81,7 +75,8 @@
         </div>
 
         <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider line-clamp-1 w-full px-1">{{ $p->nama }}</h3>
-<p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>        {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
+        <p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>
+        
         <p class="text-xs font-bold text-[#001f3f] mb-3">
             @if($p->variasis->count() > 0)
                 Rp {{ number_format($p->variasis->min('harga'), 0, ',', '.') }}
@@ -113,20 +108,17 @@
                             <div class="flex transition-transform duration-500 ease-in-out h-full inner-slider-container" id="slider-home-{{ $p->id }}" data-current-index="0">
                                 @if($p->fotos && $p->fotos->count() > 0)
                                     @foreach($p->fotos as $indexFoto => $foto)
-                                        {{-- MODIFIKASI: Tambah data-index-foto agar JavaScript tahu urutan gambarnya --}}
                                         <div class="w-full h-full flex-shrink-0" data-index-foto="{{ $indexFoto }}">
                                             <img src="{{ asset('images/' . $foto->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
                                         </div>
                                     @endforeach
                                 @else
-                                    {{-- Fallback jika admin tidak mengunggah foto variasi tambahan --}}
                                     <div class="w-full h-full flex-shrink-0" data-index-foto="0">
                                         <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover" alt="{{ $p->nama }}">
                                     </div>
                                 @endif
                             </div>
 
-                            {{-- Tombol Navigasi Panah Kiri Kanan (Hanya Muncul jika Foto Lebih dari 1) --}}
                             @if($p->fotos && $p->fotos->count() > 1)
                                 <button type="button" onclick="moveSlideHome('{{ $p->id }}', -1)" 
                                     class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#001f3f] w-8 h-8 rounded-full flex items-center justify-center shadow-md transition-all z-10 font-bold opacity-0 group-hover:opacity-100">
@@ -145,7 +137,6 @@
                                 </div>
                             @endif
                         </div>
-                        {{-- ================================================================================= --}}
 
                         <div class="flex flex-col">
                             <h2 class="text-xl font-bold uppercase tracking-tight text-gray-900 mb-1">{{ $p->nama }}</h2>
@@ -161,15 +152,14 @@
                                 <div class="flex flex-wrap gap-2">
                                     @forelse($p->variasis as $keyVar => $v)
                                         @php
-                                            // MODIFIKASI: Cari tahu foto varian ini ada di index urutan ke berapa di galeri produk
+                                            // FIX KOREKSI: Mengganti $v->foto_varian menjadi $v->foto agar sinkron dengan database & katalog
                                             $fotoIndex = 0;
-                                            if($p->fotos && $v->foto_varian) {
-                                                $fotoIndex = $p->fotos->pluck('foto')->search($v->foto_varian);
+                                            if($p->fotos && $v->foto) {
+                                                $fotoIndex = $p->fotos->pluck('foto')->search($v->foto);
                                                 if($fotoIndex === false) { $fotoIndex = 0; }
                                             }
                                         @endphp
                                         <label class="cursor-pointer label-pilihan-variasi">
-                                            {{-- MODIFIKASI: Tambahkan atribut data-index-foto --}}
                                             <input type="radio" name="produk_variasi_id" value="{{ $v->id }}" class="peer hidden radio-variasi" 
                                                    data-harga="{{ $v->harga }}" 
                                                    data-stok="{{ $v->stok }}"
@@ -184,7 +174,7 @@
                                         </label>
                                     @empty
                                         <span class="text-xs text-amber-500 font-bold">Variasi belum diatur oleh admin.</span>
-                                    @endforelse {{-- <--- Ganti jadi ini --}}
+                                    @endforelse
                                 </div>
                             </div>
 
@@ -214,20 +204,13 @@
             </div>
         </div>
     </div>
-@empty
-        <div class="col-span-2 md:col-span-3 lg:col-span-5 w-full flex flex-col items-center justify-center py-24 text-center">
-            <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <p class="text-[11px] text-gray-400 uppercase tracking-widest font-semibold">
-                {{ request('search') ? 'Produk "'.request('search').'" tidak ditemukan' : 'Belum ada produk yang ditambahkan' }}
-            </p>
-            @if(request('search'))
-                <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="inline-block mt-4 text-[10px] text-[#001f3f] underline underline-offset-4 font-bold uppercase tracking-widest hover:text-gray-600">
-                    Kembali ke Semua Produk
-                </a>
-            @endif
-        </div>
+    @empty
+    <div class="col-span-2 md:col-span-3 lg:col-span-5 w-full flex flex-col items-center justify-center py-24 text-center">
+        <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-[11px] text-gray-400 uppercase tracking-widest font-semibold">Belum ada produk yang ditambahkan</p>
+    </div>
     @endforelse
 </div>
 
@@ -284,17 +267,16 @@
     let slideInterval = setInterval(nextSlide, 5000); 
 
     // --- JAVASCRIPT LOGIC SCROLL HORIZONTAL PRODUK ---
-    document.getElementById('slide-next').addEventListener('click', function() {
-        const container = document.getElementById('produk-slider-container');
-        container.scrollLeft += 260; 
-    });
+    // FIX KOREKSI: Tambah pengecekan tombol agar tidak menyebabkan error crash JavaScript jika tombol tidak ada
+    const btnSlideNext = document.getElementById('slide-next');
+    if (btnSlideNext) {
+        btnSlideNext.addEventListener('click', function() {
+            const container = document.getElementById('produk-slider-container');
+            container.scrollLeft += 260; 
+        });
+    }
 
-    document.getElementById('slide-prev').addEventListener('click', function() {
-        const container = document.getElementById('produk-slider-container');
-        container.scrollLeft -= 260; 
-    });
-
-    // ================= MODIFIKASI: FUNGSI UTAMA PENGGERAK SLIDER FOTO DI MODAL =================
+    // ================= FUNGSI UTAMA PENGGERAK SLIDER FOTO DI MODAL =================
     function goToModalSlide(produkId, currentIndex) {
         const slider = document.getElementById('slider-home-' + produkId);
         if (!slider) return;
@@ -337,7 +319,6 @@
             const inputQty = modal.querySelector('.input-quantity');
             const btnSubmit = modal.querySelector('.btn-submit-keranjang');
             
-            // Tangkap ID produk dari input hidden id di form modal
             const hiddenIdInput = modal.querySelector('input[name="id"]');
             const produkId = hiddenIdInput ? hiddenIdInput.value : null;
 
@@ -352,14 +333,13 @@
                     displayHarga.innerText = 'Rp ' + harga.toLocaleString('id-ID');
                     hiddenHarga.value = harga;
 
-                    // FITUR BARU: Geser foto otomatis ke varian yang dicari pas diklik pembeli
+                    // Fitur geser foto otomatis ke varian yang dicari pas diklik pembeli
                     if (isVariantChanged && produkId) {
                         goToModalSlide(produkId, targetFotoIndex);
                     }
 
                     inputQty.setAttribute('max', stok);
                     
-                    // OPTIMASI UX: Kalau variasi diganti, kembalikan qty ke 1
                     if (isVariantChanged) {
                         inputQty.value = stok > 0 ? 1 : 0;
                     } else {
@@ -387,7 +367,6 @@
                 }
             }
 
-            // Validasi input ngetik manual di quantity
             if (inputQty) {
                 inputQty.addEventListener('input', function() {
                     const max = parseInt(this.getAttribute('max')) || 0;
@@ -408,7 +387,6 @@
                 radio.addEventListener('change', () => updateModalState(true));
             });
 
-            // Jalankan inisialisasi awal modal tanpa mentrigger pergeseran slider
             updateModalState(false);
         });
     });

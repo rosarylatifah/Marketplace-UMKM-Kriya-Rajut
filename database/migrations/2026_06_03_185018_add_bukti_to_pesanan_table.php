@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('pesanan', function (Blueprint $table) {
-            //
+            // Menambahkan kolom bukti_pembayaran setelah kolom status (atau hapus ->after() kalau ragu)
+            $table->string('bukti_pembayaran')->nullable()->after('status');
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('pesanan', function (Blueprint $table) {
-            //
+            // Menghapus kembali kolom jika dilakukan rollback
+            $table->dropColumn('bukti_pembayaran');
         });
     }
 };

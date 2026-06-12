@@ -64,15 +64,25 @@
                             <label class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1 font-bold">
                                 Opsi Pengantaran <span class="text-red-400">*</span>
                             </label>
+                            {{-- Dropdown disederhanakan jadi 2 Opsi Utama sesuai rencanamu --}}
                             <select name="opsi_pengantaran" id="select-opsi-pengantaran" onchange="updateOngkir()"
                                 class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer">
                                 <option value="" selected disabled>Pilih Opsi Pengantaran</option>
                                 <option value="kurir_lokal" data-ongkir="10000">Kurir Lokal Batam (Maks 1kg) - Rp 10.000</option>
-                                <option value="ambil_sendiri" data-ongkir="0">Ambil Produk di Tempat - Rp 0</option>
-                                <option value="custom_shipment" data-ongkir="0">Custom Shipment (Diskusi Kurir) - Rp 0</option>
+                                <option value="custom_shipment" data-ongkir="0">GoSend / GrabExpress - Rp0</option>
                             </select>
                             <p id="err-opsi" class="hidden text-[9px] text-red-400 mt-1 uppercase tracking-widest">Opsi pengantaran wajib dipilih</p>
-                            <p id="keterangan-opsi" class="hidden text-[10px] font-medium mt-2 leading-relaxed"></p>
+                            
+                            {{-- BOX PENJELASAN ELEGAN DAN INTERAKTIF --}}
+                            <div id="keterangan-opsi-box" class="hidden opacity-0 transform -translate-y-2 transition-all duration-300 mt-4 p-4 bg-gray-50 border border-gray-100 rounded-sm flex items-start gap-3">
+                                <div id="keterangan-icon" class="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs mt-0.5 font-bold">
+                                    {{-- Diisi via JavaScript --}}
+                                </div>
+                                <div class="flex-1">
+                                    <h4 id="keterangan-title" class="text-[10px] font-bold uppercase tracking-wider text-[#001f3f] mb-1">Mengenai Opsi</h4>
+                                    <p id="keterangan-text" class="text-[11px] text-gray-500 font-medium leading-relaxed"></p>
+                                </div>
+                            </div>
                         </div>
 
                         <div>
@@ -174,43 +184,76 @@
         const select = document.getElementById('select-opsi-pengantaran');
         const ongkirDisplay = document.getElementById('ongkir-display');
         const totalDisplay = document.getElementById('total-bayar');
-        const keteranganOpsi = document.getElementById('keterangan-opsi');
         const catatanBox = document.getElementById('catatan-ongkir-box');
         
-        const subtotal = parseInt(document.getElementById('subtotal-produk').getAttribute('data-harga'));
+        // Elemen Info Box Baru
+        const infoBox = document.getElementById('keterangan-opsi-box');
+        const infoIcon = document.getElementById('keterangan-icon');
+        const infoTitle = document.getElementById('keterangan-title');
+        const infoText = document.getElementById('keterangan-text');
         
-        // Ambil nominal ongkir dari attribute data-ongkir option terpilih
+        const subtotal = parseInt(document.getElementById('subtotal-produk').getAttribute('data-harga'));
         const selectedOption = select.options[select.selectedIndex];
         const ongkirBaru = parseInt(selectedOption.getAttribute('data-ongkir')) || 0;
         const value = select.value;
         
         const totalBaru = subtotal + ongkirBaru;
 
-        // Reset state info tambahan
-        keteranganOpsi.classList.add('hidden');
+        // Reset state & animasi info box setiap kali pilihan berubah
         catatanBox.classList.add('hidden');
-        keteranganOpsi.className = "text-[10px] font-medium mt-2 leading-relaxed"; 
+        infoBox.classList.remove('opacity-100', 'translate-y-0');
+        infoBox.classList.add('opacity-0', '-translate-y-2', 'hidden');
+        infoIcon.className = "flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs mt-0.5 font-bold";
 
-        // Logika teks info berdasarkan opsi pengantaran
+        // Logika Pengisian Teks Deskripsi & Styling Komponen Dinamis
         if (value === 'kurir_lokal') {
+            // Judul & Isi Teks Info Box
+            infoTitle.innerText = "Kurir Lokal Batam (Paket Standar)";
+            infoText.innerText = "Berlaku tarif ke seluruh wilayah Batam. Khusus produk dengan ukuran normal (berat maks 1kg) muat di kantong plastik sedang.";
+            
+            // Ikon Bulat Biru Navy Khas Tema Kamu
+            infoIcon.innerHTML = "i";
+            infoIcon.classList.add('bg-[#001f3f]/10', 'text-[#001f3f]');
+            
+            // Tampilkan Ringkasan di Bawah Ongkir Samping Kanan
             catatanBox.innerHTML = "* Pengiriman khusus wilayah kota batam. Sistem otomatis menambahkan tarif flat kurir lokal.";
             catatanBox.classList.remove('hidden');
-        } else if (value === 'ambil_sendiri') {
-            keteranganOpsi.innerHTML = "✓ Silakan ambil di tempat. Hubungi admin setelah order selesai untuk alamat lengkap.";
-            keteranganOpsi.classList.add('text-green-600', 'block');
+            
+            // Picu Efek Animasi Fade-In Smooth
+             TampilkanInfoBox(infoBox);
+
         } else if (value === 'custom_shipment') {
-            keteranganOpsi.innerHTML = "⚠️ Wajib: Silakan hubungi penjual via WhatsApp untuk mendiskusikan biaya pengiriman di luar sistem.";
-            keteranganOpsi.classList.add('text-amber-600', 'block');
+            // Judul & Isi Teks Info Box
+            infoTitle.innerText = "GoSend/GrabExpress (Custom Shipment)";
+            infoText.innerText = "Untuk total produk berukuran besar/lebar (> 1 kg). Pengiriman via GoSend/GrabExpress. Ongkir dibayar terpisah langsung ke kurir saat pengantaran. Pastikan alamat lengkap & nomor telepon aktif untuk koordinasi.";
+            
+            // Ikon Tanda Seru Amber/Orange
+            infoIcon.innerHTML = "!";
+            infoIcon.classList.add('bg-amber-100', 'text-amber-600');
+            
+            // Tampilkan Ringkasan di Bawah Ongkir Samping Kanan
             catatanBox.innerHTML = "* Ongkos kirim riil akan dibayarkan secara terpisah di luar transaksi website ini.";
             catatanBox.classList.remove('hidden');
+            
+            // Picu Efek Animasi Fade-In Smooth
+            TampilkanInfoBox(infoBox);
         }
 
-        // Update nominal di rincian
+        // Update nilai teks angka di bagian summary
         ongkirDisplay.innerText = 'Rp ' + ongkirBaru.toLocaleString('id-ID');
         totalDisplay.innerText = 'Rp ' + totalBaru.toLocaleString('id-ID');
 
-        // ISI INPUT HIDDEN SUPAYA TERKIRIM KE CONTROLLER
+        // Isi input hidden agar tersubmit aman menuju controller backend Laravel
         document.getElementById('input-ongkir-hidden').value = ongkirBaru;
+    }
+
+    // Helper function untuk memberikan transisi mulus pada info box
+    function TampilkanInfoBox(element) {
+        element.classList.remove('hidden');
+        setTimeout(() => {
+            element.classList.remove('opacity-0', '-translate-y-2');
+            element.classList.add('opacity-100', 'translate-y-0');
+        }, 50);
     }
 
     function validasiDanLanjut() {

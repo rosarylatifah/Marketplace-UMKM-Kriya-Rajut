@@ -10,40 +10,42 @@
     </div>
 
     {{-- FITUR PENCARIAN PRODUK KRIYA RAJUT --}}
-<div class="max-w-md mx-auto mb-6 px-4">
-    <form action="{{ url()->current() }}" method="GET" class="relative flex items-center border-b border-gray-300 focus-within:border-[#001f3f] transition-colors py-1">
-        
-        <input type="text" name="search" value="{{ request('search') }}" 
-               placeholder="Cari produk rajutan..." 
-               class="w-full bg-transparent border-none p-0 text-xs font-medium uppercase tracking-widest text-gray-700 placeholder-gray-400 focus:ring-0">
-        
-        {{-- Tombol Reset (X) jika user sedang mencari sesuatu --}}
-        @if(request('search'))
-            <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="text-gray-400 hover:text-red-500 mr-2 text-xs">
-                ✕
-            </a>
-        @endif
+    <div class="max-w-md mx-auto mb-6 px-4">
+        <form action="{{ url()->current() }}" method="GET" class="relative flex items-center border-b border-gray-300 focus-within:border-[#001f3f] transition-colors py-1">
+            
+            <input type="text" name="search" value="{{ request('search') }}" 
+                   placeholder="Cari produk rajutan..." 
+                   class="w-full bg-transparent border-none p-0 text-xs font-medium uppercase tracking-widest text-gray-700 placeholder-gray-400 focus:ring-0">
+            
+            {{-- Tombol Reset (X) jika user sedang mencari sesuatu --}}
+            @if(request('search'))
+                <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="text-gray-400 hover:text-red-500 mr-2 text-xs">
+                    ✕
+                </a>
+            @endif
 
-        <button type="submit" class="text-gray-400 hover:text-[#001f3f] transition-colors">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
-        </button>
-    </form>
-</div>
+            <button type="submit" class="text-gray-400 hover:text-[#001f3f] transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+            </button>
+        </form>
+    </div>
 
     <div id="sticky-sensor" class="h-px w-full"></div>
 
-    {{-- KATEGORI NAV DENGAN FITUR SLIDER HORIZONTAL --}}
+    {{-- KATEGORI NAV DENGAN FITUR SLIDER HORIZONTAL (SUDAH DIPERBAIKI KE TENGAH) --}}
     <div id="nav-kategori" class="sticky top-[83px] z-[30] w-full transition-all duration-300">
         <div id="bg-kategori-wrapper" class="w-full border-t border-gray-100 transition-all duration-300 py-6">
             <div class="relative max-w-4xl mx-auto px-8 group/nav">
                 
-                <button id="nav-prev" class="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm">
+                {{-- Tombol Prev: Hanya muncul di mobile/HP jika menu kepotong --}}
+                <button id="nav-prev" class="absolute left-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm md:hidden">
                     &larr;
                 </button>
 
-                <div id="container-kategori" class="flex items-center gap-6 md:gap-10 overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar px-2" style="-webkit-overflow-scrolling: touch;">
+                {{-- Container Kategori: Ditambahkan md:justify-center agar otomatis ke tengah di desktop --}}
+                <div id="container-kategori" class="flex items-center justify-start md:justify-center gap-6 md:gap-10 overflow-x-auto whitespace-nowrap scroll-smooth no-scrollbar px-2" style="-webkit-overflow-scrolling: touch;">
                     @foreach(['Semua', 'Pakaian', 'Aksesoris', 'Dekorasi', 'Amigurumi', 'Tas & Wadah'] as $kategori)
                     @php
                         $slug = strtolower(str_replace([' & ', ' '], ['-', '-'], $kategori));
@@ -56,7 +58,8 @@
                     @endforeach
                 </div>
 
-                <button id="nav-next" class="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm">
+                {{-- Tombol Next: Hanya muncul di mobile/HP jika menu kepotong --}}
+                <button id="nav-next" class="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-400 hover:text-[#001f3f] hover:border-[#001f3f] transition-all opacity-0 group-hover/nav:opacity-100 z-10 shadow-sm md:hidden">
                     &rarr;
                 </button>
 
@@ -75,7 +78,7 @@
             </div>
 
             <h3 class="font-bold text-gray-800 text-[11px] uppercase tracking-wider">{{ $p->nama }}</h3>
-            <p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>        {{-- Mengambil harga terendah dari variasi sebagai harga "Mulai Dari" --}}
+            <p class="text-[9px] text-gray-400 my-2 uppercase tracking-[0.2em] px-1 flex items-center justify-center">{{ $p->kategori ?? 'Umum' }}</p>
 
             {{-- Tampilan Harga Termurah "Mulai Dari" --}}
             <p class="text-xs font-bold text-[#001f3f] mb-3">
@@ -156,7 +159,6 @@
                                         <span class="text-[10px] text-gray-800 block mb-2 font-bold uppercase tracking-widest">Pilih Variasi Produk</span>
                                         <div class="flex flex-wrap gap-2">
                                             @forelse($p->variasis as $keyVar => $v)
-                                                {{-- HITUNG INDEX FOTO UNTUK JEMBATAN SLIDER --}}
                                                 @php
                                                     $fotoIndex = 0;
                                                     if($p->fotos && $v->foto) {
@@ -219,20 +221,20 @@
             </div>
         </div>
         @empty
-<div class="col-span-2 md:col-span-3 lg:col-span-5 py-20 text-center">
-    <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-    </svg>
-    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">
-        {{ request('search') ? 'Produk "'.request('search').'" tidak ditemukan' : 'Belum ada produk di kategori ini' }}
-    </p>
-    @if(request('search'))
-        <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="inline-block mt-4 text-[10px] text-[#001f3f] underline underline-offset-4 font-bold uppercase tracking-widest hover:text-gray-600">
-            Kembali ke Semua Produk
-        </a>
-    @endif
-</div>
-@endforelse
+        <div class="col-span-2 md:col-span-3 lg:col-span-5 py-20 text-center">
+            <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-xs text-gray-400 uppercase tracking-widest font-bold">
+                {{ request('search') ? 'Produk "'.request('search').'" tidak ditemukan' : 'Belum ada produk di kategori ini' }}
+            </p>
+            @if(request('search'))
+                <a href="{{ route('katalog', request()->route('category') ?? 'semua') }}" class="inline-block mt-4 text-[10px] text-[#001f3f] underline underline-offset-4 font-bold uppercase tracking-widest hover:text-gray-600">
+                    Kembali ke Semua Produk
+                </a>
+            @endif
+        </div>
+        @endforelse
     </div>
 </div>
 
@@ -279,7 +281,7 @@
         goToSlide(productId, nextSlide);
     }
 
-    // Fungsi validasi batas kuantitas input (Global scope agar bisa dipanggil dari HTML inline)
+    // Fungsi validasi batas kuantitas input
     function checkMaxQuantity(button) {
         const input = button.parentNode.querySelector('.input-quantity');
         const max = parseInt(input.getAttribute('max')) || 1;
