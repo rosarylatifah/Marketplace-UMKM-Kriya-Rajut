@@ -48,6 +48,17 @@
                         Kelola Produk
                     </a>
                 </li>
+
+                {{-- 🆕 MENU BARU: Konfirmasi Pesanan (Ditaruh di awal alur transaksi) --}}
+                <li>
+                    <a href="/admin/pesanan-konfirmasi"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
+                        {{ request()->is('admin/pesanan-konfirmasi*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
+                        <i class="fa-solid fa-clipboard-check w-4 text-center"></i>
+                        Konfirmasi Pesanan
+                    </a>
+                </li>
+
                 <li>
                     <a href="/admin/pesanan-masuk"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
@@ -56,21 +67,21 @@
                         Pesanan Masuk
                     </a>
                 </li>
-                <li>
-                    <a href="/admin/pesanan-selesai"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-                        {{ request()->is('admin/pesanan-selesai*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-                        <i class="fa-solid fa-circle-check w-4 text-center"></i>
-                        Pesanan Selesai
-                    </a>
-                </li>
-                {{-- MENU BARU: Pesanan Batal --}}
+                {{-- MENU: Pesanan Batal --}}
                 <li>
                     <a href="/admin/pesanan-batal"
                         class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
                         {{ request()->is('admin/pesanan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-ban w-4 text-center"></i>
                         Pesanan Batal
+                    </a>
+                </li>
+                <li>
+                    <a href="/admin/pesanan-selesai"
+                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
+                        {{ request()->is('admin/pesanan-selesai*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
+                        <i class="fa-solid fa-circle-check w-4 text-center"></i>
+                        Pesanan Selesai
                     </a>
                 </li>
             </ul>

@@ -7,17 +7,29 @@
     <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-2">Riwayat</p>
     <h1 class="text-2xl font-bold text-[#001f3f] uppercase tracking-[0.15em]">Pesanan Selesai</h1>
     <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
-    <p class="text-sm text-gray-400 mt-3">Riwayat pemesanan yang telah selesai.</p>
+    <p class="text-sm text-gray-400 mt-3">Riwayat pemesanan kriya rajut yang telah selesai dan sukses diselesaikan.</p>
 </div>
 
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
-    {{-- Table Header --}}
-    <div class="flex justify-between items-center px-8 py-5 border-b border-gray-100">
+    {{-- Table Header + Form Search --}}
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center px-8 py-5 border-b border-gray-100 gap-4">
         <div>
             <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-1">Total</p>
             <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-[0.2em]">Daftar Pesanan ({{ count($pesanan_selesai) }})</h2>
         </div>
+
+        {{-- Form Pencarian Minimalis --}}
+        <form action="{{ url()->current() }}" method="GET" class="w-full sm:w-auto flex items-center gap-2">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari ID / Nama Pembeli..." 
+                   class="text-xs border border-gray-200 px-4 py-2 rounded-lg outline-none focus:border-[#001f3f] transition-all min-w-[200px]">
+            <button type="submit" class="bg-[#001f3f] text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg hover:opacity-90 transition-all">
+                Cari
+            </button>
+            @if(request('search'))
+                <a href="{{ url()->current() }}" class="text-[10px] text-red-500 font-bold uppercase tracking-wider underline ml-1">Reset</a>
+            @endif
+        </form>
     </div>
 
     <div class="overflow-x-auto">
@@ -26,27 +38,159 @@
                 <tr class="bg-[#F3F5F1] text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">
                     <th class="px-8 py-4">ID Pesanan</th>
                     <th class="px-8 py-4">Nama Pembeli</th>
-                    <th class="px-8 py-4 text-center">Nama Barang</th>
+                    <th class="px-8 py-4">Detail Barang</th>
                     <th class="px-8 py-4">Total</th>
-                    <th class="px-8 py-4 text-center">Tanggal</th>
+                    <th class="px-8 py-4">Status</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
-                @forelse ($pesanan_selesai as $p)
-                <tr class="hover:bg-[#F3F5F1] transition-colors duration-150">
-                    <td class="px-8 py-4 text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $p->id_pesanan }}</td>
-                    <td class="px-8 py-4 text-sm text-gray-700">{{ $p->nama_pembeli }}</td>
-                    <td class="px-8 py-4 text-sm text-gray-700 text-center">{{ $p->nama_barang }}</td>
-                    <td class="px-8 py-4 text-sm font-bold text-[#001f3f]">
-                        Rp{{ number_format($p->total, 0, ',', '.') }}
+                @forelse ($pesanan_selesai as $index => $p)
+                {{-- 🌟 Id target dan sorotan highlight hijau tipis pas dicari --}}
+                <tr id="{{ $p->id_pesanan }}" class="hover:bg-[#F3F5F1] {{ request('search') == $p->id_pesanan ? 'bg-emerald-50/40' : '' }} transition-colors duration-150">
+                    
+                    {{-- 1. ID Pesanan + Detail Waktu Jam Selesai --}}
+                    <td class="px-8 py-4">
+                        <div class="flex flex-col">
+                            <span class="text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">#{{ $p->id_pesanan }}</span>
+                            <span class="text-[9px] text-gray-400 mt-1">
+                                {{ $p->updated_at ? \Carbon\Carbon::parse($p->updated_at)->format('d M Y, H:i') : ($p->created_at ? \Carbon\Carbon::parse($p->created_at)->format('d M Y, H:i') : 'Waktu tdk tersedia') }} WIB
+                            </span>
+                        </div>
                     </td>
-                    <td class="px-8 py-4 text-center">
-                        <span class="text-[11px] uppercase tracking-widest text-gray-400">{{ $p->created_at->format('d/m/Y') }}</span>
+
+                    {{-- 2. Nama Pembeli --}}
+                    <td class="px-8 py-4 text-sm font-semibold text-gray-700">
+                        {{ $p->nama_pembeli }}
                     </td>
+
+                    {{-- 3. Detail Barang + MODAL POPUP PERSIS PESANAN BATAL --}}
+                    <td class="px-8 py-4">
+                        <button data-modal-target="modal-selesai-{{ $index }}" data-modal-toggle="modal-selesai-{{ $index }}" type="button" class="text-left block group">
+                            <div class="flex items-center gap-3 bg-gray-50/50 p-2 rounded-lg border border-gray-100 group-hover:border-[#001f3f] group-hover:bg-white transition-all duration-150">
+                                <div class="w-8 h-8 bg-[#001f3f] text-white rounded-md flex-shrink-0 flex items-center justify-center text-[10px] font-bold uppercase">
+                                    <i class="fa-solid fa-box"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[11px] font-bold text-gray-800 uppercase tracking-wide line-clamp-1 max-w-[250px]">
+                                        {{ $p->nama_barang }}
+                                    </span>
+                                    <span class="text-[9px] text-emerald-600 font-semibold underline mt-0.5">Klik untuk Detail Ringkasan</span>
+                                </div>
+                            </div>
+                        </button>
+
+                        {{-- MODAL POPUP DETAIL PESANAN SELESAI --}}
+                        <div id="modal-selesai-{{ $index }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/60 backdrop-blur-sm p-4">
+                            <div class="relative w-full max-w-lg h-auto">
+                                <div class="relative bg-white border border-gray-300 p-6 shadow-2xl text-left rounded-xl">
+                                    
+                                    <div class="flex flex-col gap-4">
+                                        <div class="flex justify-between items-start border-b border-gray-100 pb-3">
+                                            <div>
+                                                <span class="text-[9px] text-gray-400 uppercase tracking-widest block">Rincian Transaksi Sukses</span>
+                                                <h3 class="text-sm font-bold text-[#001f3f] font-mono mt-0.5">#{{ $p->id_pesanan }}</h3>
+                                            </div>
+                                            <button data-modal-hide="modal-selesai-{{ $index }}" type="button" class="text-gray-400 hover:text-red-500">
+                                                <i class="fa-solid fa-xmark text-lg"></i>
+                                            </button>
+                                        </div>
+
+                                        <div class="space-y-3 text-xs">
+                                            <div>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Produk yang Dibeli:</span>
+                                                <p class="text-gray-800 font-bold uppercase bg-gray-50 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed">
+                                                    {{ $p->nama_barang }}
+                                                </p>
+                                            </div>
+
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Nama Pembeli</span>
+                                                    <span class="text-sm font-semibold text-gray-800">{{ $p->nama_pembeli }}</span>
+                                                </div>
+                                                <div>
+                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Email</span>
+                                                    <span class="text-sm font-mono text-gray-600">{{ $p->email }}</span>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">No. Handphone / WA:</span>
+                                                <span class="text-sm font-mono font-semibold text-gray-800">
+                                                    {{ $p->no_hp ?? ($p->user->no_hp ?? 'Belum mengisi nomor telepon') }}
+                                                </span>
+                                            </div>
+
+                                            <div>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Alamat Pengiriman:</span>
+                                                <p class="text-gray-700 bg-gray-50/70 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed font-medium">
+                                                    {{ $p->alamat ?? ($p->user->alamat ?? 'Alamat belum diatur oleh pembeli.') }}
+                                                </p>
+                                            </div>
+
+                                            {{-- 🌟 LOGIKA BARU: Rincian Struk Belanja (Harga Barang, Ongkir, Total) --}}
+                                            <div class="space-y-2 pt-3 border-t border-gray-100">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Harga Barang</span>
+                                                    <span class="text-xs font-semibold text-gray-700">
+                                                        Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Biaya Ongkir</span>
+                                                    <span class="text-xs font-medium text-gray-600">
+                                                        + Rp{{ number_format($p->ongkir ?? 0, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100 mt-1">
+                                                    <span class="text-[10px] text-[#001f3f] uppercase tracking-wider font-bold">Total Pendapatan</span>
+                                                    <span class="text-sm font-bold text-[#001f3f]">
+                                                        Rp{{ number_format($p->total, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {{-- Tombol Hubungi WhatsApp Hubungi Pembeli (Ucapin Terimakasih) --}}
+                                        <div class="mt-4 pt-4 border-t border-gray-100">
+                                            @php
+                                                $nomorTujuan = $p->no_hp ?? ($p->user->no_hp ?? '628123456789'); 
+                                                
+                                                if (str_starts_with($nomorTujuan, '0')) {
+                                                    $nomorTujuan = '62' . substr($nomorTujuan, 1);
+                                                }
+
+                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut (Namonic) ingin mengucapkan terima kasih atas pemesanan ID " . $p->id_pesanan . " senilai Rp " . number_format($p->total, 0, ',', '.') . " yang telah selesai diproses. Semoga Anda menyukai rajutan kami! Ditunggu orderan selanjutnya ya. ❤️";
+                                                $linkWA = "https://api.whatsapp.com/send?phone=" . preg_replace('/[^0-9]/', '', $nomorTujuan) . "&text=" . urlencode($pesanWA);
+                                            @endphp
+                                            
+                                            <a href="{{ $linkWA }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-wider py-3 rounded-lg transition-all shadow-md">
+                                                <i class="fa-brands fa-whatsapp text-base"></i> Kirim Terima Kasih via WhatsApp
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    {{-- 4. Total Bayar (Dikurangi Ongkir agar tampil harga produk saja) --}}
+                    <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
+                        Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
+                    </td>
+
+                    {{-- 5. Status Badge Hijau SELESAI --}}
+                    <td class="px-8 py-4">
+                        <span class="text-[10px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg px-3 py-1.5 inline-block whitespace-nowrap">
+                            {{ $p->status }}
+                        </span>
+                    </td>
+
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-8 py-16 text-center">
+                    <td colspan="5" class="px-8 py-16 text-center">
                         <div class="flex flex-col items-center gap-3">
                             <i class="fa-solid fa-circle-check text-3xl text-gray-200"></i>
                             <p class="text-sm text-gray-400 uppercase tracking-widest">Belum ada riwayat pesanan selesai</p>

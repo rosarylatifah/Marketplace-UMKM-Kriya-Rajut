@@ -53,7 +53,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <label class="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 block">Variasi, Stok, Harga & Foto Warna</label>
-                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Format: JPG/PNG. Maks 2MB. Foto pertama otomatis jadi thumbnail katalog.</p>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Format: JPG/PNG. Maks 2MB. Foto pertama wajib diisi sebagai thumbnail utama.</p>
                 </div>
                 <button type="button" id="btn-tambah-variasi" 
                         class="bg-[#001f3f] text-white text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-md hover:bg-gray-800 transition-all shadow-sm">
@@ -66,11 +66,11 @@
                 {{-- Baris Pertama (Default) --}}
                 <div class="flex flex-wrap md:flex-nowrap gap-3 items-center pb-3 border-b border-gray-100/50 item-variasi">
                     <div class="w-full md:w-2/12">
-                        <input type="text" name="variasi[0][ukuran]" placeholder="Ukuran (S, M, All Size)" required
+                        <input type="text" name="variasi[0][ukuran]" placeholder="Ukuran (S, M)" 
                             class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                     </div>
                     <div class="w-full md:w-2/12">
-                        <input type="text" name="variasi[0][warna]" placeholder="Warna (Pink, Sage)" required
+                        <input type="text" name="variasi[0][warna]" placeholder="Warna (Pink)" 
                             class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                     </div>
                     <div class="w-full md:w-2/12">
@@ -81,7 +81,7 @@
                         <input type="number" name="variasi[0][harga]" min="0" placeholder="Harga (Rp)" required
                             class="w-full border border-gray-200 rounded p-2 text-xs font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                     </div>
-                    {{-- Input File Foto Varian --}}
+                    {{-- Baris pertama foto WAJIB diisi buat thumbnail produk utama --}}
                     <div class="w-full md:w-3/12">
                         <input type="file" name="variasi[0][foto]" required accept="image/*"
                             class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
@@ -121,18 +121,18 @@
         const btnTambah = document.getElementById('btn-tambah-variasi');
         let indexVariasi = 1;
 
-        // Aksi tambah baris variasi baru
+        // Aksi tambah baris variasi baru (Bebas / Nullable)
         btnTambah.addEventListener('click', function () {
             const barisBaru = document.createElement('div');
             barisBaru.className = "flex flex-wrap md:flex-nowrap gap-3 items-center pb-3 border-b border-gray-100/50 item-variasi";
             
             barisBaru.innerHTML = `
                 <div class="w-full md:w-2/12">
-                    <input type="text" name="variasi[${indexVariasi}][ukuran]" placeholder="Ukuran (S, M, All Size)" required
+                    <input type="text" name="variasi[${indexVariasi}][ukuran]" placeholder="Ukuran (S, M)"
                         class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-2/12">
-                    <input type="text" name="variasi[${indexVariasi}][warna]" placeholder="Warna (Pink, Sage)" required
+                    <input type="text" name="variasi[${indexVariasi}][warna]" placeholder="Warna (Pink)"
                         class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-2/12">
@@ -144,7 +144,7 @@
                         class="w-full border border-gray-200 rounded p-2 text-xs font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-3/12">
-                    <input type="file" name="variasi[${indexVariasi}][foto]" required accept="image/*"
+                    <input type="file" name="variasi[${indexVariasi}][foto]" accept="image/*"
                         class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
                 </div>
                 <div class="w-auto flex justify-center">

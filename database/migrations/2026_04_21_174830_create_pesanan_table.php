@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('pesanan', function (Blueprint $table) {
             $table->id();
-            $table->string('id_pesanan')->unique(); // Contoh: ORD-001
+            $table->string('id_pesanan')->unique(); 
             $table->string('nama_pembeli');
-            $table->text('nama_barang'); // Pake text biar muat banyak kalau itemnya nambah
+            $table->string('email')->nullable(); // ---> TAMBAHIN INI
+            $table->string('no_hp')->nullable(); // ---> TAMBAHIN INI (Buat simpen No WA)
+            $table->text('nama_barang'); 
             $table->integer('total')->default(0);
             $table->integer('ongkir')->default(0);
             $table->string('status')->default('Perlu Dikirim');
-            $table->timestamps(); // Ini kode lama lu (created_at & updated_at)
+            $table->timestamps(); 
         });
     }
 

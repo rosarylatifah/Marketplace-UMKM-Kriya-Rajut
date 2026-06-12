@@ -141,9 +141,9 @@
                         </div>
                     </td>
 
-                    {{-- 4. Total Bayar --}}
-                    <td class="px-8 py-4 text-sm font-bold text-[#001f3f]">
-                        Rp{{ number_format($p->total, 0, ',', '.') }}
+                    {{-- 4. Total Bayar (Dikurangi Ongkir agar tampil harga produk saja) --}}
+                    <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
+                        Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
 
                     {{-- 5. Status --}}

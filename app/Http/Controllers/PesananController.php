@@ -12,49 +12,156 @@ class PesananController extends Controller
     /**
      * SISI ADMIN: Melihat history dari seluruh transaksi tanpa filter status.
      */
-    public function lihatSemua()
+    public function lihatSemua(Request $request)
     {
-        $semua_pesanan = Pesanan::orderBy('created_at', 'desc')->get();
+        $search = $request->query('search');
+
+        // 🔥 Ditambahkan dengan eager loading 'user'
+        $semua_pesanan = Pesanan::with('user')
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('id_pesanan', 'LIKE', "%{$search}%")
+                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%")
+                      ->orWhere('status', 'LIKE', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email
+        $semua_pesanan->transform(function ($pesanan) {
+            if ($pesanan->user) {
+                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+            } else {
+                $userAsli = User::where('email', $pesanan->email)->first();
+                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+            }
+            return $pesanan;
+        });
+
         return view('admin.lihat_semua', compact('semua_pesanan'));
     }
 
     /**
-     * SISI ADMIN: Melihat data pesanan aktif.
+     * SISI ADMIN: Mengelola Pesanan Masuk (Sudah Konfirmasi & Siap Diproses/Kirim).
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pesanan_masuk = Pesanan::whereIn('status', ['SEDANG DIPROSES', 'DALAM PERJALANAN'])
-                                ->orderBy('created_at', 'desc')
-                                ->get();
+        $search = $request->query('search');
+
+        // 🔥 Ditambahkan dengan eager loading 'user'
+        $pesanan_masuk = Pesanan::with('user')
+            ->whereIn('status', ['SEDANG DIPROSES', 'DALAM PERJALANAN'])
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('id_pesanan', 'LIKE', "%{$search}%")
+                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%")
+                      ->orWhere('status', 'LIKE', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+                    
+        // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email
+        $pesanan_masuk->transform(function ($pesanan) {
+            if ($pesanan->user) {
+                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+            } else {
+                $userAsli = User::where('email', $pesanan->email)->first();
+                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+            }
+            return $pesanan;
+        });
+
         return view('admin.pesanan_masuk', compact('pesanan_masuk'));
+    }
+
+    /**
+     * SISI ADMIN: Halaman Konfirmasi Pesanan.
+     */
+    public function konfirmasi(Request $request)
+    {
+        $search = $request->query('search');
+
+        // 🔥 Ditambahkan with('user') biar data alamat dari sisi pembeli bisa ketarik!
+        $pesanan_konfirmasi = Pesanan::with('user')
+            ->where('status', 'BELUM KONFIRMASI')
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('id_pesanan', 'LIKE', "%{$search}%")
+                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%")
+                      ->orWhere('total', 'LIKE', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email pembeli biar link WhatsApp-nya beneran aktif
+        $pesanan_konfirmasi->transform(function ($pesanan) {
+            if ($pesanan->user) {
+                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+            } else {
+                $userAsli = User::where('email', $pesanan->email)->first();
+                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+            }
+            return $pesanan;
+        });
+                    
+        return view('admin.pesanan_konfirmasi', compact('pesanan_konfirmasi'));
     }
 
     /**
      * SISI ADMIN: Melihat data pesanan yang telah sukses diselesaikan.
      */
-    public function selesai()
+    public function selesai(Request $request)
     {
-        $pesanan_selesai = Pesanan::where('status', 'SELESAI')
-                                  ->orderBy('updated_at', 'desc')
-                                  ->get();
+        $search = $request->query('search');
+
+        // 🔥 Ditambahkan dengan eager loading 'user' juga biar aman
+        $pesanan_selesai = Pesanan::with('user')
+            ->where('status', 'SELESAI')
+            ->when($search, function ($query) use ($search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('id_pesanan', 'LIKE', "%{$search}%")
+                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%");
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email
+        $pesanan_selesai->transform(function ($pesanan) {
+            if ($pesanan->user) {
+                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+            } else {
+                $userAsli = User::where('email', $pesanan->email)->first();
+                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+            }
+            return $pesanan;
+        });
+
         return view('admin.pesanan_selesai', compact('pesanan_selesai'));
     }
 
     /**
-     * FR-08 (Sisi Admin): Admin dapat melihat data pesanan yang dibatalkan oleh pelanggan.
-     * Mengambil data nomor telepon user untuk keperluan alur pengembalian dana manual.
+     * SISI ADMIN: Melihat data pesanan yang dibatalkan/refund.
      */
     public function dibatalkan()
     {
-        $pesanan_batal = Pesanan::where('status', 'DIBATALKAN')
+        // 🔥 Ditambahkan dengan eager loading 'user' agar seragam
+        $pesanan_batal = Pesanan::with('user')
+                                ->where('status', 'DIBATALKAN')
                                 ->orderBy('created_at', 'desc')
                                 ->get();
 
-        // Melakukan mapping data untuk menyisipkan nomor handphone pembeli dari tabel users
+        // Mapping nomor HP pembeli tetap dipertahankan
         $pesanan_batal->transform(function ($pesanan) {
-            $user = User::where('email', $pesanan->email)->first();
-            // Menyesuaikan jika di tabel user menggunakan nama kolom no_hp atau telepon
-            $pesanan->no_hp = $user ? ($user->no_hp ?? $user->telepon ?? $user->no_telp) : null; 
+            if ($pesanan->user) {
+                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+            } else {
+                $userAsli = User::where('email', $pesanan->email)->first();
+                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+            }
             return $pesanan;
         });
 
@@ -97,31 +204,29 @@ class PesananController extends Controller
     }
 
     /**
-     * FR-07 (Sisi Admin): Mengubah status pesanan produk.
+     * FR-07 (Sisi Admin): Mengubah status pesanan produk via dropdown / tombol aksi.
      */
     public function update(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:SEDANG DIPROSES,DALAM PERJALANAN,SELESAI,DIBATALKAN'
+            'status' => 'required|in:BELUM KONFIRMASI,SUDAH KONFIRMASI,SEDANG DIPROSES,DALAM PERJALANAN,DIBATALKAN,SELESAI'
         ]);
 
         $pesanan = Pesanan::findOrFail($id);
         $pesanan->status = $request->status;
         $pesanan->save();
 
-        return back()->with('success', 'Status pesanan berhasil diperbarui!');
+        return back()->with('success', 'Status pesanan ' . $pesanan->id_pesanan . ' berhasil diperbarui!');
     }
 
     /**
      * SISI PEMBELI: Menampilkan halaman status/lacak pesanan berdasarkan email dan kode order.
-     * Menggunakan ->first() untuk mencegah error "Property does not exist on this collection instance".
      */
     public function statusPesanan(Request $request)
     {
         $email = $request->query('email');
         $kode = $request->query('kode');
 
-        // Diubah menjadi first() agar mengembalikan single object Pesanan, bukan kumpulan collection
         $pesanan = Pesanan::where('email', $email)
                           ->where('id_pesanan', $kode)
                           ->first();
