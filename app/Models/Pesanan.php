@@ -30,4 +30,15 @@ class Pesanan extends Model
         'status',
         'bukti_pembayaran',
     ];
+
+    /**
+     * Konsep PBO - Association (Asosiasi antar Objek / Relasi Eloquent):
+     * Method ini mendefinisikan hubungan kebergantungan (belongsTo) antara objek Pesanan 
+     * dengan objek User. Menghubungkan state 'email' pada tabel pesanan sebagai Foreign Key
+     * menuju state 'email' pada tabel users sebagai Primary Key/Unique Key.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'email', 'email');
+    }
 }

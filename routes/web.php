@@ -6,6 +6,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\PesananController;
+use App\Http\Controllers\AdminAuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,7 +36,6 @@ Route::get('/katalog/{category?}', [ProdukController::class, 'katalog'])->name('
 Route::get('/produk/{id}', [ProdukController::class, 'show'])->name('produk.show');
 
 // FR-11: Manajemen State Keranjang Belanja Pelanggan (Session-based)
-// FIX: Nama route disesuaikan menjadi 'keranjang' agar sinkron dengan layout pembeli
 Route::get('/keranjang', [CartController::class, 'index'])->name('keranjang'); 
 Route::post('/add-to-cart', [CartController::class, 'store'])->name('cart.store');
 Route::post('/update-cart', [CartController::class, 'update'])->name('cart.update');
@@ -43,10 +43,9 @@ Route::post('/remove-from-cart', [CartController::class, 'remove'])->name('cart.
 
 // Tracking & Status Pembelian
 Route::view('/lacak-pesanan', 'pembeli.lacak');
-// FIX: Diarahkan ke PesananController@statusPesanan agar sesuai dengan perbaikan internal server error
 Route::get('/status-pesanan', [PesananController::class, 'statusPesanan'])->name('status.pesanan');
 
-// FITUR BARU: Proses pembatalan pesanan dari sisi Pembeli (Berada di luar prefix admin)
+// Proses pembatalan pesanan dari sisi Pembeli
 Route::post('/pesanan/batalkan', [CartController::class, 'batalkanPesanan'])->name('pembeli.pesanan.batalkan');
 
 // FR-12: Pelanggan melakukan checkout dengan mengisikan data diri
@@ -62,18 +61,36 @@ Route::post('/konfirmasi-pesanan/{id}', [App\Http\Controllers\PesananController:
 
 /*
 |--------------------------------------------------------------------------
-| Tampilan Admin (Penjual) - Dibungkus Prefix 'admin'
+| 🔐 Tampilan Admin (Autentikasi - URL Rahasia & Berdiri Sendiri)
 |--------------------------------------------------------------------------
 */
+Route::middleware(['guest'])->group(function () {
+    // Tampilan & Proses Login Admin
+    Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+    Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
 
-Route::prefix('admin')->group(function () {
+    // Tampilan & Proses Kirim Link Lupa Password
+    Route::get('/admin/forgot-password', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
+    Route::post('/admin/forgot-password', [AdminAuthController::class, 'sendResetLink'])->name('admin.password.email');
+});
+
+// Proses Logout Admin
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('auth');
+
+
+/*
+|--------------------------------------------------------------------------
+| 🛡️ Tampilan Admin (Operasional Panel) - Proteksi Middleware Auth & Prefix admin
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->middleware(['auth'])->group(function () {
     
-    Route::view('/login', 'admin.login');
+    // Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::view('/kategori', 'admin.kategori');
     Route::get('/lihat-semua', [PesananController::class, 'lihatSemua'])->name('admin.lihat_semua');
     
-    // Sisi Admin: Operasi CRUD Kelola Produk Induk & Objek Variasinya
+    // Sisi Admin: Operasi CRUD Kelola Produk
     Route::get('/produk-list', [ProdukController::class, 'index'])->name('admin.produk.index');
     Route::get('/produk-tambah', [ProdukController::class, 'create'])->name('admin.produk.create');
     Route::post('/produk-simpan', [ProdukController::class, 'store'])->name('admin.produk.store');
@@ -81,22 +98,29 @@ Route::prefix('admin')->group(function () {
     Route::put('/produk-update/{id}', [ProdukController::class, 'update'])->name('admin.produk.update');
     Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('admin.produk.destroy');
 
-    // FR-07: Admin melihat daftar pesanan aktif dan mengubah nilainya (State Mutation)
+    // FR-07: Admin melihat daftar pesanan masuk/aktif dan mengubah nilainya
     Route::get('/pesanan-masuk', [PesananController::class, 'index'])->name('admin.pesanan.index');
+    Route::get('/pesanan-konfirmasi', [PesananController::class, 'konfirmasi'])->name('admin.pesanan.konfirmasi');
+    
+    // 🌟 UTAMA: Route update status yang dipanggil oleh dropdown halaman konfirmasi & pesanan masuk
     Route::put('/pesanan-update/{id}', [PesananController::class, 'update'])->name('pesanan.update');
     
     // Sisi Admin: Riwayat Pesanan yang Berhasil Selesai
     Route::get('/pesanan-selesai', [PesananController::class, 'selesai'])->name('admin.pesanan.selesai');
     
-    // FR-08: Admin dapat melihat data pesanan yang dibatalkan oleh pelanggan
+    // FR-08: Admin dapat melihat data pesanan refund / batal
     Route::get('/pesanan-batal', [PesananController::class, 'dibatalkan'])->name('admin.pesanan.batal');
     
     // Sisi Admin: Penghapusan Objek Pesanan Permanen dari DB
     Route::delete('/hapus-pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.hapus');
-
 });
 
-// Utilitas Developer untuk pembersihan state session lokal
+
+/*
+|--------------------------------------------------------------------------
+| Utilitas Developer
+|--------------------------------------------------------------------------
+*/
 Route::get('/clear-session', function () {
     session()->flush();
     return "Session sudah bersih! Silakan balik ke Katalog.";

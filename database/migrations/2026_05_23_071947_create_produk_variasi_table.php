@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('warna')->nullable();  // Misal: Pink
             $table->integer('stok')->default(0);  // Stok khusus buat M + Pink
             $table->integer('harga')->default(0); // Harga spesifik tiap variasi
-            $table->string('foto')->nullable();   // <-- FOTO SPESIFIK VARIASI DI SINI, ZAR!
             $table->timestamps();
         });
     }

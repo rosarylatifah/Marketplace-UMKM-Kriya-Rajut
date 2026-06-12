@@ -53,7 +53,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <label class="text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 block">Variasi, Stok, Harga & Foto Warna</label>
-                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Kosongkan file foto pada varian lama jika tidak ingin mengganti fotonya.</p>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Kosongkan file foto pada varian lama jika tidak ingin mengganti fotonya. Ukuran/Warna boleh kosong.</p>
                 </div>
                 <button type="button" id="btn-tambah-variasi" 
                         class="bg-[#001f3f] text-white text-[9px] font-bold uppercase tracking-widest px-3 py-2 rounded-md hover:bg-gray-800 transition-all shadow-sm">
@@ -66,15 +66,15 @@
                 @if($produk->variasis && $produk->variasis->count() > 0)
                     @foreach($produk->variasis as $index => $v)
                         <div class="flex flex-wrap md:flex-nowrap gap-3 items-center pb-3 border-b border-gray-100/50 item-variasi">
-                            {{-- Kirim ID variasi lama biar backend tau variasi ini di-update, bukan dibikin baru --}}
+                            {{-- ID variasi lama --}}
                             <input type="hidden" name="variasi[{{ $index }}][id]" value="{{ $v->id }}">
 
                             <div class="w-full md:w-2/12">
-                                <input type="text" name="variasi[{{ $index }}][ukuran]" value="{{ $v->ukuran }}" placeholder="Ukuran" required
+                                <input type="text" name="variasi[{{ $index }}][ukuran]" value="{{ $v->ukuran }}" placeholder="Ukuran (S, M)"
                                        class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                             </div>
                             <div class="w-full md:w-2/12">
-                                <input type="text" name="variasi[{{ $index }}][warna]" value="{{ $v->warna }}" placeholder="Warna" required
+                                <input type="text" name="variasi[{{ $index }}][warna]" value="{{ $v->warna }}" placeholder="Warna (Pink)"
                                        class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                             </div>
                             <div class="w-full md:w-1/12">
@@ -108,11 +108,11 @@
                     {{-- Cadangan kalau produk ga punya variasi sama sekali --}}
                     <div class="flex flex-wrap md:flex-nowrap gap-3 items-center pb-3 border-b border-gray-100/50 item-variasi">
                         <div class="w-full md:w-2/12">
-                            <input type="text" name="variasi[0][ukuran]" placeholder="Ukuran (S, M)" required
+                            <input type="text" name="variasi[0][ukuran]" placeholder="Ukuran (S, M)"
                                    class="w-full border border-gray-200 rounded p-2 text-xs bg-white outline-none">
                         </div>
                         <div class="w-full md:w-2/12">
-                            <input type="text" name="variasi[0][warna]" placeholder="Warna" required
+                            <input type="text" name="variasi[0][warna]" placeholder="Warna"
                                    class="w-full border border-gray-200 rounded p-2 text-xs bg-white outline-none">
                         </div>
                         <div class="w-full md:w-1/12">
@@ -124,7 +124,7 @@
                                    class="w-full border border-gray-200 rounded p-2 text-xs font-bold bg-white outline-none">
                         </div>
                         <div class="w-full md:w-4/12">
-                            <input type="file" name="variasi[0][foto]" required accept="image/*"
+                            <input type="file" name="variasi[0][foto]" accept="image/*"
                                 class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
                         </div>
                         <div class="w-auto flex justify-center">
@@ -162,21 +162,20 @@
         const wrapper = document.getElementById('wrapper-variasi');
         const btnTambah = document.getElementById('btn-tambah-variasi');
         
-        // Menggunakan timestamp milidetik sebagai index awal variasi baru agar tidak bentrok dengan index lama
         let indexVariasi = Date.now();
 
-        // Fungsi Tambah Baris Varian Baru
+        // Fungsi Tambah Baris Varian Baru (Bebas / Tanpa Required untuk Ukuran, Warna, dan Foto)
         btnTambah.addEventListener('click', function () {
             const barisBaru = document.createElement('div');
             barisBaru.className = 'flex flex-wrap md:flex-nowrap gap-3 items-center pb-3 border-b border-gray-100/50 item-variasi';
             
             barisBaru.innerHTML = `
                 <div class="w-full md:w-2/12">
-                    <input type="text" name="variasi[${indexVariasi}][ukuran]" placeholder="Ukuran" required
+                    <input type="text" name="variasi[${indexVariasi}][ukuran]" placeholder="Ukuran"
                            class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-2/12">
-                    <input type="text" name="variasi[${indexVariasi}][warna]" placeholder="Warna" required
+                    <input type="text" name="variasi[${indexVariasi}][warna]" placeholder="Warna"
                            class="w-full border border-gray-200 rounded p-2 text-xs focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-1/12">
@@ -188,7 +187,7 @@
                            class="w-full border border-gray-200 rounded p-2 text-xs font-bold focus:ring-[#001f3f] focus:border-[#001f3f] bg-white outline-none">
                 </div>
                 <div class="w-full md:w-4/12">
-                    <input type="file" name="variasi[${indexVariasi}][foto]" required accept="image/*"
+                    <input type="file" name="variasi[${indexVariasi}][foto]" accept="image/*"
                         class="w-full text-[11px] file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
                 </div>
                 <div class="w-auto flex justify-center">

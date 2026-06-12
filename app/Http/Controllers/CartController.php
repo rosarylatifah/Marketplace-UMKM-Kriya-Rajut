@@ -36,29 +36,34 @@ class CartController extends Controller
      */
     public function store(Request $request)
     {
+        // AMAN: Validasi data-data krusial yang pendek saja, data deskripsi kita abaikan!
+        $request->validate([
+            'id' => 'required',
+            'nama' => 'required',
+            'harga' => 'required',
+            'quantity' => 'required|integer|min:1',
+            'produk_variasi_id' => 'required'
+        ]);
+
         $cart = session()->get('cart', []);
         
-        // Kita jadikan gabungan "ID_Produk-ID_Variasi" sebagai KEY unik di dalam session cart
-        // Biar kalau pembeli beli produk yang sama tapi beda variasi, gak saling timpa!
         $variasiId = $request->produk_variasi_id;
         $cartKey = $request->id . '-' . $variasiId;
 
-        // Ambil info variasi buat dapetin teks ukuran & warna melalui pencarian Object Model
         $variasi = ProdukVariasi::find($variasiId);
         $varianInfo = $variasi ? ' (' . $variasi->ukuran . ' - ' . $variasi->warna . ')' : '';
 
-        // Jika item dengan key tersebut sudah ada di keranjang, akumulasikan quantity-nya (Polimorfisme State)
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $request->quantity;
         } else {
             $cart[$cartKey] = [
                 "id_produk"         => $request->id,
                 "produk_variasi_id" => $variasiId,
-                "nama"              => $request->nama . $varianInfo, // Biar di invoice muncul nama variannya
+                "nama"              => $request->nama . $varianInfo, 
                 "quantity"          => $request->quantity,
-                "harga"             => $request->harga, // Harga dinamis variasi dari hidden input view kemarin
+                "harga"             => $request->harga, 
                 "foto"              => $request->foto,
-                "deskripsi"         => $request->deskripsi
+                // "deskripsi"      => $request->deskripsi // 🗑️ KITA HAPUS LINE INI AGAR ANTI 404!
             ];
         }
 
@@ -142,6 +147,7 @@ class CartController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255',
+            'no_hp' => 'required|string|max:20',
             'alamat' => 'required|string',
             'opsi_pengantaran' => 'required|string|in:kurir_lokal,ambil_sendiri,custom_shipment',
             'metode_pembayaran' => 'required|string',
@@ -194,10 +200,11 @@ class CartController extends Controller
             'id_pesanan'   => $idPesanan,
             'nama_pembeli' => $request->input('nama'),
             'email'        => $request->input('email'),
+            'no_hp'        => $request->input('no_hp'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,
-            'status'       => 'SEDANG DIPROSES',
+            'status'       => 'BELUM KONFIRMASI', // 🌟 UBAH INI biar masuk ke halaman konfirmasi dulu
         ]);
 
         // Simpan info invoice pesanan ke session buat halaman konfirmasi pembayaran

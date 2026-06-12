@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pesanan', function (Blueprint $table) {
-
-            $table->string('email')->nullable();
-
-        });
+        // FIX: Cek dulu secara otomatis, kalau kolom 'email' BELUM ADA, baru dibikin.
+        // Kalau UDAH ADA, codingan ini bakal ngelewatin tanpa bikin error duplicate!
+        if (!Schema::hasColumn('pesanan', 'email')) {
+            Schema::table('pesanan', function (Blueprint $table) {
+                $table->string('email')->nullable();
+            });
+        }
     }
 
     /**
@@ -23,10 +25,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pesanan', function (Blueprint $table) {
-
-            $table->dropColumn('email');
-
-        });
+        if (Schema::hasColumn('pesanan', 'email')) {
+            Schema::table('pesanan', function (Blueprint $table) {
+                $table->dropColumn('email');
+            });
+        }
     }
 };

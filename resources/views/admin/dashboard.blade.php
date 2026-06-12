@@ -64,6 +64,8 @@
                     <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Diproses</span>
                 @elseif($a->status == 'DALAM PERJALANAN')
                     <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dikirim</span>
+                @elseif($a->status == 'DIBATALKAN')
+                    <span class="inline-block bg-rose-50 text-rose-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dibatalkan</span>
                 @elseif($a->status == 'SELESAI')
                     <span class="inline-block bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Selesai</span>
                 @endif
