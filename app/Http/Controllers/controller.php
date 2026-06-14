@@ -1,0 +1,8 @@
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    // Biarkan kosong saja tidak apa-apa
+}
