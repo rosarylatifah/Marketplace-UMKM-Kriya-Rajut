@@ -58,7 +58,7 @@
                         {{ $p->nama_pembeli }}
                     </td>
 
-                    {{-- 3. Detail Barang (Berdasarkan String Database Anda) --}}
+                    {{-- 3. Detail Barang dengan Pop-up Modal --}}
                     <td class="px-8 py-4">
                         <button data-modal-target="modal-batal-{{ $index }}" data-modal-toggle="modal-batal-{{ $index }}" type="button" class="text-left block group">
                             <div class="flex items-center gap-3 bg-gray-50/50 p-2 rounded-lg border border-gray-100 group-hover:border-[#001f3f] group-hover:bg-white transition-all duration-150">
@@ -74,7 +74,7 @@
                             </div>
                         </button>
 
-                        {{-- MODAL POPUP FIX ACCORDING TO DATABASE --}}
+                        {{-- MODAL POPUP RAPI DENGAN STRUKTUR TABEL & GAMBAR --}}
                         <div id="modal-batal-{{ $index }}" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/60 backdrop-blur-sm p-4">
                             <div class="relative w-full max-w-lg h-auto">
                                 <div class="relative bg-white border border-gray-300 p-6 shadow-2xl text-left rounded-xl">
@@ -90,12 +90,126 @@
                                             </button>
                                         </div>
 
-                                        <div class="space-y-3 text-xs">
+                                        <div class="space-y-4 text-xs">
+                                            {{-- BAGIAN BARANG YANG DIBATALKAN --}}
                                             <div>
-                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Produk yang Dibatalkan:</span>
-                                                <p class="text-gray-800 font-bold uppercase bg-gray-50 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed">
-                                                    {{ $p->class ?? $p->nama_barang }}
-                                                </p>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold mb-2">Produk yang Dibatalkan:</span>
+                                                
+                                                <div class="border border-gray-100 rounded-lg overflow-hidden bg-gray-50/50">
+                                                    <table class="w-full text-left border-collapse">
+                                                        <thead>
+                                                            <tr class="bg-gray-100 text-[9px] uppercase tracking-wider text-gray-500 font-bold border-b border-gray-200">
+                                                                <th class="px-4 py-2.5">Gambar & Produk</th>
+                                                                <th class="px-4 py-2.5 text-center w-16">Qty</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="divide-y divide-gray-200 bg-white text-xs">
+                                                            @php
+                                                                // Memisahkan multi-produk berdasarkan koma
+                                                                $items = explode(',', $p->nama_barang);
+                                                            @endphp
+
+                                                            @foreach ($items as $item)
+                                                                @php
+                                                                    $item = trim($item);
+                                                                    if (empty($item)) continue;
+
+                                                                    // 1. Ekstrak Quantity (x1 atau X1)
+                                                                    $qty = '1';
+                                                                    if (preg_match('/\(X(\d+)\)/i', $item, $matchQty)) {
+                                                                        $qty = $matchQty[1];
+                                                                        $itemClean = trim(preg_replace('/\(X\d+\)/i', '', $item));
+                                                                    } else {
+                                                                        $itemClean = $item;
+                                                                    }
+
+                                                                    // 2. Ekstrak Nama Produk Utama dan Teks Varian
+                                                                    $namaProdukSaja = $itemClean;
+                                                                    $varianSaja = '-';
+                                                                    if (preg_match('/^([^(]+)\(([^)]+)\)/', $itemClean, $matchDetail)) {
+                                                                        $namaProdukSaja = trim($matchDetail[1]);
+                                                                        $varianSaja = trim($matchDetail[2]);
+                                                                    }
+
+                                                                    // 3. PENCARIAN SUPER FLEKSIBEL (ROBUST SEARCHING)
+                                                                    $dbProduk = null;
+                                                                    if (isset($semua_produk)) {
+                                                                        $dbProduk = $semua_produk->first(function($prod) use ($namaProdukSaja, $varianSaja) {
+                                                                            $namaDbClean = strtoupper(preg_replace('/\s+/', '', trim($prod->nama)));
+                                                                            $namaCariClean = strtoupper(preg_replace('/\s+/', '', trim($namaProdukSaja)));
+                                                                            $varianCariClean = strtoupper(preg_replace('/\s+/', '', trim($varianSaja)));
+
+                                                                            $matchNama = ($namaDbClean === $namaCariClean || stripos($namaDbClean, $namaCariClean) !== false || stripos($namaCariClean, $namaDbClean) !== false);
+                                                                            $matchVarianKeNamaDb = (!empty($varianSaja) && stripos($namaDbClean, $varianCariClean) !== false);
+
+                                                                            return $matchNama || $matchVarianKeNamaDb;
+                                                                        });
+                                                                    }
+
+                                                                    // 4. Ambil Jalur Gambar Produk / Gambar Varian dari Database
+                                                                    $namaFileGambar = null;
+                                                                    if ($dbProduk) {
+                                                                        $dbVarian = $dbProduk->variasis->first(function($v) use ($varianSaja) {
+                                                                            $warnaDb = strtoupper(preg_replace('/\s+/', '', trim($v->warna ?? '')));
+                                                                            $ukuranDb = strtoupper(preg_replace('/\s+/', '', trim($v->ukuran ?? '')));
+                                                                            $varianCari = strtoupper(preg_replace('/\s+/', '', trim($varianSaja)));
+
+                                                                            $matchWarna = (!empty($warnaDb) && (stripos($varianCari, $warnaDb) !== false || stripos($warnaDb, $varianCari) !== false));
+                                                                            $matchUkuran = (!empty($ukuranDb) && (stripos($varianCari, $ukuranDb) !== false || stripos($ukuranDb, $varianCari) !== false));
+
+                                                                            return $matchWarna || $matchUkuran;
+                                                                        });
+
+                                                                        $namaFileGambar = ($dbVarian && !empty($dbVarian->foto)) ? $dbVarian->foto : $dbProduk->foto;
+                                                                    }
+
+                                                                    $pathFoto = $namaFileGambar ? asset('images/' . $namaFileGambar) : null;
+                                                                @endphp
+
+                                                                <tr class="hover:bg-gray-50/80 transition-colors">
+                                                                    {{-- Kolom Gambar & Info Produk --}}
+                                                                    <td class="px-4 py-3">
+                                                                        <div class="flex items-center gap-3">
+                                                                            {{-- Thumbnail Frame Gambar Produk --}}
+                                                                            <div class="w-12 h-12 rounded border border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                                                                @if($pathFoto)
+                                                                                    <img src="{{ $pathFoto }}" alt="Produk" class="w-full h-full object-cover">
+                                                                                @else
+                                                                                    <div class="text-gray-400 text-center flex flex-col items-center justify-center">
+                                                                                        <i class="fa-solid fa-image text-xs block mb-0.5"></i>
+                                                                                        <span class="text-[7px] uppercase tracking-wider font-semibold">No Img</span>
+                                                                                    </div>
+                                                                                @endif
+                                                                            </div>
+
+                                                                            {{-- Deskripsi Judul Produk & Tautan Dinamis Admin --}}
+                                                                            <div class="flex flex-col min-w-0">
+                                                                                @if ($dbProduk)
+                                                                                    <a href="{{ route('admin.produk.edit', $dbProduk->id) }}" class="font-bold text-[#001f3f] hover:text-blue-600 hover:underline uppercase tracking-wide text-[11px] truncate">
+                                                                                        {{ $namaProdukSaja }}
+                                                                                    </a>
+                                                                                @else
+                                                                                    <span class="font-bold text-gray-700 uppercase tracking-wide text-[11px] truncate">
+                                                                                        {{ $namaProdukSaja }}
+                                                                                    </span>
+                                                                                @endif
+                                                                                
+                                                                                <span class="text-[9px] text-gray-400 font-medium uppercase mt-0.5">
+                                                                                    Varian: <span class="text-gray-600 font-semibold">{{ $varianSaja }}</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {{-- Kolom Quantity Belanja --}}
+                                                                    <td class="px-4 py-3 text-center font-bold text-gray-800 align-middle text-sm">
+                                                                        x{{ $qty }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
 
                                             <div class="grid grid-cols-2 gap-4">
@@ -121,12 +235,11 @@
                                             </div>
                                         </div>
 
-                                        {{-- Tombol Hubungi WhatsApp Pembeli --}}
+                                        {{-- Tombol Hubungi WhatsApp --}}
                                         <div class="mt-4 pt-4 border-t border-gray-100">
                                             @php
-                                                // Jika di database no_hp pembeli kosong, gunakan nomor default atau tampilkan input / link WA langsung
-                                                $nomorTujuan = $p->no_hp ?? '628123456789'; // Ganti dengan nomor default admin jika data pembeli kosong
-                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut ingin mengonfirmasi pengembalian dana untuk ID Pesanan " . $p->id_pesanan . " sebesar Rp " . number_format($p->total, 0, ',', '.') . " yang dibatalkan. Mohon kirimkan rekening Anda. Terima kasih.";
+                                                $nomorTujuan = $p->no_hp ?? '628123456789';
+                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut ingin mengonfirmasi pengembalian dana untuk ID Pesanan " . $p->id_pesanan . " sebesar Rp " . number_format($p->total, 0, ',', '.') . " yang dibatalkan. Mohon kirimkan nomor rekening Anda. Terima kasih.";
                                                 $linkWA = "https://api.whatsapp.com/send?phone=" . preg_replace('/[^0-9]/', '', $nomorTujuan) . "&text=" . urlencode($pesanWA);
                                             @endphp
                                             
@@ -141,7 +254,7 @@
                         </div>
                     </td>
 
-                    {{-- 4. Total Bayar (Dikurangi Ongkir agar tampil harga produk saja) --}}
+                    {{-- 4. Total Bayar --}}
                     <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
@@ -153,7 +266,7 @@
                         </span>
                     </td>
 
-                    {{-- 6. Aksi Hapus --}}
+                    {{-- 6. Aksi Hapus Log --}}
                     <td class="px-8 py-4 text-center">
                         <form action="{{ route('pesanan.hapus', $p->id) }}" method="POST" class="inline">
                             @csrf

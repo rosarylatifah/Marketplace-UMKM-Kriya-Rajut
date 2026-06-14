@@ -165,7 +165,11 @@ class PesananController extends Controller
             return $pesanan;
         });
 
-        return view('admin.pesanan_batal', compact('pesanan_batal'));
+        // 🔥 SEKARANG MENGGUNAKAN EAGER LOADING 'with(variasis)' AGAR STRUKTUR VARIANT TERBACA SEMPURNA DI BLADE
+        $semua_produk = Produk::with('variasis')->get();
+
+        // 🔥 Mengirim variabel ke dalam view admin pesanan_batal
+        return view('admin.pesanan_batal', compact('pesanan_batal', 'semua_produk'));
     }
     
     /**

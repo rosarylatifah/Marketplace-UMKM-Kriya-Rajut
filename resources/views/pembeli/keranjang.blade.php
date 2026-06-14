@@ -23,34 +23,28 @@
                 class="product-card p-4 flex gap-4 bg-white border border-gray-100 shadow-sm relative transition-all group">
                 <div
                     class="w-20 h-20 bg-white border border-gray-50 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
-                    <img src="{{ $details['foto'] }}"
-                        class="w-full h-full object-cover"
-                        alt="{{ $details['nama'] }}">
+                    {{-- PERBAIKAN: Memperbaiki tag img dan menambahkan folder 'images/' --}}
+                    <img src="{{ asset('images/' . $details['foto']) }}" class="w-full h-full object-cover" alt="{{ $details['nama'] }}">
                 </div>
 
                 <div class="flex-grow flex flex-col justify-between py-0.5">
                     <div class="flex justify-between items-start">
                         <div>
-                        <h3 class="font-bold text-sm text-[#001f3f] uppercase tracking-widest">
+                            <h3 class="font-bold text-sm text-[#001f3f] uppercase tracking-widest">
                                 {{ $details['nama'] }}</h3>
                             <p class="text-[10px] harga-satuan text-gray-400 mt-0.5 font-medium"
                                 data-harga="{{ $details['harga'] }}">
                                 IDR {{ number_format($details['harga'], 0, ',', '.') }}
                             </p>
 
-                            {{-- 
-                                PERBAIKAN: Ganti inline onclick string dengan data-* attributes.
-                                Ini mencegah error JavaScript jika deskripsi/nama mengandung
-                                tanda kutip tunggal atau karakter spesial lainnya.
-                            --}}
                             <button 
                                 class="btn-lihat-detail mt-1 text-[10px] tracking-widest font-bold text-[#001f3f] hover:underline block text-left"
-
-                           data-nama="{{ $details['nama'] }}"
+                                data-nama="{{ $details['nama'] }}"
                                 data-harga="{{ number_format($details['harga'], 0, ',', '.') }}"
                                 data-deskripsi="{{ $details['deskripsi'] ?? 'Tidak ada deskripsi.' }}"
                                 data-stok="Tersedia"
-                                data-foto="{{ $details['foto'] }}">
+                                {{-- PERBAIKAN: Memastikan data-foto mengirimkan URL asset yang lengkap menuju folder 'images/' --}}
+                                data-foto="{{ asset('images/' . $details['foto']) }}">
                                 Lihat Detail
                             </button>
                         </div>
@@ -111,12 +105,17 @@
         </div>
     </div>
     @else
-    {{-- Tampilan Keranjang Kosong --}}
-    <div class="text-center py-20 border border-dashed border-gray-200">
-        <p class="text-gray-400 text-[11px] uppercase tracking-widest mb-6">Keranjang Anda masih kosong</p>
+    {{-- PERBAIKAN: Tampilan Keranjang Kosong yang Baru (Sesuai Gaya Katalog) --}}
+    <div class="text-center py-20">
+        {{-- SVG Emot Sedih Persis dari Halaman Katalog --}}
+        <svg class="w-12 h-12 text-gray-200 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-6">Belum ada produk di keranjang ini</p>
         <a href="/katalog"
-            class="inline-block bg-[#001f3f] text-white px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest">Mulai
-            Belanja</a>
+            class="inline-block bg-[#001f3f] text-white px-8 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-gray-800 shadow-md hover:shadow-xl transition-all">
+            Mulai Belanja
+        </a>
     </div>
     @endif
 </div>
@@ -139,9 +138,6 @@
             <h2 id="detail-nama" class="text-lg font-bold text-[#001f3f] uppercase tracking-widest mb-1">Nama Produk</h2>
             <p id="detail-harga" class="text-xs font-bold text-gray-400 mb-4">Rp 0</p>
             <p id="detail-deskripsi" class="text-[11px] text-gray-500 leading-relaxed mb-6">Deskripsi...</p>
-            <div class="pt-4 border-t border-gray-100">
-                <span id="detail-stok" class="text-[9px] bg-gray-50 px-3 py-1 text-gray-600 font-bold uppercase">Stok: Tersedia</span>
-            </div>
         </div>
     </div>
 </div>
@@ -167,9 +163,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         hitungTotalSemua();
 
-        // PERBAIKAN: Pasang event listener ke semua tombol "Lihat Detail"
-        // menggunakan data-* attributes, bukan inline onclick string.
-        // Cara ini aman dari karakter spesial seperti tanda kutip dalam deskripsi.
+        // Pasang event listener ke semua tombol "Lihat Detail" menggunakan data-* attributes
         document.querySelectorAll('.btn-lihat-detail').forEach(function(btn) {
             btn.addEventListener('click', function() {
                 const nama     = this.dataset.nama;
@@ -239,7 +233,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {                                                                                                                                                                                                             
+                if (data.success) {                                                                                                                                                                                                                                                                                                                             
                     qtyElement.innerText = qtyBaru;
                     subtotalElement.innerText = (hargaSatuan * qtyBaru).toLocaleString('id-ID');
                     hitungTotalSemua();
@@ -260,11 +254,11 @@
         document.getElementById('estimasi-total').innerText = 'Rp ' + totalHarga.toLocaleString('id-ID');
     }
 
+    // Fungsi modal detail mengambil data parameter yang aman
     function bukaModalDetail(nama, harga, deskripsi, stok, foto) {
         document.getElementById('detail-nama').innerText = nama;
         document.getElementById('detail-harga').innerText = 'IDR ' + harga;
         document.getElementById('detail-deskripsi').innerText = deskripsi;
-        document.getElementById('detail-stok').innerText = 'Stok: ' + stok;
         document.getElementById('detail-foto').src = foto;
         document.getElementById('modal-detail').classList.remove('hidden');
     }

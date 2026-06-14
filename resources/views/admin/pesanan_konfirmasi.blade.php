@@ -52,7 +52,8 @@
                 <tr class="bg-[#F3F5F1] text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">
                     <th class="px-8 py-4">ID Pesanan</th>
                     <th class="px-8 py-4">Nama Pembeli</th>
-                    <th class="px-8 py-4">Detail Barang</th>
+                    <th class="px-8 py-4">Detail Pesanan</th>
+                    <th class="px-8 py-4">Bukti Pembayaran</th>
                     <th class="px-8 py-4">Total</th>
                     <th class="px-8 py-4 text-center">Status Saat Ini</th>
                     <th class="px-8 py-4 text-center">Aksi Verifikasi</th>
@@ -207,6 +208,25 @@
                         </div>
                     </td>
 
+                    {{-- Kolom Tambahan: Bukti Pembayaran --}}
+                    <td class="px-8 py-4 align-middle">
+                        @if($p->bukti_pembayaran)
+                            <a href="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" target="_blank" class="inline-block group">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
+                                    <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
+                                    {{-- Efek Hover Overlay Kaca Pembesar --}}
+                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
+                                    </div>
+                                </div>
+                            </a>
+                        @else
+                            <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md">
+                                ⏳ Belum Kirim
+                            </span>
+                        @endif
+                    </td>
+
                     {{-- 4. Total Bayar (Dikurangi Ongkir agar tampil harga produk saja) --}}
                     <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
@@ -238,7 +258,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-8 py-16 text-center">
+                    <td colspan="7" class="px-8 py-16 text-center">
                         <div class="flex flex-col items-center gap-3">
                             <i class="fa-solid fa-inbox text-3xl text-gray-200"></i>
                             <p class="text-sm text-gray-400 uppercase tracking-widest">Tidak ada pesanan yang perlu dikonfirmasi</p>

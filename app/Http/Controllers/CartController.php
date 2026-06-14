@@ -34,9 +34,8 @@ class CartController extends Controller
      * menyusunnya menjadi array terstruktur dengan key unik gabungan ID Produk & Variasi,
      * kemudian menyimpannya ke dalam Session array tanpa persistent DB storage terlebih dahulu.
      */
-    public function store(Request $request)
+public function store(Request $request)
     {
-        // AMAN: Validasi data-data krusial yang pendek saja, data deskripsi kita abaikan!
         $request->validate([
             'id' => 'required',
             'nama' => 'required',
@@ -51,7 +50,25 @@ class CartController extends Controller
         $cartKey = $request->id . '-' . $variasiId;
 
         $variasi = ProdukVariasi::find($variasiId);
-        $varianInfo = $variasi ? ' (' . $variasi->ukuran . ' - ' . $variasi->warna . ')' : '';
+        $varianParts = [];
+        
+        if ($variasi) {
+            if (!empty($variasi->ukuran)) {
+                $varianParts[] = $variasi->ukuran;
+            }
+            if (!empty($variasi->warna)) {
+                $varianParts[] = $variasi->warna;
+            }
+        }
+        $varianInfo = !empty($varianParts) ? ' (' . implode(' - ', $varianParts) . ')' : '';
+
+        $produk = Produk::find($request->id);
+        $deskripsi = $produk ? $produk->deskripsi : 'Tidak ada deskripsi.';
+
+        // ✨ PERBAIKAN FOTO VARIASI: 
+        // Cek apakah variasi ini punya foto khusus di database. 
+        // Jika tidak ada/null, otomatis fallback (kembali) ke foto utama produk dari request.
+        $fotoProduk = ($variasi && !empty($variasi->foto)) ? $variasi->foto : ($produk ? $produk->foto : '');
 
         if(isset($cart[$cartKey])) {
             $cart[$cartKey]['quantity'] += $request->quantity;
@@ -62,8 +79,8 @@ class CartController extends Controller
                 "nama"              => $request->nama . $varianInfo, 
                 "quantity"          => $request->quantity,
                 "harga"             => $request->harga, 
-                "foto"              => $request->foto,
-                // "deskripsi"      => $request->deskripsi // 🗑️ KITA HAPUS LINE INI AGAR ANTI 404!
+                "foto"              => $fotoProduk, // ✨ Sekarang menggunakan foto yang dinamis!
+                "deskripsi"         => $deskripsi
             ];
         }
 
@@ -72,7 +89,7 @@ class CartController extends Controller
         return redirect()->back()
             ->with('success', 'Produk berhasil ditambah ke keranjang!');
     }
-
+    
     /**
      * Menampilkan halaman formulir checkout data diri.
      */
@@ -147,7 +164,7 @@ class CartController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|email|max:255',
-            'no_hp' => 'required|string|max:20',
+            'telepon' => 'required|string|max:20',
             'alamat' => 'required|string',
             'opsi_pengantaran' => 'required|string|in:kurir_lokal,ambil_sendiri,custom_shipment',
             'metode_pembayaran' => 'required|string',
@@ -200,7 +217,7 @@ class CartController extends Controller
             'id_pesanan'   => $idPesanan,
             'nama_pembeli' => $request->input('nama'),
             'email'        => $request->input('email'),
-            'no_hp'        => $request->input('no_hp'),
+            'telepon'      => $request->input('telepon'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,

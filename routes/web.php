@@ -61,13 +61,16 @@ Route::post('/konfirmasi-pesanan/{id}', [App\Http\Controllers\PesananController:
 
 /*
 |--------------------------------------------------------------------------
-| 🔐 Tampilan Admin (Autentikasi - URL Rahasia & Berdiri Sendiri)
+| 🔐 Tampilan Admin (Autentikasi - URL Baru & Berdiri Sendiri)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['guest'])->group(function () {
     // Tampilan & Proses Login Admin
     Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('admin.login.submit');
+
+    // FIX: Menambahkan alias 'login' agar middleware 'auth' Laravel tidak melempar error 404 saat redirect
+    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
 
     // Tampilan & Proses Kirim Link Lupa Password
     Route::get('/admin/forgot-password', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
@@ -86,7 +89,7 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     
     // Dashboard Utama
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::view('/kategori', 'admin.kategori');
     Route::get('/lihat-semua', [PesananController::class, 'lihatSemua'])->name('admin.lihat_semua');
     
@@ -97,6 +100,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/produk-edit/{id}', [ProdukController::class, 'edit'])->name('admin.produk.edit');
     Route::put('/produk-update/{id}', [ProdukController::class, 'update'])->name('admin.produk.update');
     Route::delete('/produk/{id}', [ProdukController::class, 'destroy'])->name('admin.produk.destroy');
+    
+    // PERBAIKAN DI SINI: Diubah menjadi Route::delete untuk menangani bulk-hapus
+    Route::delete('/produk-bulk-hapus', [ProdukController::class, 'bulkDestroy'])->name('admin.produk.bulkDestroy');
 
     // FR-07: Admin melihat daftar pesanan masuk/aktif dan mengubah nilainya
     Route::get('/pesanan-masuk', [PesananController::class, 'index'])->name('admin.pesanan.index');

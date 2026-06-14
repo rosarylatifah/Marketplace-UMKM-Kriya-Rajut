@@ -44,12 +44,14 @@ class Produk extends Model
     }
 
     /**
-     * RELASI ALIAS (Polimorfisme Query):
-     * Method pembeda untuk menarik koleksi objek variasi yang secara spesifik 
-     * memiliki attribute state 'foto' tidak bernilai null, digunakan untuk galeri view pembeli.
+/**
+     * GALERI FOTO TAMBAHAN (Murni Galeri Produk diluar Foto Varian)
+     * Konsep PBO - Object Relationship (1-to-Many):
+     * Satu produk bisa memiliki banyak galeri foto tambahan pendukung visual katalog.
      */
     public function fotos()
     {
-        return $this->hasMany(ProdukVariasi::class, 'produk_id')->whereNotNull('foto');
+        // Diarahkan ke class model foto galeri yang baru
+        return $this->hasMany(ProdukFoto::class, 'produk_id', 'id');
     }
 }

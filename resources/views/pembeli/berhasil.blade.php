@@ -136,12 +136,31 @@
 </style>
 
 <script>
+    // Mengisi tanggal otomatis pada invoice
     document.getElementById('tanggal-pesanan').textContent = new Date().toLocaleDateString('id-ID', {
         day: 'numeric', month: 'long', year: 'numeric'
     });
 
+    // Memicu cetak invoice bawaan browser
     function downloadPDF() {
         window.print();
     }
+
+    // 🔥 FIX BUG NAVIGASI BACK BROWSER
+    // Mengunci history browser agar saat di-back tidak kembali ke halaman pembayaran
+    document.addEventListener('DOMContentLoaded', function () {
+        // Daftarkan state baru di history browser
+        window.history.pushState(null, "", window.location.href);
+        
+        // Ketika tombol back browser diklik oleh pembeli
+        window.onpopstate = function () {
+            // Paksa history maju kembali ke halaman berhasil
+            window.history.pushState(null, "", window.location.href);
+            
+            // OPSIONAL: Kamu bisa membiarkannya diam di halaman berhasil, 
+            // atau jika ingin dialihkan langsung ke halaman utama, aktifkan baris di bawah ini:
+            // window.location.href = "/"; 
+        };
+    });
 </script>
 @endsection
