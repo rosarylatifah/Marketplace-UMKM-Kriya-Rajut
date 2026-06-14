@@ -10,6 +10,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+<<<<<<< HEAD
         // 1. Total Produk Aktif
         $totalProduk = Produk::count();
 
@@ -26,6 +27,13 @@ class DashboardController extends Controller
             ->whereYear('created_at', now()->year)
             ->whereMonth('created_at', now()->month)
             ->sum(\DB::raw('total - ongkir'));
+=======
+        // Stat Cards
+        $totalProduk      = Produk::count();
+        $pesananBaru      = Pesanan::where('status', 'SEDANG DIPROSES')->count();
+        $pesananAktif     = Pesanan::whereIn('status', ['SEDANG DIPROSES', 'DALAM PERJALANAN'])->count();
+        $totalPendapatan  = Pesanan::where('status', 'SELESAI')->sum('total');
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
 
         // Aktivitas Terbaru — 10 pesanan terbaru
         $aktivitas = Pesanan::latest()->take(10)->get();
@@ -34,7 +42,11 @@ class DashboardController extends Controller
             'totalProduk',
             'pesananBaru',
             'pesananAktif',
+<<<<<<< HEAD
             'pendapatanKotorBulanIni',
+=======
+            'totalPendapatan',
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
             'aktivitas'
         ));
     }

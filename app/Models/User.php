@@ -45,6 +45,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+<<<<<<< HEAD
 
     /**
      * ALUR RESET PASSWORD ADMIN
@@ -67,3 +68,6 @@ class User extends Authenticatable
         );
     }
 }
+=======
+}
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424

@@ -208,6 +208,7 @@
                         </div>
                     </td>
 
+<<<<<<< HEAD
                     {{-- Kolom Bukti Pembayaran dengan Modal Popup --}}
                     <td class="px-8 py-4 align-middle" x-data="{ openModal: false, imgUrl: '' }">
                         @if($p->bukti_pembayaran)
@@ -217,10 +218,20 @@
                                     class="inline-block group border-none bg-transparent cursor-pointer transition-transform hover:scale-105">
                                 <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
                                     <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover">
+=======
+                    {{-- Kolom Tambahan: Bukti Pembayaran --}}
+                    <td class="px-8 py-4 align-middle">
+                        @if($p->bukti_pembayaran)
+                            <a href="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" target="_blank" class="inline-block group">
+                                <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
+                                    <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
+                                    {{-- Efek Hover Overlay Kaca Pembesar --}}
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
                                     </div>
                                 </div>
+<<<<<<< HEAD
                             </button>
 
                             {{-- Modal Popup --}}
@@ -242,6 +253,9 @@
                                     <img :src="imgUrl" alt="Bukti Pembayaran" class="w-full h-auto rounded">
                                 </div>
                             </div>
+=======
+                            </a>
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                         @else
                             <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md">
                                 ⏳ Belum Kirim
@@ -270,8 +284,13 @@
                                 
                                 <select name="status" onchange="if(this.value === 'SEDANG DIPROSES' ? confirm('Konfirmasi pesanan ini dan pindahkan ke Pesanan Masuk?') : true) { this.form.submit(); }" 
                                         class="text-[11px] font-bold uppercase tracking-wider bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:border-[#001f3f] focus:outline-none transition-all cursor-pointer">
+<<<<<<< HEAD
                                     <option value="BELUM KONFIRMASI" {{ $p->status == 'BELUM KONFIRMASI' ? 'selected' : '' }}> Belum Konfirmasi</option>
                                     <option value="SEDANG DIPROSES"> Sudah Konfirmasi</option>
+=======
+                                    <option value="BELUM KONFIRMASI" {{ $p->status == 'BELUM KONFIRMASI' ? 'selected' : '' }}>❌ Belum Konfirmasi</option>
+                                    <option value="SEDANG DIPROSES">✔️ Sudah Konfirmasi</option>
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                 </select>
                             </form>
                         </div>

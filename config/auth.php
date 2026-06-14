@@ -40,10 +40,13 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+<<<<<<< HEAD
         'admin' => [
             'driver' => 'session',
             'provider' => 'users', // Kita pake provider yang sama karena lu bilang tabelnya sama
         ],
+=======
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     ],
 
     /*
@@ -69,10 +72,17 @@ return [
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
 
+<<<<<<< HEAD
         'admins' => [
             'driver' => 'eloquent',
             'model' => App\Models\User::class, // Tetap arahin ke User model, tapi nanti di logic Controller kita pastiin role-nya admin
         ],
+=======
+        // 'users' => [
+        //     'driver' => 'database',
+        //     'table' => 'users',
+        // ],
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     ],
 
     /*
@@ -101,6 +111,7 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+<<<<<<< HEAD
 
         'admins' => [
             'provider' => 'users', // pake provider users aja karena tabel admin & user lu sama
@@ -108,6 +119,8 @@ return [
             'expire' => 60,
             'throttle' => 60,
         ],
+=======
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     ],
 
     /*
@@ -120,4 +133,10 @@ return [
     | confirmation screen. By default, the timeout lasts for three hours.
     |
     */
+<<<<<<< HEAD
+=======
+
+    'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
+
+>>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
 ];
