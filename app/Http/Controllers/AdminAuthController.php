@@ -45,13 +45,8 @@ class AdminAuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-<<<<<<< HEAD
         // PENTING: Tambahin Password::broker('admins') biar gak tabrakan sama user biasa
         $status = Password::broker('admins')->sendResetLink($request->only('email'));
-=======
-        // Fitur bawaan Laravel untuk mengurus token & kirim email otomatis
-        $status = Password::sendResetLink($request->only('email'));
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
 
         if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', 'Link reset password sudah dikirim ke email kamu!');
@@ -60,7 +55,6 @@ class AdminAuthController extends Controller
         return back()->withErrors(['email' => 'Email admin tidak ditemukan.']);
     }
 
-<<<<<<< HEAD
     // 5. Tampilkan Form Input Password Baru (Dipanggil dari link email)
     public function showResetPasswordForm($token, Request $request)
     {
@@ -100,19 +94,12 @@ class AdminAuthController extends Controller
     }
 
     // 7. Proses Logout Admin
-=======
-    // 5. Proses Logout Admin
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     public function logout(Request $request)
     {
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-<<<<<<< HEAD
         return redirect()->route('admin.login');
-=======
-        return redirect('/rahasia-admin-login');
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     }
 }
