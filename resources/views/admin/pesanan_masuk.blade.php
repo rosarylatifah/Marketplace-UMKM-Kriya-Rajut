@@ -121,11 +121,7 @@
                                                 </div>
                                             </div>
 
-<<<<<<< HEAD
                                             {{-- MODIFIKASI: Menampilkan Kontak Pembeli Dinamis --}}
-=======
-                                            {{-- 🌟 MODIFIKASI: Menampilkan Kontak Pembeli Dinamis --}}
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                             <div class="pt-1">
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">No. Handphone / WA:</span>
                                                 <span class="text-sm font-mono font-semibold text-gray-800">
@@ -133,11 +129,7 @@
                                                 </span>
                                             </div>
 
-<<<<<<< HEAD
                                             {{-- MODIFIKASI: Menampilkan Alamat Pengiriman Dinamis --}}
-=======
-                                            {{-- 🌟 MODIFIKASI: Menampilkan Alamat Pengiriman Dinamis --}}
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                             <div class="pt-1">
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Alamat Pengiriman:</span>
                                                 <p class="text-gray-700 bg-gray-50/70 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed font-medium">
@@ -169,11 +161,7 @@
 
                                         </div>
 
-<<<<<<< HEAD
                                         {{-- Tombol Konfirmasi WhatsApp ( DIUBAH SUPAYA VARIABEL SINKRON) --}}
-=======
-                                        {{-- Tombol Konfirmasi WhatsApp (🌟 DIUBAH SUPAYA VARIABEL SINKRON) --}}
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                         <div class="mt-4 pt-4 border-t border-gray-100">
                                             @php
                                                 // Mengambil nomor hp dari pesanan atau user, fallback ke nomor default jika kosong
@@ -212,17 +200,9 @@
                                 class="text-[10px] font-bold uppercase tracking-widest border border-gray-200 rounded-lg px-3 py-2 cursor-pointer outline-none transition-all duration-150
                                 {{ $p->status == 'SEDANG DIPROSES' ? 'bg-amber-50 text-amber-600 border-amber-200' : '' }}
                                 {{ $p->status == 'DALAM PERJALANAN' ? 'bg-blue-50 text-blue-600 border-blue-200' : '' }}
-<<<<<<< HEAD
                                 {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : '' }}">
                                 <option value="SEDANG DIPROSES" {{ $p->status == 'SEDANG DIPROSES' ? 'selected' : '' }}>Sedang Diproses</option>
                                 <option value="DALAM PERJALANAN" {{ $p->status == 'DALAM PERJALANAN' ? 'selected' : '' }}>Dalam Perjalanan</option>
-=======
-                                {{ $p->status == 'DIBATALKAN' ? 'bg-rose-50 text-rose-600 border-rose-200' : '' }}
-                                {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : '' }}">
-                                <option value="SEDANG DIPROSES" {{ $p->status == 'SEDANG DIPROSES' ? 'selected' : '' }}>Sedang Diproses</option>
-                                <option value="DALAM PERJALANAN" {{ $p->status == 'DALAM PERJALANAN' ? 'selected' : '' }}>Dalam Perjalanan</option>
-                                <option value="DIBATALKAN" {{ $p->status == 'DIBATALKAN' ? 'selected' : '' }}>Batalkan Pesanan</option>
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
                                 <option value="SELESAI" {{ $p->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
                             </select>
                         </form>
