@@ -32,7 +32,6 @@
     </div>
 
     <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-<<<<<<< HEAD
         <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pendapatan Kotor Bulan Ini</p>
         
         <p class="text-2xl font-bold text-[#001f3f] mb-1">
@@ -42,11 +41,6 @@
         <p class="text-[11px] text-gray-400">
             <span class="text-green-600 font-medium">Murni produk</span> • Tidak termasuk ongkir
         </p>
-=======
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Total Pendapatan</p>
-        <p class="text-2xl font-bold text-[#001f3f] mb-1">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
-        <p class="text-[11px] text-gray-400">Dari pesanan selesai</p>
->>>>>>> e81a9824da7f0bcb2b495d2eebe5295f4f295424
     </div>
 
 </div>
