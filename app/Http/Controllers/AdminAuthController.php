@@ -22,13 +22,12 @@ class AdminAuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Mencocokkan inputan dengan password ter-hash di DB
-        if (Auth::attempt($credentials)) {
+        // UBAH JADI INI (Pake guard 'admin')
+        if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended('/admin/dashboard');
         }
 
-        // Jika salah, balik ke halaman login dengan error text
         return back()->withErrors([
             'login_error' => 'Email atau Password yang kamu masukkan salah!',
         ])->onlyInput('email');
@@ -96,7 +95,9 @@ class AdminAuthController extends Controller
     // 7. Proses Logout Admin
     public function logout(Request $request)
     {
-        Auth::logout();
+        // UBAH JADI INI (Pake guard 'admin')
+        Auth::guard('admin')->logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         

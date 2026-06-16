@@ -78,7 +78,7 @@ Route::middleware(['guest'])->group(function () {
 });
 
 // Proses Logout Admin
-Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('auth');
+Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout')->middleware('auth:admin');
 
 
 /*
@@ -86,7 +86,7 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 | 🛡️ Tampilan Admin (Operasional Panel) - Proteksi Middleware Auth & Prefix admin
 |--------------------------------------------------------------------------
 */
-Route::prefix('admin')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     
     // Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');

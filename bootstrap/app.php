@@ -12,7 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
     // Arahkan user yang belum login ke halaman login rahasia admin kita
-    $middleware->redirectTo('/rahasia-admin-login');
+    $middleware->redirectTo('/admin/login');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
