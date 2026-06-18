@@ -65,11 +65,14 @@
                 <p class="text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $a->id_pesanan }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $a->nama_pembeli }} &nbsp;·&nbsp; Rp {{ number_format($a->total, 0, ',', '.') }}</p>
             </div>
+            
             <div class="text-right">
-                @if($a->status == 'SEDANG DIPROSES')
-                    <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Diproses</span>
+                @if($a->status == 'BELUM DIKONFIRMASI')
+                    <span class="inline-block bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Belum Dikonfirmasi</span>
+                @elseif($a->status == 'SEDANG DIPROSES')
+                    <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Sedang Diproses</span>
                 @elseif($a->status == 'DALAM PERJALANAN')
-                    <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dikirim</span>
+                    <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dalam Perjalanan</span>
                 @elseif($a->status == 'DIBATALKAN')
                     <span class="inline-block bg-rose-50 text-rose-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dibatalkan</span>
                 @elseif($a->status == 'SELESAI')
@@ -77,6 +80,7 @@
                 @endif
                 <p class="text-[10px] text-gray-300 mt-1">{{ $a->created_at->format('d/m/Y') }}</p>
             </div>
+
         </div>
         @empty
         <div class="py-16 text-center">

@@ -211,13 +211,14 @@ public function store(Request $request)
         }
 
         $total = $subtotal + $ongkir;
-
+        
         // Instansiasi mass assignment data baru ke tabel 'pesanan'
         Pesanan::create([
             'id_pesanan'   => $idPesanan,
             'nama_pembeli' => $request->input('nama'),
             'email'        => $request->input('email'),
-            'telepon'      => $request->input('telepon'),
+            'no_hp'        => $request->input('telepon'),
+            'alamat'       => $request->input('alamat'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,
@@ -229,6 +230,7 @@ public function store(Request $request)
             'id_pesanan'   => $idPesanan,
             'nama_pembeli' => $request->input('nama'),
             'email'        => $request->input('email'),
+            'no_hp'        => $request->input('telepon'), // Pastikan nama input form-nya 'telepon'
             'alamat'       => $request->input('alamat'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,

@@ -24,11 +24,14 @@ class Pesanan extends Model
         'id_pesanan',
         'nama_pembeli',
         'email',
+        'no_hp', 
+        'alamat',
         'nama_barang',
         'total',
         'ongkir',
         'status',
-        'bukti_pembayaran',
+        'bukti_pembayaran', 
+        
     ];
 
     /**
