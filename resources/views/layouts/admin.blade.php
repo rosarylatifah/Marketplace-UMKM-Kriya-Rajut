@@ -18,7 +18,7 @@
     <nav class="fixed top-0 z-50 w-full bg-white border-b border-gray-100">
         <div class="px-6 py-4 flex items-center justify-between">
             <span class="text-[#001f3f] font-bold tracking-[0.2em] uppercase text-xl">
-                KRIYA<span class="text-gray-400 font-light">RAJUT</span>
+                Stitchy<span class="text-gray-400 font-light">Sist</span>
                 <span class="text-[13px] text-gray-300 font-normal tracking-widest ml-2">/ ADMIN</span>
             </span>
         </div>

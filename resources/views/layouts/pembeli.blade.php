@@ -28,15 +28,23 @@
 {{-- MENAMBAHKAN overflow-x-hidden BIAR SLIDER NGGAK MERUSAK LEBAR LAYAR DESKTOP --}}
 <body class="bg-[#F3F5F1] flex flex-col min-h-screen overflow-x-hidden">
     {{-- Navbar --}}
-    <nav class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm w-full">
-        <div class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-5">
-            <a href="/" class="flex items-center space-x-3">
-                <span class="self-center text-xl font-bold whitespace-nowrap text-[#001f3f] tracking-[0.2em] uppercase">
-                    Stitchy<span class="text-gray-400 font-light">Sist</span>
-                </span>
-            </a>
+<nav class="bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm w-full">
+    <div class="max-w-7xl flex flex-wrap items-center justify-between mx-auto p-5">
+        <a href="/" class="flex items-center space-x-3">
+            <span class="self-center text-xl font-bold whitespace-nowrap text-[#001f3f] tracking-[0.2em] uppercase">
+                Stitchy<span class="text-gray-400 font-light">Sist</span>
+            </span>
+        </a>
 
-            <div class="hidden w-full md:block md:w-auto">
+                {{-- TOMBOL HAMBURGER (tampil hanya di bawah md) --}}
+        <button data-collapse-toggle="navbar-menu" type="button"
+            class="inline-flex items-center p-2 w-10 h-10 justify-center text-gray-700 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none"
+            aria-controls="navbar-menu" aria-expanded="false">
+            <span class="sr-only">Buka menu</span>
+            <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+
+            <div class="hidden w-full md:block md:w-auto" id="navbar-menu">
                 <ul class="flex flex-col md:flex-row md:space-x-10 md:items-center bg-transparent">
                     <li>
                         <a href="/"
@@ -79,9 +87,6 @@
     <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-40 animate-ping"></span>
     <i class="fab fa-whatsapp text-2xl relative"></i>
 </a>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
-</body>
 
     {{-- Footer --}}
     <footer id="tentang-kami" class="bg-[#EAE4DD] border-t border-gray-100 mt-20 pt-16 pb-8 text-gray-800 w-full">
@@ -155,7 +160,7 @@
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 </body>
 
 </html>

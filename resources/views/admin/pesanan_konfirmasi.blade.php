@@ -10,10 +10,15 @@
     <p class="text-sm text-gray-400 mt-3">Periksa bukti transaksi dan validasi pesanan awal sebelum masuk antrean produksi.</p>
 </div>
 
-{{-- Alert Success Notifikasi --}}
+{{-- Alert Success / Error Notifikasi --}}
 @if(session('success'))
     <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-wider">
         {{ session('success') }}
+    </div>
+@endif
+@if(session('error'))
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+        {{ session('error') }}
     </div>
 @endif
 
@@ -129,7 +134,6 @@
                                                 </div>
                                             </div>
 
-                                            {{-- Menampilkan No Handphone Dinamis --}}
                                             <div>
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">No. Handphone / WA:</span>
                                                 <span class="text-sm font-mono font-semibold text-gray-800">
@@ -137,16 +141,13 @@
                                                 </span>
                                             </div>
 
-                                            {{-- Alamat Pengiriman --}}
                                             <div>
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Alamat Pengiriman:</span>
                                                 <p class="text-gray-700 bg-gray-50/70 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed font-medium">
-                                                    {{-- JADI --}}
-{{ $p->alamat ?? optional($p->user)->alamat ?? 'Alamat belum diatur oleh pembeli.' }}
+                                                    {{ $p->alamat ?? optional($p->user)->alamat ?? 'Alamat belum diatur oleh pembeli.' }}
                                                 </p>
                                             </div>
 
-                                            {{-- Desain Struk Total Harga (Bentuk Row) --}}
                                             <div class="space-y-2 pt-3 border-t border-gray-100">
                                                 <div class="flex justify-between items-center">
                                                     <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Harga Barang</span>
@@ -172,32 +173,22 @@
                                         {{-- Tombol Hubungi Pembeli WhatsApp --}}
                                         <div class="mt-4 pt-4 border-t border-gray-100">
                                             @php
-                                                // Ambil nomor HP dari data pesanan/user
                                                 $nomorRaw = $p->no_hp ?? ($p->user->no_hp ?? '');
-                                                
-                                                // Bersihkan karakter non-angka
                                                 $nomorClean = preg_replace('/[^0-9]/', '', $nomorRaw);
-
-                                                // Normalisasi format 08xx ke kode negara 628xx
                                                 if (str_starts_with($nomorClean, '0')) {
                                                     $nomorClean = '62' . substr($nomorClean, 1);
                                                 }
-
-                                                // Cadangan darurat jika data kosong
                                                 $nomorTujuan = empty($nomorClean) ? '628123456789' : $nomorClean;
-
                                                 $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut (Namonic) ingin mengonfirmasi pesanan Anda dengan ID #" . $p->id_pesanan . ". Apakah data transaksinya sudah sesuai?";
                                                 $linkWA = "https://api.whatsapp.com/send?phone=" . $nomorTujuan . "&text=" . urlencode($pesanWA);
                                             @endphp
                                             
-                                            {{-- Jika nomor HP kosong, kasih warning --}}
                                             @if(empty($nomorClean))
                                                 <div class="text-center text-[10px] text-amber-600 font-semibold uppercase tracking-wider bg-amber-50 p-2 rounded-lg border border-amber-200 mb-2">
                                                     ⚠️ Pembeli belum mengisi nomor HP / WhatsApp
                                                 </div>
                                             @endif
 
-                                            {{-- FIX: Teks Tombol diganti menjadi Hubungi Pembeli --}}
                                             <a href="{{ $linkWA }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-wider py-3 rounded-lg transition-all shadow-md">
                                                 <i class="fa-brands fa-whatsapp text-base"></i> Hubungi Pembeli via WhatsApp
                                             </a>
@@ -215,7 +206,6 @@
                             <a href="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" target="_blank" class="inline-block group">
                                 <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
                                     <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
-                                    {{-- Efek Hover Overlay Kaca Pembesar --}}
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
                                     </div>
@@ -228,7 +218,7 @@
                         @endif
                     </td>
 
-                    {{-- 4. Total Bayar (Dikurangi Ongkir agar tampil harga produk saja) --}}
+                    {{-- 4. Total Bayar --}}
                     <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
@@ -240,19 +230,33 @@
                         </span>
                     </td>
 
-                    {{-- 6. Dropdown Tunggal Otomatis Proses --}}
+                    {{-- 6. Aksi Verifikasi: Konfirmasi + Batalkan --}}
                     <td class="px-8 py-4 align-middle text-center">
-                        <div class="flex justify-center items-center">
+                        <div class="flex flex-col items-center gap-2">
+
+                            {{-- Tombol Konfirmasi (pindah ke Sedang Diproses) --}}
                             <form action="{{ route('pesanan.update', $p->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                
-                                <select name="status" onchange="if(this.value === 'SEDANG DIPROSES' ? confirm('Konfirmasi pesanan ini dan pindahkan ke Pesanan Masuk?') : true) { this.form.submit(); }" 
-                                        class="text-[11px] font-bold uppercase tracking-wider bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:border-[#001f3f] focus:outline-none transition-all cursor-pointer">
-                                    <option value="BELUM KONFIRMASI" {{ $p->status == 'BELUM KONFIRMASI' ? 'selected' : '' }}>❌ Belum Konfirmasi</option>
-                                    <option value="SEDANG DIPROSES">✔️ Sudah Konfirmasi</option>
-                                </select>
+                                <input type="hidden" name="status" value="SEDANG DIPROSES">
+                                <button type="submit"
+                                    onclick="return confirm('Konfirmasi pesanan #{{ $p->id_pesanan }} dan pindahkan ke Pesanan Masuk?')"
+                                    class="text-[10px] font-bold uppercase tracking-wider bg-[#001f3f] hover:bg-[#003366] text-white px-4 py-2 rounded-lg transition-all whitespace-nowrap">
+                                    Konfirmasi
+                                </button>
                             </form>
+
+                            {{-- Tombol Batalkan oleh Admin --}}
+                            <form action="{{ route('admin.pesanan.batalkanOlehAdmin', $p->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <button type="submit"
+                                    onclick="return confirm('Batalkan pesanan #{{ $p->id_pesanan }}? Stok produk akan dikembalikan otomatis.')"
+                                    class="text-[10px] font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-lg transition-all whitespace-nowrap">
+                                    ✖ TOLAK
+                                </button>
+                            </form>
+
                         </div>
                     </td>
 
