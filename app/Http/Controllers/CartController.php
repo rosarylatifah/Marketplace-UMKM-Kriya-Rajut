@@ -20,15 +20,6 @@ class CartController extends Controller
     }
 
     /**
-     * Menampilkan katalog berdasarkan kategori.
-     */
-    public function katalog($category = 'Semua')
-    {
-        $currentCategory = ucfirst($category);
-        return view('pembeli.katalog', compact('currentCategory'));
-    }
-
-    /**
      * FR-11: Pelanggan dapat menambahkan produk ke dalam keranjang belanja.
      * Alur PBO: Menerima kumpulan data dari HTTP Request (Encapsulation), 
      * menyusunnya menjadi array terstruktur dengan key unik gabungan ID Produk & Variasi,
@@ -128,27 +119,6 @@ public function store(Request $request)
     }
 
     /**
-     * Melacak status pesanan pelanggan berdasarkan Email dan ID Pesanan.
-     */
-    public function statusPesanan(Request $request)
-    {
-        if (!$request->email && !$request->kode) {
-            return redirect('/lacak-pesanan');
-        }
-
-        $pesanan = Pesanan::where('email', $request->email)
-                    ->where('id_pesanan', $request->kode)
-                    ->get();
-
-        if($pesanan->isEmpty()) {
-            return redirect('/lacak-pesanan')
-                ->with('error', 'Pesanan tidak ditemukan. Periksa kembali email dan kode pesananmu.');
-        }
-
-        return view('pembeli.status', compact('pesanan'));
-    }
-
-    /**
      * FR-12: Pelanggan dapat melakukan proses checkout dengan mengisi data diri.
      */
     public function prosesCheckout(Request $request)
@@ -217,11 +187,13 @@ public function store(Request $request)
             'id_pesanan'   => $idPesanan,
             'nama_pembeli' => $request->input('nama'),
             'email'        => $request->input('email'),
-            'telepon'      => $request->input('telepon'),
+            'no_hp'        => $request->input('telepon'),
+            'alamat'       => $request->input('alamat'),
             'nama_barang'  => implode(', ', $nama_barang),
             'total'        => $total,
             'ongkir'       => $ongkir,
-            'status'       => 'BELUM KONFIRMASI', // 🌟 UBAH INI biar masuk ke halaman konfirmasi dulu
+            'status'       => 'BELUM KONFIRMASI', 
+            'items_snapshot' => $cart, 
         ]);
 
         // Simpan info invoice pesanan ke session buat halaman konfirmasi pembayaran
@@ -247,54 +219,28 @@ public function store(Request $request)
             ->with('success', 'Silakan selesaikan pembayaran.');
     }
 
-    /**
-     * FITUR BARU: Membatalkan pesanan dari sisi pembeli dan mengembalikan stok produk variasi.
-     * Alur PBO: Menjaga integritas data state menggunakan DB Transaction, 
-     * mengembalikan kuantitas stok ke Object Model ProdukVariasi, lalu mengubah status entitas pesanan.
-     */
-    public function batalkanPesanan(Request $request)
-    {
-        $idPesanan = $request->input('id_pesanan');
-        
-        // Cari entitas objek pesanan berdasarkan ID
-        $pesanan = Pesanan::where('id_pesanan', $idPesanan)->first();
 
-        if (!$pesanan) {
-            return redirect()->back()->with('error', 'Data pesanan tidak ditemukan.');
-        }
+/**
+ * SISI PEMBELI: Mengajukan pembatalan pesanan (belum benar-benar dibatalkan).
+ * Menunggu persetujuan admin sebelum status berubah jadi DIBATALKAN.
+ */
+public function ajukanPembatalan(Request $request)
+{
+    $idPesanan = $request->input('id_pesanan');
 
-        // Syarat mutlak pembatalan: Status harus berupa 'SEDANG DIPROSES'
-        if ($pesanan->status !== 'SEDANG DIPROSES') {
-            return redirect()->back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses lebih lanjut oleh admin.');
-        }
+    $pesanan = Pesanan::where('id_pesanan', $idPesanan)->first();
 
-        // Ambil data item keranjang terakhir dari session untuk mengembalikan stok variasi produk
-        $lastCart = session()->get('pesanan_terakhir', []);
-
-        try {
-            \DB::transaction(function () use ($pesanan, $lastCart) {
-                // 1. Loop item untuk mengembalikan stok variasi barang ke database
-                if (!empty($lastCart)) {
-                    foreach ($lastCart as $item) {
-                        if (isset($item['produk_variasi_id'])) {
-                            $variasi = ProdukVariasi::find($item['produk_variasi_id']);
-                            if ($variasi) {
-                                // Tambahkan kembali stok yang sempat dikurangi saat checkout
-                                $variasi->stok += $item['quantity'];
-                                $variasi->save();
-                            }
-                        }
-                    }
-                }
-
-                // 2. Ubah state status pesanan di database menjadi DIBATALKAN
-                $pesanan->status = 'DIBATALKAN';
-                $pesanan->save();
-            });
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal membatalkan pesanan: ' . $e->getMessage());
-        }
-
-        return redirect()->back()->with('success', 'Pesanan  berhasil dibatalkan. Mohon hubungi penjual untuk pengembalian dana.');
+    if (!$pesanan) {
+        return redirect()->back()->with('error', 'Data pesanan tidak ditemukan.');
     }
+
+    if ($pesanan->status !== 'BELUM KONFIRMASI') {
+        return redirect()->back()->with('error', 'Pesanan tidak dapat diajukan pembatalan karena sudah diproses lebih lanjut oleh admin.');
+    }
+
+    $pesanan->status = 'PENGAJUAN BATAL';
+    $pesanan->save();
+
+    return redirect()->back()->with('success', 'Pengajuan pembatalan terkirim. Admin akan menghubungimu untuk konfirmasi lebih lanjut.');
+}
 }

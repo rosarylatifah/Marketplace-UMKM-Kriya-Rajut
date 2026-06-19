@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -8,16 +7,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('produk_variasi', function (Blueprint $table) {
-            // Tambah kolom foto (nullable) setelah kolom harga
-            $table->string('foto')->nullable()->after('harga');
-        });
+        if (!Schema::hasColumn('produk_variasi', 'foto')) {
+            Schema::table('produk_variasi', function (Blueprint $table) {
+                // Tambah kolom foto (nullable) setelah kolom harga
+                $table->string('foto')->nullable()->after('harga');
+            });
+        }
     }
 
     public function down(): void
     {
         Schema::table('produk_variasi', function (Blueprint $table) {
-            $table->dropColumn('foto');
+            if (Schema::hasColumn('produk_variasi', 'foto')) {
+                $table->dropColumn('foto');
+            }
         });
     }
 };

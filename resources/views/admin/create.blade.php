@@ -45,14 +45,12 @@
                 <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">
                     Kategori <span class="text-red-400">*</span>
                 </label>
-                <select name="kategori" required
-                    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
-                    <option value="PAKAIAN"   {{ old('kategori') == 'PAKAIAN'   ? 'selected' : '' }}>Pakaian</option>
-                    <option value="AKSESORIS" {{ old('kategori') == 'AKSESORIS' ? 'selected' : '' }}>Aksesoris</option>
-                    <option value="DEKORASI"  {{ old('kategori') == 'DEKORASI'  ? 'selected' : '' }}>Dekorasi</option>
-                    <option value="AMIGURUMI" {{ old('kategori') == 'AMIGURUMI' ? 'selected' : '' }}>Amigurumi</option>
-                    <option value="TAS"       {{ old('kategori') == 'TAS'       ? 'selected' : '' }}>Tas & Wadah</option>
-                </select>
+<select name="kategori" required
+    class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer bg-transparent outline-none">
+    @foreach($kategoris as $k)
+        <option value="{{ $k->kode }}" {{ old('kategori') == $k->kode ? 'selected' : '' }}>{{ $k->nama }}</option>
+    @endforeach
+</select>
             </div>
 
             {{-- Foto Display Utama --}}
@@ -64,6 +62,14 @@
                     class="w-full text-[11px] file:mr-2 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-gray-100 file:text-[#001f3f] cursor-pointer">
                 <p class="text-[10px] text-gray-400 mt-1">JPG, JPEG, PNG. Maks 2MB.</p>
             </div>
+            <div class="md:col-span-2 flex items-center gap-3 bg-gray-50/50 p-4 border border-gray-100 rounded-xl">
+    <input type="checkbox" name="is_pilihan" id="is_pilihan" value="1"
+        {{ old('is_pilihan') ? 'checked' : '' }}
+        class="w-4 h-4 rounded border-gray-300 accent-[#001f3f] cursor-pointer">
+    <label for="is_pilihan" class="text-[11px] font-bold uppercase tracking-widest text-gray-600 cursor-pointer">
+        Tampilkan produk ini di "Koleksi Pilihan" Beranda
+    </label>
+</div>
 
         </div>
 

@@ -49,6 +49,7 @@
                     </a>
                 </li>
 
+
                 {{-- 🆕 MENU BARU: Konfirmasi Pesanan (Ditaruh di awal alur transaksi) --}}
                 <li>
                     <a href="/admin/pesanan-konfirmasi"
@@ -67,6 +68,16 @@
                         Pesanan Masuk
                     </a>
                 </li>
+
+<li>
+    <a href="/admin/pesanan-pengajuan-batal"
+        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
+        {{ request()->is('admin/pesanan-pengajuan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
+        <i class="fa-solid fa-rotate-left w-4 text-center"></i>
+        Pengajuan Batal
+    </a>
+</li>
+
                 {{-- MENU: Pesanan Batal --}}
                 <li>
                     <a href="/admin/pesanan-batal"

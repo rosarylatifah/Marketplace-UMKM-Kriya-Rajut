@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\PesananController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\KategoriController;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,9 +46,9 @@ Route::post('/remove-from-cart', [CartController::class, 'remove'])->name('cart.
 Route::view('/lacak-pesanan', 'pembeli.lacak');
 Route::get('/status-pesanan', [PesananController::class, 'statusPesanan'])->name('status.pesanan');
 
-// Proses pembatalan pesanan dari sisi Pembeli
-Route::post('/pesanan/batalkan', [CartController::class, 'batalkanPesanan'])->name('pembeli.pesanan.batalkan');
 
+// Proses pembatalan pesanan dari sisi Pembeli
+Route::post('/pesanan/ajukan-batal', [CartController::class, 'ajukanPembatalan'])->name('pembeli.pesanan.ajukanBatal');
 // FR-12: Pelanggan melakukan checkout dengan mengisikan data diri
 Route::get('/checkout', [CartController::class, 'checkout'])->name('checkout');
 Route::post('/proses-checkout', [CartController::class, 'prosesCheckout'])->name('checkout.proses');
@@ -90,7 +91,9 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     
     // Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
-    Route::view('/kategori', 'admin.kategori');
+    Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('admin.kategori.update');
+Route::post('/kategori', [KategoriController::class, 'store'])->name('admin.kategori.store');
+Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('admin.kategori.destroy');
     Route::get('/lihat-semua', [PesananController::class, 'lihatSemua'])->name('admin.lihat_semua');
     
     // Sisi Admin: Operasi CRUD Kelola Produk
@@ -116,6 +119,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     
     // FR-08: Admin dapat melihat data pesanan refund / batal
     Route::get('/pesanan-batal', [PesananController::class, 'dibatalkan'])->name('admin.pesanan.batal');
+    Route::get('/pesanan-pengajuan-batal', [PesananController::class, 'pengajuanBatal'])->name('admin.pesanan.pengajuanBatal');
+Route::put('/pesanan-batal/setujui/{id}', [PesananController::class, 'setujuiPembatalan'])->name('admin.pesanan.setujuiBatal');
+Route::put('/pesanan-batal/tolak/{id}', [PesananController::class, 'tolakPembatalan'])->name('admin.pesanan.tolakBatal');
+
     
     // Sisi Admin: Penghapusan Objek Pesanan Permanen dari DB
     Route::delete('/hapus-pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.hapus');

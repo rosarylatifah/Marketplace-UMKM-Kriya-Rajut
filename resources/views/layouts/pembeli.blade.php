@@ -73,6 +73,16 @@
         @yield('content')
     </main>
 
+    {{-- TOMBOL WHATSAPP MELAYANG --}}
+<a href="https://wa.me/6285778092881" target="_blank"
+   class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200">
+    <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-40 animate-ping"></span>
+    <i class="fab fa-whatsapp text-2xl relative"></i>
+</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+</body>
+
     {{-- Footer --}}
     <footer id="tentang-kami" class="bg-[#EAE4DD] border-t border-gray-100 mt-20 pt-16 pb-8 text-gray-800 w-full">
         <div class="max-w-7xl mx-auto px-6">

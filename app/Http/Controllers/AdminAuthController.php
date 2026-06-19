@@ -62,6 +62,6 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect('/rahasia-admin-login');
+        return redirect('/admin/login');
     }
 }

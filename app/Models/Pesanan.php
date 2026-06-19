@@ -20,16 +20,22 @@ class Pesanan extends Model
      * Langkah ini membatasi modifikasi data state secara liar dan mengamankan 
      * proses instansiasi data transaksi baru dari manipulasi pihak luar.
      */
-    protected $fillable = [
-        'id_pesanan',
-        'nama_pembeli',
-        'email',
-        'nama_barang',
-        'total',
-        'ongkir',
-        'status',
-        'bukti_pembayaran',
-    ];
+protected $fillable = [
+    'id_pesanan',
+    'nama_pembeli',
+    'email',
+    'no_hp',
+    'alamat',
+    'nama_barang',
+    'total',
+    'ongkir',
+    'status',
+    'bukti_pembayaran',
+    'items_snapshot',
+];
+    protected $casts = [
+    'items_snapshot' => 'array',
+];
 
     /**
      * Konsep PBO - Association (Asosiasi antar Objek / Relasi Eloquent):

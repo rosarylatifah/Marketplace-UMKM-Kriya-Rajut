@@ -133,7 +133,7 @@
                                             <div>
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">No. Handphone / WA:</span>
                                                 <span class="text-sm font-mono font-semibold text-gray-800">
-                                                    {{ $p->no_hp ?? ($p->user->no_hp ?? 'Belum mengisi nomor telepon') }}
+                                                    {{ $p->no_hp ?? optional($p->user)->no_hp ?? 'Belum mengisi nomor telepon' }}
                                                 </span>
                                             </div>
 
@@ -141,7 +141,8 @@
                                             <div>
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Alamat Pengiriman:</span>
                                                 <p class="text-gray-700 bg-gray-50/70 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed font-medium">
-                                                    {{ $p->user->alamat ?? ($p->alamat ?? 'Alamat belum diatur oleh pembeli.') }}
+                                                    {{-- JADI --}}
+{{ $p->alamat ?? optional($p->user)->alamat ?? 'Alamat belum diatur oleh pembeli.' }}
                                                 </p>
                                             </div>
 

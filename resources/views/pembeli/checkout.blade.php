@@ -69,7 +69,7 @@
                                 class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[11px] py-3 px-0 transition-all duration-300 font-bold uppercase tracking-widest cursor-pointer">
                                 <option value="" selected disabled>Pilih Opsi Pengantaran</option>
                                 <option value="kurir_lokal" data-ongkir="10000">Kurir Lokal Batam (Maks 1kg) - Rp 10.000</option>
-                                <option value="custom_shipment" data-ongkir="0">GoSend / GrabExpress - Rp0</option>
+                                <option value="custom_shipment" data-ongkir="0">GoSend / GrabExpress - Biaya Menyesuaikan</option>
                             </select>
                             <p id="err-opsi" class="hidden text-[9px] text-red-400 mt-1 uppercase tracking-widest">Opsi pengantaran wajib dipilih</p>
                             

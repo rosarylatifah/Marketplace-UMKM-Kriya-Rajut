@@ -31,6 +31,11 @@
             class="inline-flex items-center gap-2 bg-[#001f3f] hover:bg-[#003366] text-white font-bold uppercase tracking-[0.2em] text-[11px] px-6 py-3 rounded-full transition-all duration-200 shadow-md hover:shadow-lg whitespace-nowrap">
             <i class="fa-solid fa-plus text-xs"></i> Tambah Produk
         </a>
+
+        <button type="button" data-modal-target="modal-kelola-kategori" data-modal-toggle="modal-kelola-kategori"
+    class="inline-flex items-center gap-2 bg-white hover:bg-[#F3F5F1] text-[#001f3f] border border-gray-200 font-bold uppercase tracking-[0.2em] text-[11px] px-6 py-3 rounded-full transition-all duration-200 whitespace-nowrap">
+    <i class="fa-solid fa-tags text-xs"></i> Kelola Kategori
+</button>
     </div>
 </div>
 
@@ -230,6 +235,82 @@
     </div>
 </div>
 
+{{-- MODAL KELOLA KATEGORI --}}
+<div id="modal-kelola-kategori" tabindex="-1" aria-hidden="true"
+    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-xl max-h-full">
+        <div class="relative bg-white rounded-xl shadow">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <h3 class="text-[11px] font-bold text-[#001f3f] uppercase tracking-[0.2em]">Kelola Kategori</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-modal-hide="modal-kelola-kategori">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <form action="{{ route('admin.kategori.store') }}" method="POST" class="flex items-end gap-3 mb-6">
+                    @csrf
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-2">Nama Kategori Baru</label>
+                        <input type="text" name="nama" required placeholder="Contoh: Sepatu Rajut"
+                            class="w-full border-b-2 border-gray-100 border-t-0 border-l-0 border-r-0 focus:border-[#001f3f] focus:ring-0 text-[13px] py-2.5 px-0 transition-all duration-300 bg-transparent outline-none">
+                    </div>
+                    <button type="submit"
+                        class="bg-[#001f3f] hover:bg-[#003366] text-white font-bold py-2.5 px-6 rounded-full uppercase text-[10px] tracking-[0.2em] transition-all duration-200 whitespace-nowrap">
+                        + Tambah
+                    </button>
+                </form>
+
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-[#F3F5F1] text-[9px] uppercase tracking-[0.2em] text-gray-400 font-bold">
+                                <th class="px-5 py-3">Nama</th>
+                                <th class="px-5 py-3 text-center">Jml Produk</th>
+                                <th class="px-5 py-3 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+@forelse($kategoris as $k)
+<tr id="row-{{ $k->id }}">
+    <td class="px-5 py-3 text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $k->nama }}</td>
+    <td class="px-5 py-3 text-center text-xs text-gray-500 font-semibold">{{ $k->jumlahProduk() }}</td>
+    <td class="px-5 py-3 text-center">
+        <div class="flex items-center justify-center gap-3">
+            <button type="button" onclick="toggleEditKategori({{ $k->id }})" class="text-gray-400 hover:text-[#001f3f] transition-colors">
+                <i class="fa-solid fa-pen text-xs"></i>
+            </button>
+            <form action="{{ route('admin.kategori.destroy', $k->id) }}" method="POST"
+                onsubmit="return confirm('Yakin mau hapus kategori {{ $k->nama }}? Produk yang sudah memakai kategori ini tidak akan terhapus.')">
+                @csrf @method('DELETE')
+                <button type="submit" class="text-red-400 hover:text-red-600 transition-colors">
+                    <i class="fa-solid fa-trash-can text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </td>
+</tr>
+<tr id="edit-row-{{ $k->id }}" class="hidden bg-gray-50/50">
+    <td colspan="3" class="px-5 py-3">
+        <form action="{{ route('admin.kategori.update', $k->id) }}" method="POST" class="flex items-center gap-2">
+            @csrf @method('PUT')
+            <input type="text" name="nama" value="{{ $k->nama }}" required
+                class="flex-1 border border-gray-200 rounded p-2 text-xs font-bold uppercase tracking-widest focus:ring-[#001f3f] focus:border-[#001f3f] outline-none">
+            <button type="submit" class="text-emerald-500 hover:text-emerald-600 px-2"><i class="fa-solid fa-check"></i></button>
+            <button type="button" onclick="toggleEditKategori({{ $k->id }})" class="text-gray-400 hover:text-gray-600 px-2"><i class="fa-solid fa-xmark"></i></button>
+        </form>
+    </td>
+</tr>
+@empty
+                            <tr><td colspan="3" class="px-5 py-8 text-center text-xs text-gray-400 uppercase tracking-widest">Belum ada kategori</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- =====================================================================
      JAVASCRIPT: Logic Bulk Delete
      ===================================================================== --}}
@@ -237,6 +318,10 @@
     function getCheckboxesTerpilih() {
         return document.querySelectorAll('.produk-checkbox:checked');
     }
+    
+    function toggleEditKategori(id) {
+    document.getElementById('edit-row-' + id).classList.toggle('hidden');
+}
 
     function updateBulkToolbar() {
         const terpilih = getCheckboxesTerpilih();
