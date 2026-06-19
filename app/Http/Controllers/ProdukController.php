@@ -7,6 +7,7 @@ use App\Models\Produk;
 use App\Models\ProdukVariasi;
 use App\Models\ProdukFoto;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Kategori;
 
 class ProdukController extends Controller
 {
@@ -15,33 +16,75 @@ class ProdukController extends Controller
     // =====================================================================
     public function home()
     {
-        $produk = Produk::with('variasis')->latest()->take(8)->get();
+        $produk = Produk::with('variasis')
+            ->where('is_pilihan', true)
+            ->latest()
+            ->take(8)
+            ->get();
+
         return view('pembeli.home', compact('produk'));
     }
 
     // =====================================================================
     // PEMBELI: Katalog
     // =====================================================================
-    public function katalog(Request $request, $category = null)
-    {
-        $query = Produk::with('variasis');
+public function katalog(Request $request, $category = null)
+{
+    $query = Produk::with('variasis');
 
-        if ($category) {
-            $query->where('kategori', strtoupper($category));
+    $kategoriAktif = null;
+    if ($category && $category !== 'semua') {
+        $kategoriAktif = Kategori::where('slug', $category)->first();
+        if ($kategoriAktif) {
+            $query->where('kategori', $kategoriAktif->kode);
         }
-
-        if ($request->filled('search')) {
-            $keyword = $request->search;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nama', 'like', "%$keyword%")
-                  ->orWhere('kategori', 'like', "%$keyword%")
-                  ->orWhere('deskripsi', 'like', "%$keyword%");
-            });
-        }
-
-        $produk = $query->latest()->get();
-        return view('pembeli.katalog', compact('produk'));
     }
+
+    if ($request->filled('search')) {
+        $keyword = $request->search;
+        $query->where(function ($q) use ($keyword) {
+            $q->where('nama', 'like', "%$keyword%")
+              ->orWhere('kategori', 'like', "%$keyword%")
+              ->orWhere('deskripsi', 'like', "%$keyword%");
+        });
+    }
+
+    $produk = $query->latest()->get();
+
+    // Hitung harga efektif (harga terendah dari variasi, atau harga dasar produk)
+    $produk->each(function ($p) {
+        $p->harga_efektif = $p->variasis->count() > 0
+            ? $p->variasis->min('harga')
+            : $p->harga;
+    });
+
+    // Filter rentang harga
+    if ($request->filled('harga_min')) {
+        $produk = $produk->filter(fn($p) => $p->harga_efektif >= (int) $request->harga_min);
+    }
+    if ($request->filled('harga_max')) {
+        $produk = $produk->filter(fn($p) => $p->harga_efektif <= (int) $request->harga_max);
+    }
+
+    // Sorting
+    switch ($request->get('urutkan')) {
+        case 'harga_asc':
+            $produk = $produk->sortBy('harga_efektif');
+            break;
+        case 'harga_desc':
+            $produk = $produk->sortByDesc('harga_efektif');
+            break;
+        case 'nama_az':
+            $produk = $produk->sortBy('nama');
+            break;
+    }
+
+    $produk = $produk->values();
+    $kategoris = Kategori::orderBy('nama')->get();
+    $currentCategory = $kategoriAktif ? $kategoriAktif->nama : 'Semua';
+
+    return view('pembeli.katalog', compact('produk', 'kategoris', 'currentCategory'));
+}
 
     // =====================================================================
     // PEMBELI: Detail Produk
@@ -55,29 +98,31 @@ class ProdukController extends Controller
     // =====================================================================
     // ADMIN: Index / Kelola Produk
     // =====================================================================
-    public function index(Request $request)
-    {
-        $query = Produk::with('variasis');
+public function index(Request $request)
+{
+    $query = Produk::with('variasis');
 
-        if ($request->filled('search')) {
-            $keyword = $request->search;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('nama', 'like', "%$keyword%")
-                  ->orWhere('kategori', 'like', "%$keyword%");
-            });
-        }
-
-        $produk = $query->latest()->get();
-        return view('admin.kelola_produk', compact('produk'));
+    if ($request->filled('search')) {
+        $keyword = $request->search;
+        $query->where(function ($q) use ($keyword) {
+            $q->where('nama', 'like', "%$keyword%")
+              ->orWhere('kategori', 'like', "%$keyword%");
+        });
     }
+
+    $produk = $query->latest()->get();
+    $kategoris = Kategori::orderBy('nama')->get();
+    return view('admin.kelola_produk', compact('produk', 'kategoris'));
+}
 
     // =====================================================================
     // ADMIN: Form Tambah Produk
     // =====================================================================
-    public function create()
-    {
-        return view('admin.create');
-    }
+public function create()
+{
+    $kategoris = Kategori::orderBy('nama')->get();
+    return view('admin.create', compact('kategoris'));
+}
 
     // =====================================================================
     // ADMIN: Simpan Produk Baru
@@ -129,6 +174,7 @@ class ProdukController extends Controller
             'foto'      => $namaFotoDisplay,
             'harga'     => $hargaTerendah,
             'stok'      => $totalStok,
+            'is_pilihan' => $request->boolean('is_pilihan'),
         ]);
 
         // --- Simpan tiap baris Variasi ---
@@ -172,11 +218,12 @@ class ProdukController extends Controller
     // =====================================================================
     // ADMIN: Form Edit Produk
     // =====================================================================
-    public function edit($id)
-    {
-        $produk = Produk::with(['variasis', 'fotos'])->findOrFail($id);
-        return view('admin.produk_edit', compact('produk'));
-    }
+public function edit($id)
+{
+    $produk = Produk::with(['variasis', 'fotos'])->findOrFail($id);
+    $kategoris = Kategori::orderBy('nama')->get();
+    return view('admin.produk_edit', compact('produk', 'kategoris'));
+}
 
     // =====================================================================
     // ADMIN: Update Produk
@@ -221,6 +268,7 @@ class ProdukController extends Controller
             'foto'      => $namaFotoDisplay,
             'harga'     => $hargaTerendah,
             'stok'      => $totalStok,
+            'is_pilihan' => $request->boolean('is_pilihan'),
         ]);
 
         // --- Kelola Variasi: Update lama, tambah baru, hapus yang dihilangkan ---

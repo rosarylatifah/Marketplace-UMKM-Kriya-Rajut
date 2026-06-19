@@ -306,10 +306,31 @@
                             btnSubmit.innerText = 'Stok Varian Habis';
                         }
                     }
-                } else {
-                    badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Habis</span>`;
-                    if (btnSubmit) btnSubmit.disabled = true;
-                }
+} else {
+    const punyaVariasi = modal.querySelectorAll('.radio-variasi').length > 0;
+
+    if (!punyaVariasi) {
+        const stokDasar = parseInt(modal.getAttribute('data-stok-dasar')) || 0;
+        inputQty.setAttribute('max', stokDasar);
+        if (parseInt(inputQty.value) > stokDasar) inputQty.value = stokDasar;
+        if (parseInt(inputQty.value) < 1 && stokDasar > 0) inputQty.value = 1;
+        if (stokDasar === 0) inputQty.value = 0;
+
+        if (stokDasar > 0) {
+            badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-green-50 text-green-700 border border-green-100 rounded">Tersedia (${stokDasar} Pcs)</span>`;
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = '+ Tambah ke Keranjang';
+            }
+        } else {
+            badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Habis</span>`;
+            if (btnSubmit) btnSubmit.disabled = true;
+        }
+    } else {
+        badgeStok.innerHTML = `<span class="px-2 py-0.5 bg-red-50 text-red-500 border border-red-100 rounded">Stok Habis</span>`;
+        if (btnSubmit) btnSubmit.disabled = true;
+    }
+}
             }
 
             if (inputQty) {

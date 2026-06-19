@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Pesanan;
 use App\Models\Produk;
 use App\Models\User;
+use App\Models\ProdukVariasi;
 
 class PesananController extends Controller
 {   
@@ -97,15 +98,7 @@ class PesananController extends Controller
             ->get();
 
         // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email pembeli biar link WhatsApp-nya beneran aktif
-        $pesanan_konfirmasi->transform(function ($pesanan) {
-            if ($pesanan->user) {
-                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
-            } else {
-                $userAsli = User::where('email', $pesanan->email)->first();
-                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
-            }
-            return $pesanan;
-        });
+$pesanan_konfirmasi->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
                     
         return view('admin.pesanan_konfirmasi', compact('pesanan_konfirmasi'));
     }
@@ -143,6 +136,23 @@ class PesananController extends Controller
         return view('admin.pesanan_selesai', compact('pesanan_selesai'));
     }
 
+    private function syncNoHp($pesanan)
+{
+    // Kalau no_hp di tabel pesanan sudah ada isinya, jangan ditimpa!
+    if (!empty($pesanan->no_hp)) {
+        return $pesanan;
+    }
+
+    if ($pesanan->user) {
+        $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+    } else {
+        $userAsli = User::where('email', $pesanan->email)->first();
+        $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+    }
+
+    return $pesanan;
+}
+
     /**
      * SISI ADMIN: Melihat data pesanan yang dibatalkan/refund.
      */
@@ -171,6 +181,83 @@ class PesananController extends Controller
         // 🔥 Mengirim variabel ke dalam view admin pesanan_batal
         return view('admin.pesanan_batal', compact('pesanan_batal', 'semua_produk'));
     }
+
+    /**
+ * SISI ADMIN: Menampilkan daftar pengajuan pembatalan yang menunggu keputusan.
+ */
+public function pengajuanBatal()
+{
+    $pesanan_pengajuan = Pesanan::with('user')
+        ->where('status', 'PENGAJUAN BATAL')
+        ->orderBy('created_at', 'desc')
+        ->get();
+
+    $pesanan_pengajuan->transform(function ($pesanan) {
+        if ($pesanan->user) {
+            $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
+        } else {
+            $userAsli = User::where('email', $pesanan->email)->first();
+            $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
+        }
+        return $pesanan;
+    });
+
+    return view('admin.pesanan_pengajuan_batal', compact('pesanan_pengajuan'));
+}
+
+/**
+ * SISI ADMIN: Menyetujui pengajuan pembatalan.
+ * Stok variasi produk dikembalikan berdasarkan snapshot item saat checkout,
+ * bukan dari session, supaya tetap akurat walau dieksekusi di sesi admin.
+ */
+public function setujuiPembatalan($id)
+{
+    $pesanan = Pesanan::findOrFail($id);
+
+    if ($pesanan->status !== 'PENGAJUAN BATAL') {
+        return back()->with('error', 'Pesanan ini tidak sedang dalam status pengajuan pembatalan.');
+    }
+
+    try {
+        \DB::transaction(function () use ($pesanan) {
+            $items = $pesanan->items_snapshot ?? [];
+
+            foreach ($items as $item) {
+                if (isset($item['produk_variasi_id'])) {
+                    $variasi = ProdukVariasi::find($item['produk_variasi_id']);
+                    if ($variasi) {
+                        $variasi->stok += $item['quantity'];
+                        $variasi->save();
+                    }
+                }
+            }
+
+            $pesanan->status = 'DIBATALKAN';
+            $pesanan->save();
+        });
+    } catch (\Exception $e) {
+        return back()->with('error', 'Gagal menyetujui pembatalan: ' . $e->getMessage());
+    }
+
+    return back()->with('success', 'Pembatalan disetujui, stok produk sudah dikembalikan.');
+}
+
+/**
+ * SISI ADMIN: Menolak pengajuan pembatalan, pesanan kembali diproses normal.
+ */
+public function tolakPembatalan($id)
+{
+    $pesanan = Pesanan::findOrFail($id);
+
+    if ($pesanan->status !== 'PENGAJUAN BATAL') {
+        return back()->with('error', 'Pesanan ini tidak sedang dalam status pengajuan pembatalan.');
+    }
+
+    $pesanan->status = 'BELUM KONFIRMASI';
+    $pesanan->save();
+
+    return back()->with('success', 'Pengajuan pembatalan ditolak, pesanan kembali ke antrean konfirmasi.');
+}
     
     /**
      * Menampilkan formulir modifikasi item pesanan secara manual oleh Admin.
@@ -237,6 +324,8 @@ class PesananController extends Controller
 
         return view('pembeli.status', compact('pesanan'));
     }
+
+
 
     public function uploadBukti(Request $request)
     {

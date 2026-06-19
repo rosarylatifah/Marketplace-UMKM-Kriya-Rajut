@@ -30,7 +30,8 @@ class Produk extends Model
         'deskripsi', 
         'foto', 
         'ukuran', 
-        'warna'
+        'warna',
+        'is_pilihan'
     ];
 
     /**

@@ -27,4 +27,6 @@ return new class extends Migration
             $table->dropColumn('bukti_pembayaran');
         });
     }
+
+    
 };

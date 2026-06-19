@@ -33,7 +33,7 @@
                 <tr class="bg-[#F3F5F1] text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">
                     <th class="px-8 py-4">ID Pesanan</th>
                     <th class="px-8 py-4">Nama Pembeli</th>
-                    <th class="px-8 py-4">Detail Barang</th>
+                    <th class="px-8 py-4">Detail Pesanan</th>
                     <th class="px-8 py-4">Total</th>
                     <th class="px-8 py-4">Status</th>
                     <th class="px-8 py-4 text-center">Aksi</th>
