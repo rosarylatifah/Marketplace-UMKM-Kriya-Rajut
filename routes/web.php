@@ -76,6 +76,10 @@ Route::middleware(['guest'])->group(function () {
     // Tampilan & Proses Kirim Link Lupa Password
     Route::get('/admin/forgot-password', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
     Route::post('/admin/forgot-password', [AdminAuthController::class, 'sendResetLink'])->name('admin.password.email');
+
+    // Tampilan & Proses Reset Password Admin
+    Route::get('/admin/reset-password/{token}', [AdminAuthController::class, 'showResetForm'])->name('admin.password.reset');
+    Route::post('/admin/reset-password', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
 });
 
 // Proses Logout Admin
@@ -92,9 +96,12 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     // Dashboard Utama
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::put('/kategori/{id}', [KategoriController::class, 'update'])->name('admin.kategori.update');
-Route::post('/kategori', [KategoriController::class, 'store'])->name('admin.kategori.store');
-Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('admin.kategori.destroy');
+    Route::post('/kategori', [KategoriController::class, 'store'])->name('admin.kategori.store');
+    Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('admin.kategori.destroy');
+    Route::get('/admin/export-pendapatan/{format}', [DashboardController::class, 'exportData'])->name('admin.export.pendapatan');
+    Route::view('/kategori', 'admin.kategori');
     Route::get('/lihat-semua', [PesananController::class, 'lihatSemua'])->name('admin.lihat_semua');
+    Route::get('/admin/pendapatan-bulan-ini', [DashboardController::class, 'showPendapatanBulanan'])->name('admin.pendapatan.bulanan');
     
     // Sisi Admin: Operasi CRUD Kelola Produk
     Route::get('/produk-list', [ProdukController::class, 'index'])->name('admin.produk.index');
@@ -120,8 +127,8 @@ Route::delete('/kategori/{id}', [KategoriController::class, 'destroy'])->name('a
     // FR-08: Admin dapat melihat data pesanan refund / batal
     Route::get('/pesanan-batal', [PesananController::class, 'dibatalkan'])->name('admin.pesanan.batal');
     Route::get('/pesanan-pengajuan-batal', [PesananController::class, 'pengajuanBatal'])->name('admin.pesanan.pengajuanBatal');
-Route::put('/pesanan-batal/setujui/{id}', [PesananController::class, 'setujuiPembatalan'])->name('admin.pesanan.setujuiBatal');
-Route::put('/pesanan-batal/tolak/{id}', [PesananController::class, 'tolakPembatalan'])->name('admin.pesanan.tolakBatal');
+    Route::put('/pesanan-batal/setujui/{id}', [PesananController::class, 'setujuiPembatalan'])->name('admin.pesanan.setujuiBatal');
+    Route::put('/pesanan-batal/tolak/{id}', [PesananController::class, 'tolakPembatalan'])->name('admin.pesanan.tolakBatal');
 
     
     // Sisi Admin: Penghapusan Objek Pesanan Permanen dari DB

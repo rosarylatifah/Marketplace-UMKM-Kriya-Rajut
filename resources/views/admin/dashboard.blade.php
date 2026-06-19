@@ -13,36 +13,63 @@
 {{-- Stat Cards --}}
 <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
-        <p class="text-[11px] text-gray-400">total produk aktif</p>
+    <a href="{{ route('admin.produk.index') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Total produk aktif</p>
+        </div>
+    </a>
+
+    <a href="{{ route('admin.pesanan.konfirmasi') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Baru</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananBaru }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Menunggu Konfirmasi</p>
+        </div>
+    </a>
+
+    <a href="{{ route('admin.pesanan.index') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Aktif</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananAktif }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Sedang Diproses</p>
+        </div>
+    </a>
+    
+    <a href="{{ route('admin.pendapatan.bulanan') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-7 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer flex flex-col justify-between h-full">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pendapatan Kotor Bulan Ini</p>
+            <p class="text-2xl font-bold text-[#001f3f] mb-1">
+                Rp {{ number_format($pendapatanKotorBulanIni, 0, ',', '.') }}
+            </p>
+            <p class="text-[11px] text-gray-400">
+                <span class="text-green-600 font-medium">Murni produk</span> • Tidak termasuk ongkir
+            </p>
+        </div>
+    </a>
+
+</div>
+
+{{-- Produk Terlaris --}}
+<div class="bg-white border border-gray-200 rounded-xl p-8 mt-6 mb-10"> 
+    
+    <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-6">
+        <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-widest">Produk Terlaris (Best Seller)</h2>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Baru</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananBaru }}</p>
-        <p class="text-[11px] text-gray-400">Menunggu Konfirmasi</p>
+    <div class="divide-y divide-gray-100">
+        @forelse($produkTerlaris as $produk)
+        <div class="flex justify-between items-center py-4">
+            <span class="text-xs text-gray-700 font-medium">{{ $produk->nama_barang }}</span>
+            <span class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">
+                {{ $produk->total_terjual }} Terjual
+            </span>
+        </div>
+        @empty
+        <p class="text-xs text-gray-400 italic">Belum ada data penjualan.</p>
+        @endforelse
     </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Aktif</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananAktif }}</p>
-        <p class="text-[11px] text-gray-400">Sedang Diproses</p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pendapatan Kotor Bulan Ini</p>
-        
-        <p class="text-2xl font-bold text-[#001f3f] mb-1">
-            Rp {{ number_format($pendapatanKotorBulanIni, 0, ',', '.') }}
-        </p>
-        
-        <p class="text-[11px] text-gray-400">
-            <span class="text-green-600 font-medium">Murni produk</span> • Tidak termasuk ongkir
-        </p>
-    </div>
-
 </div>
 
 {{-- Aktivitas Terbaru --}}
@@ -67,7 +94,7 @@
             </div>
             
             <div class="text-right">
-                @if($a->status == 'BELUM DIKONFIRMASI')
+                @if($a->status == 'BELUM KONFIRMASI')
                     <span class="inline-block bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Belum Dikonfirmasi</span>
                 @elseif($a->status == 'SEDANG DIPROSES')
                     <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Sedang Diproses</span>

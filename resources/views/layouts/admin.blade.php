@@ -23,7 +23,7 @@
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
                 <span class="text-[#001f3f] font-bold tracking-[0.2em] uppercase text-xl">
-                    KRIYA<span class="text-gray-400 font-light">RAJUT</span>
+                    Stitchy<span class="text-gray-400 font-light">Sist</span>
                     <span class="hidden sm:inline text-[13px] text-gray-300 font-normal tracking-widest ml-2">/ ADMIN</span>
                 </span>
             </div>

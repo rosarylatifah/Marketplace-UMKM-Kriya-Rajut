@@ -8,6 +8,7 @@
         <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-2">Manajemen</p>
         <h1 class="text-2xl font-bold text-[#001f3f] uppercase tracking-[0.15em]">Kelola Produk</h1>
         <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
+        <p class="text-sm text-gray-400 mt-3">Daftar total produk yang tersedia.</p>
     </div>
 
     <div class="flex items-center gap-3 w-full md:w-auto">

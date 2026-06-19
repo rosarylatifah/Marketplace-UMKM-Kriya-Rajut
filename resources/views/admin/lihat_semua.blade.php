@@ -46,10 +46,12 @@
                 <tr class="hover:bg-[#F3F5F1]/50 transition-colors duration-150">
                     <td class="py-5 pl-2 font-bold text-[#001f3f] uppercase tracking-wider">
                         {{-- Logika link lo tetep aman disini --}}
-                        @if($p->status == 'BELUM KONFIRMASI')
-                            <a href="/admin/pesanan-konfirmasi?search={{ $p->id_pesanan }}" class="hover:underline text-blue-600">#{{ $p->id_pesanan }}</a>
-                        @elseif(in_array($p->status, ['SEDANG DIPROSES', 'DALAM PERJALANAN']))
+                        @if($p->status == 'BELUM KONFIRMASI') 
+                            <a href="/admin/pesanan-konfirmasi?search={{ $p->id_pesanan }}" class="hover:underline text-orange-600">#{{ $p->id_pesanan }}</a>
+                        @elseif($p->status == 'SEDANG DIPROSES')
                             <a href="/admin/pesanan-masuk?search={{ $p->id_pesanan }}" class="hover:underline text-amber-600">#{{ $p->id_pesanan }}</a>
+                        @elseif($p->status == 'DALAM PERJALANAN')
+                            <a href="/admin/pesanan-masuk?search={{ $p->id_pesanan }}" class="hover:underline text-blue-600">#{{ $p->id_pesanan }}</a>
                         @elseif($p->status == 'SELESAI')
                             <a href="/admin/pesanan-selesai?search={{ $p->id_pesanan }}" class="hover:underline text-emerald-600">#{{ $p->id_pesanan }}</a>
                         @else
@@ -73,7 +75,12 @@
 
                     <td class="py-5 font-semibold text-gray-800">Rp {{ number_format($p->total, 0, ',', '.') }}</td>
                     <td class="py-5 text-center">
-                        <span class="inline-block {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600' : ($p->status == 'DIBATALKAN' ? 'bg-rose-50 text-rose-600' : 'bg-gray-50 text-gray-600') }} text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-gray-100">
+                        <span class="inline-block text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full border 
+                            {{ $p->status == 'BELUM KONFIRMASI' ? 'bg-orange-50 text-orange-600 border-orange-100' : '' }}
+                            {{ $p->status == 'SEDANG DIPROSES' ? 'bg-amber-50 text-amber-600 border-amber-100' : '' }} 
+                            {{ $p->status == 'DALAM PERJALANAN' ? 'bg-blue-50 text-blue-600 border-blue-100' : '' }}
+                            {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : '' }}
+                            {{ $p->status == 'DIBATALKAN' ? 'bg-rose-50 text-rose-600 border-rose-100' : '' }}">
                             {{ $p->status }}
                         </span>
                     </td>
