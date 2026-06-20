@@ -129,8 +129,9 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::get('/pesanan-pengajuan-batal', [PesananController::class, 'pengajuanBatal'])->name('admin.pesanan.pengajuanBatal');
     Route::put('/pesanan-batal/setujui/{id}', [PesananController::class, 'setujuiPembatalan'])->name('admin.pesanan.setujuiBatal');
     Route::put('/pesanan-batal/tolak/{id}', [PesananController::class, 'tolakPembatalan'])->name('admin.pesanan.tolakBatal');
+    Route::put('/pesanan-batalkan-admin/{id}', [PesananController::class, 'batalkanOlehAdmin'])->name('admin.pesanan.batalkanOlehAdmin');
 
-    
+        
     // Sisi Admin: Penghapusan Objek Pesanan Permanen dari DB
     Route::delete('/hapus-pesanan/{id}', [PesananController::class, 'destroy'])->name('pesanan.hapus');
 });

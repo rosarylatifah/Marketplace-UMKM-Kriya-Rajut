@@ -36,8 +36,8 @@ $totalSlide = max(count($semuaFoto), 1);
     class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black/60 backdrop-blur-sm container-modal-produk p-4"
     data-stok-dasar="{{ $p->stok }}">
 
-    <div class="relative w-full max-w-3xl h-auto">
-        <div class="relative bg-white border border-gray-300 p-6 md:p-8 shadow-2xl">
+<div class="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div class="relative bg-white border border-gray-300 p-6 md:p-8 shadow-2xl">
 
             <form action="{{ route('cart.store') }}" method="POST">
                 @csrf
