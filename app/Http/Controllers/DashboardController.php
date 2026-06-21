@@ -30,21 +30,12 @@ class DashboardController extends Controller
         // 5. Aktivitas Terbaru — 4 pesanan terbaru
         $aktivitas = Pesanan::latest()->take(4)->get();
 
-        // 6. PRODUK TERLARIS (Best Seller) produk yang paling banyak terjual berdasarkan jumlah pesanan selesai
-        $produkTerlaris = Pesanan::select('nama_barang', \DB::raw('count(*) as total_terjual'))
-            ->where('status', 'SELESAI')
-            ->groupBy('nama_barang')
-            ->orderBy('total_terjual', 'desc')
-            ->take(5)
-            ->get();
-
         return view('admin.dashboard', compact(
             'totalProduk',
             'pesananBaru',
             'pesananAktif',
             'pendapatanKotorBulanIni',
-            'aktivitas',
-            'produkTerlaris'
+            'aktivitas'
         ));
     }
 
@@ -85,6 +76,7 @@ class DashboardController extends Controller
                 return [
                     'ID Pesanan'    => $p->id_pesanan,
                     'Tanggal'       => $p->created_at->format('d/m/Y'),
+                    'Nomor Telepon' => $p->no_hp,
                     'Nama Pembeli'  => $p->nama_pembeli,
                     'Barang'        => $p->nama_barang ?? '-', 
                     'Total (Murni)' => $p->total - $p->ongkir,
@@ -95,6 +87,7 @@ class DashboardController extends Controller
             $dataExcel[] = [
                 'ID Pesanan'    => 'TOTAL KESELURUHAN',
                 'Tanggal'       => '',
+                'Nomor Telepon' => '',
                 'Nama Pembeli'  => '',
                 'Barang'        => '',
                 'Total (Murni)' => $totalKeseluruhan,

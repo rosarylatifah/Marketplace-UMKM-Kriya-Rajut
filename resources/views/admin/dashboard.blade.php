@@ -51,27 +51,6 @@
 
 </div>
 
-{{-- Produk Terlaris --}}
-<div class="bg-white border border-gray-200 rounded-xl p-8 mt-6 mb-10"> 
-    
-    <div class="flex justify-between items-center mb-2 border-b border-gray-100 pb-6">
-        <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-widest">Produk Terlaris (Best Seller)</h2>
-    </div>
-
-    <div class="divide-y divide-gray-100">
-        @forelse($produkTerlaris as $produk)
-        <div class="flex justify-between items-center py-4">
-            <span class="text-xs text-gray-700 font-medium">{{ $produk->nama_barang }}</span>
-            <span class="text-[10px] bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">
-                {{ $produk->total_terjual }} Terjual
-            </span>
-        </div>
-        @empty
-        <p class="text-xs text-gray-400 italic">Belum ada data penjualan.</p>
-        @endforelse
-    </div>
-</div>
-
 {{-- Aktivitas Terbaru --}}
 <div class="bg-white border border-gray-200 rounded-xl p-8">
 

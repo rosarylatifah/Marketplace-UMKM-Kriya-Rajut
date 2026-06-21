@@ -32,78 +32,49 @@
 
     {{-- Sidebar --}}
     <aside class="fixed top-0 left-0 z-40 w-56 h-screen pt-16 bg-white border-r border-gray-100 transition-transform duration-300 lg:translate-x-0"
-           :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'">
         <div class="h-full px-4 py-8 overflow-y-auto flex flex-col justify-between">
 
             <ul class="space-y-1" @click="sidebarOpen = false">
                 <li><p class="text-[9px] uppercase tracking-[0.3em] text-gray-300 font-bold px-3 mb-3">Menu</p></li>
+                
                 <li>
                     <a href="/admin/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/dashboard') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-chart-simple w-4 text-center"></i> Dashboard
                     </a>
                 </li>
+                
                 <li>
-                    <a href="/admin/produk-list"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-                        {{ request()->is('admin/produk-list*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-                        <i class="fa-solid fa-box w-4 text-center"></i>
-                        Kelola Produk
+                    <a href="/admin/produk-list" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150 {{ request()->is('admin/produk-list*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
+                        <i class="fa-solid fa-box w-4 text-center"></i> Kelola Produk
                     </a>
                 </li>
 
-
-                {{-- 🆕 MENU BARU: Konfirmasi Pesanan (Ditaruh di awal alur transaksi) --}}
-                <li>
-                    <a href="/admin/pesanan-konfirmasi"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-                        {{ request()->is('admin/pesanan-konfirmasi*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-                        <i class="fa-solid fa-clipboard-check w-4 text-center"></i>
-                        Konfirmasi Pesanan
-                    </a>
-                </li>
-
-                <li>
-                    <a href="/admin/pesanan-masuk"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-                        {{ request()->is('admin/pesanan-masuk*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-                        <i class="fa-solid fa-inbox w-4 text-center"></i>
-                        Pesanan Masuk
-                    </a>
-                </li>
-
-<li>
-    <a href="/admin/pesanan-pengajuan-batal"
-        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-        {{ request()->is('admin/pesanan-pengajuan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-        <i class="fa-solid fa-rotate-left w-4 text-center"></i>
-        Pengajuan Batal
-    </a>
-</li>
-
-                {{-- MENU: Pesanan Batal --}}
-                <li>
-                    <a href="/admin/pesanan-batal"
-                        class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all duration-150
-                        {{ request()->is('admin/pesanan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
-                        <i class="fa-solid fa-ban w-4 text-center"></i>
-                        Pesanan Batal
-                    </a>
-                </li>
+                {{-- Alur Transaksi --}}
                 <li>
                     <a href="/admin/pesanan-konfirmasi" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/pesanan-konfirmasi*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-clipboard-check w-4 text-center"></i> Konfirmasi Pesanan
                     </a>
                 </li>
+                
                 <li>
                     <a href="/admin/pesanan-masuk" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/pesanan-masuk*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-inbox w-4 text-center"></i> Pesanan Masuk
                     </a>
                 </li>
+
+                <li>
+                    <a href="/admin/pesanan-pengajuan-batal" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/pesanan-pengajuan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
+                        <i class="fa-solid fa-rotate-left w-4 text-center"></i> Pengajuan Batal
+                    </a>
+                </li>
+
                 <li>
                     <a href="/admin/pesanan-batal" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/pesanan-batal*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-ban w-4 text-center"></i> Pesanan Batal
                     </a>
                 </li>
+
                 <li>
                     <a href="/admin/pesanan-selesai" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-widest {{ request()->is('admin/pesanan-selesai*') ? 'bg-[#001f3f] text-white' : 'text-gray-400 hover:text-[#001f3f] hover:bg-[#F3F5F1]' }}">
                         <i class="fa-solid fa-circle-check w-4 text-center"></i> Pesanan Selesai

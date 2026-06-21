@@ -27,21 +27,30 @@
             <div class="flex justify-between items-center">
                 <span class="text-xs uppercase tracking-[0.2em] text-gray-500">Status Pesanan</span>
                 <div class="flex items-center gap-2">
-                    {{-- Warna diubah ke amber biar terkesan 'pending' bukan 'selesai' --}}
+                    {{-- Dot warna ngikutin status (opsional: bisa dikasih logic biar warnanya berubah) --}}
                     <span class="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-                    <span class="text-[11px] font-bold uppercase tracking-widest text-amber-600">MENUNGGU KONFIRMASI ADMIN</span>
+                    
+                    {{-- Status dari Database Admin --}}
+                    <span class="text-[11px] font-bold uppercase tracking-widest text-amber-600">
+                        {{ $pesanan->status ?? 'Menunggu Konfirmasi' }}
+                    </span>
                 </div>
             </div>
+            
             <div class="h-px bg-gray-200"></div>
+            
             <div class="flex justify-between items-center">
-                <span class="text-xs uppercase tracking-[0.2em] text-gray-500">Estimasi Pengiriman</span>
-                <span class="text-xs font-bold uppercase tracking-widest text-[#001f3f]">3 – 5 Hari Kerja</span>
+                <span class="text-xs uppercase tracking-[0.2em] text-gray-500">Info Admin</span>
+                {{-- Teks info 24 jam --}}
+                <span class="text-[10px] font-medium uppercase tracking-widest text-[#001f3f] text-right leading-tight">
+                    Admin akan mengonfirmasi <br> dalam 24 jam
+                </span>
             </div>
         </div>
 
         <div class="flex flex-col gap-3 mt-8">
             <button onclick="downloadPDF()"
-                class="flex items-center justify-center gap-2 w-full text-center bg-[#001f3f] hover:bg-[#003366] text-white font-bold uppercase tracking-[0.2em] text-xs py-4 rounded-full transition-all duration-200 shadow-md hover:shadow-lg">
+                class="flex items-center justify-center gap-2 w-full text-center bg-[#001f3f] hover:bg-[#003366] text-white font-bold uppercase tracking-[0.25em] text-[11px] py-4 rounded-full transition-all duration-200 shadow-md hover:shadow-lg">
                 <i class="fa-solid fa-file-arrow-down"></i> Unduh Bukti Pesanan
             </button>
             <a href="/lacak-pesanan"
@@ -59,31 +68,47 @@
 {{-- Template PDF --}}
 <div id="pdf-content" class="hidden">
     <div style="font-family: 'Plus Jakarta Sans', sans-serif; max-width: 600px; margin: 0 auto; padding: 48px; color: #001f3f;">
+
         <div style="text-align: center; margin-bottom: 40px; border-bottom: 1px solid #e5e7eb; padding-bottom: 32px;">
             <p style="font-size: 20px; font-weight: 800; letter-spacing: 0.3em; text-transform: uppercase; margin: 0;">
-                KRIYA<span style="color: #9ca3af; font-weight: 300;">RAJUT</span>
+                Stitchy<span style="color: #9ca3af; font-weight: 300;">Sist</span>
             </p>
             <p style="font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: #9ca3af; margin-top: 6px;">Bukti Pesanan</p>
         </div>
-        <div style="background: #f3f5f1; border-radius: 8px; padding: 16px 24px; display: flex; justify-content: space-between; margin-bottom: 24px;">
-            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af;">Status</span>
-            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #059669;">✓ Dikonfirmasi</span>
-        </div>
+
         <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 24px;">
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Kode Pesanan</td><td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['id_pesanan'] ?? '-' }}</td></tr>
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Tanggal</td><td style="padding: 12px 0; font-weight: 700; text-align: right;" id="tanggal-pesanan"></td></tr>
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Nama Penerima</td><td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['nama_pembeli'] ?? '-' }}</td></tr>
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Alamat</td><td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['alamat'] ?? '-' }}</td></tr>
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Produk</td><td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['nama_barang'] ?? '-' }}</td></tr>
-            <tr style="border-bottom: 1px solid #f3f5f1;"><td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Metode Pembayaran</td><td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['metode'] ?? '-' }}</td></tr>
-            <tr><td style="padding: 16px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Total Pembayaran</td><td style="padding: 16px 0; font-weight: 800; font-size: 16px; text-align: right;">Rp {{ number_format($info['total'] ?? 0, 0, ',', '.') }}</td></tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Kode Pesanan</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['id_pesanan'] ?? '-' }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Tanggal</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;" id="tanggal-pesanan"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Nama Penerima</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['nama_pembeli'] ?? '-' }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Alamat</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['alamat'] ?? '-' }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Produk</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['nama_barang'] ?? '-' }}</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f3f5f1;">
+                <td style="padding: 12px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Metode Pembayaran</td>
+                <td style="padding: 12px 0; font-weight: 700; text-align: right;">{{ $info['metode'] ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td style="padding: 16px 0; color: #9ca3af; font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em;">Total Pembayaran</td>
+                <td style="padding: 16px 0; font-weight: 800; font-size: 16px; text-align: right;">Rp {{ number_format($info['total'] ?? 0, 0, ',', '.') }}</td>
+            </tr>
         </table>
-        <div style="background: #f3f5f1; border-radius: 8px; padding: 16px 24px; display: flex; justify-content: space-between; margin-bottom: 40px;">
-            <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #9ca3af;">Estimasi Pengiriman</span>
-            <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;">3 – 5 Hari Kerja</span>
-        </div>
+
         <div style="text-align: center; border-top: 1px solid #e5e7eb; padding-top: 24px;">
-            <p style="font-size: 10px; color: #9ca3af; letter-spacing: 0.15em; text-transform: uppercase;">© 2026 Kriya Rajut Studio. Terima kasih telah berbelanja.</p>
+            <p style="font-size: 10px; color: #9ca3af; letter-spacing: 0.15em; text-transform: uppercase;">© 2026 StitchySist. Terima kasih telah berbelanja.</p>
         </div>
     </div>
 </div>
@@ -92,7 +117,12 @@
 @media print {
     body * { visibility: hidden; }
     #pdf-content, #pdf-content * { visibility: visible; }
-    #pdf-content { display: block !important; position: fixed; top: 0; left: 0; width: 100%; }
+    #pdf-content {
+        display: block !important;
+        position: fixed;
+        top: 0; left: 0;
+        width: 100%;
+    }
 }
 </style>
 

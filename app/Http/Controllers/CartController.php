@@ -16,7 +16,15 @@ class CartController extends Controller
      */
     public function index()
     {
-        return view('pembeli.keranjang');
+        $cart = session()->get('cart', []);
+        
+        // TAMBAHKAN INI: Bersihin session cart kalau ternyata isinya bukan array (biar gak error)
+        if (!is_array($cart)) {
+            session()->forget('cart');
+            $cart = [];
+        }
+
+        return view('pembeli.keranjang', compact('cart'));
     }
 
     /**
@@ -25,7 +33,7 @@ class CartController extends Controller
      * menyusunnya menjadi array terstruktur dengan key unik gabungan ID Produk & Variasi,
      * kemudian menyimpannya ke dalam Session array tanpa persistent DB storage terlebih dahulu.
      */
-public function store(Request $request)
+    public function store(Request $request)
     {
         $request->validate([
             'id' => 'required',
@@ -70,8 +78,9 @@ public function store(Request $request)
                 "nama"              => $request->nama . $varianInfo, 
                 "quantity"          => $request->quantity,
                 "harga"             => $request->harga, 
-                "foto"              => $fotoProduk, // ✨ Sekarang menggunakan foto yang dinamis!
-                "deskripsi"         => $deskripsi
+                "foto"              => $fotoProduk,
+                "deskripsi"         => $deskripsi,
+                "stok"              => $variasi ? $variasi->stok : 0 // TAMBAHKAN BARIS INI
             ];
         }
 
@@ -97,10 +106,25 @@ public function store(Request $request)
     {
         if($request->id && $request->quantity){
             $cart = session()->get('cart');
-            $cart[$request->id]["quantity"] = $request->quantity;
-            session()->put('cart', $cart);
-            return response()->json(['success' => true]);
+            
+            // Cek apakah item ada di keranjang
+            if(isset($cart[$request->id])) {
+                $item = $cart[$request->id];
+                
+                // Validasi: Jika quantity yang diminta melebihi stok yang tersimpan di sesi
+                if($request->quantity > $item['stok']) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Stok tidak mencukupi!'
+                    ]);
+                }
+
+                $cart[$request->id]["quantity"] = $request->quantity;
+                session()->put('cart', $cart);
+                return response()->json(['success' => true]);
+            }
         }
+        return response()->json(['success' => false]);
     }
 
     /**

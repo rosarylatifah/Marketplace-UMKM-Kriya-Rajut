@@ -19,14 +19,27 @@
 
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
-    {{-- Table Header --}}
-    <div class="flex justify-between items-center px-8 py-5 border-b border-gray-100">
+    {{-- Table Header + Form Search --}}
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center px-8 py-5 border-b border-gray-100 gap-4">
         <div>
             <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 mb-1">Total</p>
-            <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-[0.2em]">Daftar Pembatalan ({{ count($pesanan_batal) }})</h2>
+            <h2 class="text-sm font-bold text-[#001f3f] uppercase tracking-[0.2em]">Daftar Pesanan ({{ count($pesanan_batal) }})</h2>
         </div>
+        
+        {{-- Form Pencarian Minimalis --}}
+        <form action="{{ url()->current() }}" method="GET" class="w-full sm:w-auto flex items-center gap-2">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari ID / Nama Pembeli..." 
+                   class="text-xs border border-gray-200 px-4 py-2 rounded-lg outline-none focus:border-[#001f3f] transition-all min-w-[200px]">
+            <button type="submit" class="bg-[#001f3f] text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded-lg hover:opacity-90 transition-all">
+                Cari
+            </button>
+            @if(request('search'))
+                <a href="{{ url()->current() }}" class="text-[10px] text-red-500 font-bold uppercase tracking-wider underline ml-1">Reset</a>
+            @endif
+        </form>
     </div>
 
+    {{-- Tabel Pesanan Dibatalkan --}}
     <div class="overflow-x-auto">
         <table class="w-full text-left">
             <thead>
@@ -90,19 +103,19 @@
                                             </button>
                                         </div>
 
-                                        <div class="space-y-4 text-xs">
-                                            {{-- BAGIAN BARANG YANG DIBATALKAN --}}
+                                        <div class="space-y-3 text-xs">
                                             <div>
-                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold mb-2">Produk yang Dibatalkan:</span>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Produk yang Dipesan:</span>
                                                 
-                                                <div class="border border-gray-100 rounded-lg overflow-hidden bg-gray-50/50">
-                                                    <table class="w-full text-left border-collapse">
-                                                        <thead>
-                                                            <tr class="bg-gray-100 text-[9px] uppercase tracking-wider text-gray-500 font-bold border-b border-gray-200">
-                                                                <th class="px-4 py-2.5">Gambar & Produk</th>
-                                                                <th class="px-4 py-2.5 text-center w-16">Qty</th>
-                                                            </tr>
-                                                        </thead>
+                                                <div class="relative w-full border border-gray-100 rounded-lg overflow-hidden bg-gray-50/50">
+                                                    <div class="max-h-[250px] overflow-y-auto">
+                                                        <table class="w-full text-left border-collapse">
+                                                            <thead class="sticky top-0 bg-gray-100 z-10">
+                                                                <tr class="bg-gray-100 text-[9px] uppercase tracking-wider text-gray-500 font-bold border-b border-gray-200">
+                                                                    <th class="px-4 py-2.5">Gambar & Produk</th>
+                                                                    <th class="px-4 py-2.5 text-center w-16">Qty</th>
+                                                                </tr>
+                                                            </thead>
                                                         <tbody class="divide-y divide-gray-200 bg-white text-xs">
                                                             @php
                                                                 // Memisahkan multi-produk berdasarkan koma
@@ -167,6 +180,7 @@
                                                                 @endphp
 
                                                                 <tr class="hover:bg-gray-50/80 transition-colors">
+                                                                    
                                                                     {{-- Kolom Gambar & Info Produk --}}
                                                                     <td class="px-4 py-3">
                                                                         <div class="flex items-center gap-3">
@@ -210,11 +224,12 @@
                                                         </tbody>
                                                     </table>
                                                 </div>
+                                                    
                                             </div>
 
                                             <div class="grid grid-cols-2 gap-4">
                                                 <div>
-                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Nama Pemesan</span>
+                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Nama Pembeli</span>
                                                     <span class="text-sm font-semibold text-gray-800">{{ $p->nama_pembeli }}</span>
                                                 </div>
                                                 <div>
@@ -223,32 +238,79 @@
                                                 </div>
                                             </div>
 
-                                            <div class="grid grid-cols-2 gap-4 pt-1">
-                                                <div>
-                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Total Dana Terbayar</span>
-                                                    <span class="text-sm font-bold text-[#001f3f]">Rp{{ number_format($p->total, 0, ',', '.') }}</span>
+                                            <div>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">No. Handphone / WA:</span>
+                                                <span class="text-sm font-mono font-semibold text-gray-800">
+                                                    {{ $p->no_hp ?? optional($p->user)->no_hp ?? 'Belum mengisi nomor telepon' }}
+                                                </span>
+                                            </div>
+
+                                            <div>
+                                                <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Alamat Pengiriman:</span>
+                                                <p class="text-gray-700 bg-gray-50/70 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed font-medium">
+                                                    {{ $p->alamat ?? optional($p->user)->alamat ?? 'Alamat belum diatur oleh pembeli.' }}
+                                                </p>
+                                            </div>
+
+                                            <div class="space-y-2 pt-3 border-t border-gray-100">
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Harga Barang</span>
+                                                    <span class="text-xs font-semibold text-gray-700">
+                                                        Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
+                                                    </span>
                                                 </div>
-                                                <div>
-                                                    <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Biaya Ongkir</span>
-                                                    <span class="text-sm font-medium text-gray-600">Rp{{ number_format($p->ongkir ?? 0, 0, ',', '.') }}</span>
+                                                <div class="flex justify-between items-center">
+                                                    <span class="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Biaya Ongkir</span>
+                                                    <span class="text-xs font-medium text-gray-600">
+                                                        + Rp{{ number_format($p->ongkir ?? 0, 0, ',', '.') }}
+                                                    </span>
+                                                </div>
+                                                <div class="flex justify-between items-center bg-gray-50 p-2 rounded-lg border border-gray-100 mt-1">
+                                                    <span class="text-[10px] text-[#001f3f] uppercase tracking-wider font-bold">Total Tagihan</span>
+                                                    <span class="text-sm font-bold text-[#001f3f]">
+                                                        Rp{{ number_format($p->total, 0, ',', '.') }}
+                                                    </span>
                                                 </div>
                                             </div>
+
                                         </div>
 
-                                        {{-- Tombol Hubungi WhatsApp --}}
+                                        {{-- BAGIAN TOMBOL HUBUNGI PEMBELI VIA WHATSAPP --}}
+                                        {{-- Tombol Hubungi Pembeli WhatsApp --}}
                                         <div class="mt-4 pt-4 border-t border-gray-100">
-                                            @php
-                                                $nomorTujuan = $p->no_hp ?? '628123456789';
-                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut ingin mengonfirmasi pengembalian dana untuk ID Pesanan " . $p->id_pesanan . " sebesar Rp " . number_format($p->total, 0, ',', '.') . " yang dibatalkan. Mohon kirimkan nomor rekening Anda. Terima kasih.";
-                                                $linkWA = "https://api.whatsapp.com/send?phone=" . preg_replace('/[^0-9]/', '', $nomorTujuan) . "&text=" . urlencode($pesanWA);
+                                           @php
+                                                // Ambil nomor HP dari tabel pesanan atau dari profil user
+                                                $nomorRaw = $p->no_hp ?? ($p->user->no_hp ?? '');
+                                                
+                                                // Bersihkan karakter non-angka (biar cuma sisa angka)
+                                                $nomorClean = preg_replace('/[^0-9]/', '', $nomorRaw);
+
+                                                // Normalisasi format 08xx ke kode negara 628xx
+                                                if (str_starts_with($nomorClean, '0')) {
+                                                    $nomorClean = '62' . substr($nomorClean, 1);
+                                                }
+
+                                                // Pesan buat chat WA (bisa kamu ganti bahasanya)
+                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut (StitchySist). Kami melihat pesanan Anda dengan ID #" . $p->id_pesanan . " telah dibatalkan. Apakah ada yang bisa kami bantu atau ada kendala saat proses transaksi?";
+                                                
+                                                // Generate link WA-nya
+                                                $linkWA = "https://api.whatsapp.com/send?phone=" . $nomorClean . "&text=" . urlencode($pesanWA);
                                             @endphp
-                                            
+                                                                                        
+                                            {{-- Jika nomor HP kosong, kasih warning --}}
+                                            @if(empty($nomorClean))
+                                                <div class="text-center text-[10px] text-amber-600 font-semibold uppercase tracking-wider bg-amber-50 p-2 rounded-lg border border-amber-200 mb-2">
+                                                    ⚠️ Pembeli belum mengisi nomor HP / WhatsApp
+                                                </div>
+                                            @endif
+
+                                            {{-- FIX: Teks Tombol diganti menjadi Hubungi Pembeli --}}
                                             <a href="{{ $linkWA }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-wider py-3 rounded-lg transition-all shadow-md">
-                                                <i class="fa-brands fa-whatsapp text-base"></i> Hubungi Pembeli via WhatsApp
+                                                <i class="fa-brands fa-whatsapp text-base"></i> Kirim Pesan via WhatsApp
                                             </a>
                                         </div>
-                                    </div>
 
+                                    </div>
                                 </div>
                             </div>
                         </div>

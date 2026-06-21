@@ -45,7 +45,7 @@
                 @forelse($semua_pesanan as $p)
                 <tr class="hover:bg-[#F3F5F1]/50 transition-colors duration-150">
                     <td class="py-5 pl-2 font-bold text-[#001f3f] uppercase tracking-wider">
-                        {{-- Logika link lo tetep aman disini --}}
+                        {{-- Logika link halaman sesuai status --}}
                         @if($p->status == 'BELUM KONFIRMASI') 
                             <a href="/admin/pesanan-konfirmasi?search={{ $p->id_pesanan }}" class="hover:underline text-orange-600">#{{ $p->id_pesanan }}</a>
                         @elseif($p->status == 'SEDANG DIPROSES')
@@ -54,13 +54,17 @@
                             <a href="/admin/pesanan-masuk?search={{ $p->id_pesanan }}" class="hover:underline text-blue-600">#{{ $p->id_pesanan }}</a>
                         @elseif($p->status == 'SELESAI')
                             <a href="/admin/pesanan-selesai?search={{ $p->id_pesanan }}" class="hover:underline text-emerald-600">#{{ $p->id_pesanan }}</a>
+                        @elseif($p->status == 'DIBATALKAN')
+                            <a href="/admin/pesanan-batal?search={{ $p->id_pesanan }}" class="hover:underline text-rose-600">#{{ $p->id_pesanan }}</a>
+                        @elseif($p->status == 'PENGAJUAN BATAL')
+                            <a href="/admin/pesanan-pengajuan-batal?search={{ $p->id_pesanan }}" class="hover:underline text-600">#{{ $p->id_pesanan }}</a>
                         @else
                             <span class="text-gray-500">#{{ $p->id_pesanan }}</span>
                         @endif
                     </td>
                     <td class="py-5 text-gray-400">{{ $p->created_at->format('d/m/Y') }}</td>
                     <td class="py-5 text-gray-700 font-medium">{{ $p->nama_pembeli }}</td>
-                    
+
                     <td class="py-5">
                         <div class="flex flex-col gap-1 max-w-[200px]">
                             @foreach(explode(',', $p->nama_barang) as $item)
@@ -80,7 +84,9 @@
                             {{ $p->status == 'SEDANG DIPROSES' ? 'bg-amber-50 text-amber-600 border-amber-100' : '' }} 
                             {{ $p->status == 'DALAM PERJALANAN' ? 'bg-blue-50 text-blue-600 border-blue-100' : '' }}
                             {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : '' }}
-                            {{ $p->status == 'DIBATALKAN' ? 'bg-rose-50 text-rose-600 border-rose-100' : '' }}">
+                            {{ $p->status == 'DIBATALKAN' ? 'bg-rose-50 text-rose-600 border-rose-100' : '' }}
+                            {{ $p->status == 'PENGAJUAN BATAL' ? ' text-600 border-100' : '' }}">
+                             
                             {{ $p->status }}
                         </span>
                     </td>

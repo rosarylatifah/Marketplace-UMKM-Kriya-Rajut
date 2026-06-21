@@ -35,6 +35,7 @@
             <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b border-gray-100">
                 <th class="pb-4 font-bold">ID Pesanan</th>
                 <th class="pb-4 font-bold">Tanggal</th>
+                <th class="pb-4 font-bold">Nomor Telepon</th>
                 <th class="pb-4 font-bold">Nama Pembeli</th>
                 <th class="pb-4 font-bold">Detail Barang</th>
                 <th class="pb-4 font-bold text-right">Total Pendapatan</th>
@@ -45,6 +46,7 @@
             <tr class="hover:bg-[#F3F5F1]/50 transition-colors duration-150">
                 <td class="py-5 font-bold text-[#001f3f]">#{{ $p->id_pesanan }}</td>
                 <td class="py-5 text-gray-400">{{ $p->created_at->format('d M Y') }}</td>
+                <td class="py-5 text-gray-700">{{ $p->no_hp }}</td>
                 <td class="py-5 text-gray-700">{{ $p->nama_pembeli }}</td>
                 <td class="py-5">
                     <div class="flex flex-col gap-1">
@@ -65,7 +67,7 @@
             
             {{-- Baris Total yang udah diperbaiki colspan-nya --}}
             <tr class="bg-gray-50 border-t border-gray-100">
-                <td colspan="4" class="py-4 px-6 font-bold text-right uppercase tracking-widest text-[10px] text-gray-500">Total Keseluruhan</td>
+                <td colspan="5" class="py-4 px-6 font-bold text-right uppercase tracking-widest text-[10px] text-gray-500">Total Keseluruhan</td>
                 <td class="py-4 px-6 font-bold text-lg text-[#001f3f] text-right">Rp {{ number_format($total_keseluruhan, 0, ',', '.') }}</td>
             </tr>
         </tbody>

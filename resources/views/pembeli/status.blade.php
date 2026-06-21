@@ -109,13 +109,6 @@
                         <i class="fa-brands fa-whatsapp text-sm text-emerald-500"></i>
                         Kontak Penjual
                     </a>
-                    {{-- Tombol Unduh Bukti (di bawah Kontak Penjual) --}}
-                    
-                    <button onclick="window.print()"
-                        class="flex items-center justify-center gap-2 border border-[#001f3f] bg-[#001f3f] hover:bg-[#003366] text-white px-6 py-3 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all w-full text-center cursor-pointer mt-2">
-                        <i class="fa-solid fa-file-arrow-down text-xs"></i>
-                        Unduh Bukti Pesanan
-                    </button>
 
                     @if($pesanan->status === 'BELUM KONFIRMASI')
                         <button type="button" onclick="konfirmasiPembatalan('{{ $pesanan->id_pesanan }}')"
