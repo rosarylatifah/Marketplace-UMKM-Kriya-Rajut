@@ -244,9 +244,18 @@
         const alasan = document.getElementById('komplain-alasan').value;
         const idPesanan = '{{ $pesanan->id_pesanan ?? "" }}';
         const pesan = `Halo admin Kriya Rajut, saya ingin mengajukan ${jenis} untuk pesanan ${idPesanan}.\n\nAlasan: ${alasan}\n\nMohon bantuannya ya, terima kasih!`;
-        window.open('https://wa.me/6285778092881?text=' + encodeURIComponent(pesan), '_blank');
-        document.getElementById('modal-komplain').classList.add('hidden');
-        document.getElementById('form-komplain').reset();
+window.open('https://wa.me/6285778092881?text=' + encodeURIComponent(pesan), '_blank');
+
+// Tutup modal lewat instance Flowbite resmi (biar backdrop ikut hilang)
+const modalEl = document.getElementById('modal-komplain');
+const modalInstance = FlowbiteInstances.getInstance('Modal', 'modal-komplain');
+if (modalInstance) {
+    modalInstance.hide();
+} else {
+    modalEl.classList.add('hidden');
+}
+
+document.getElementById('form-komplain').reset();
     }
 </script>
 @endsection
