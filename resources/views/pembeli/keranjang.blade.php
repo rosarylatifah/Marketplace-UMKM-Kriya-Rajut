@@ -18,8 +18,10 @@
             @foreach(session('cart') as $id => $details)
             <div id="item-{{ $id }}"
                 class="product-card p-4 flex gap-4 bg-white border border-gray-100 shadow-sm relative transition-all group">
-                <div class="w-20 h-20 bg-white border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
-                    <img src="{{ asset('images/' . $details['foto']) }}" class="w-full h-full object-cover" alt="{{ $details['nama'] }}">
+                <div
+                    class="w-20 h-20 bg-white border border-gray-50 flex-shrink-0 flex items-center justify-center overflow-hidden shadow-sm">
+                    {{-- PERBAIKAN: Memperbaiki tag img dan menambahkan folder 'images/' --}}
+                    <img src="{{ asset('images/' . ($details['foto'] ?? 'default.png')) }}"class="w-full h-full object-cover" alt="{{ $details['nama'] ?? 'Produk' }}">
                 </div>
                 <div class="flex-grow flex flex-col justify-between py-0.5 min-w-0">
                     <div class="flex justify-between items-start gap-2">
@@ -34,7 +36,8 @@
                                 data-harga="{{ number_format($details['harga'], 0, ',', '.') }}"
                                 data-deskripsi="{{ $details['deskripsi'] ?? 'Tidak ada deskripsi.' }}"
                                 data-stok="Tersedia"
-                                data-foto="{{ asset('images/' . $details['foto']) }}">
+                                {{-- PERBAIKAN: Memastikan data-foto mengirimkan URL asset yang lengkap menuju folder 'images/' --}}
+                                data-foto="{{ asset('images/' . ($details['foto'] ?? 'default.png')) }}">
                                 Lihat Detail
                             </button>
                         </div>
@@ -166,19 +169,27 @@
     function updateQty(id, perubahan) {
         const card = document.getElementById('item-' + id);
         const qtyElement = card.querySelector('.qty-produk');
-        const subtotalElement = card.querySelector('.subtotal-item');
-        const hargaSatuan = parseInt(card.querySelector('.harga-satuan').getAttribute('data-harga'));
         let qtyBaru = parseInt(qtyElement.innerText) + perubahan;
+
         if (qtyBaru < 1) return;
+
         fetch("{{ route('cart.update') }}", {
             method: "POST",
-            headers: { "Content-Type": "application/json", "X-CSRF-TOKEN": "{{ csrf_token() }}" },
+            headers: { 
+                "Content-Type": "application/json", 
+                "X-CSRF-TOKEN": "{{ csrf_token() }}" 
+            },
             body: JSON.stringify({ id: id, quantity: qtyBaru })
-        }).then(r => r.json()).then(data => {
+        })
+        .then(r => r.json())
+        .then(data => {
             if (data.success) {
                 qtyElement.innerText = qtyBaru;
-                subtotalElement.innerText = (hargaSatuan * qtyBaru).toLocaleString('id-ID');
-                hitungTotalSemua();
+                // Update subtotal dan hitung ulang total keseluruhan
+                location.reload(); // Atau panggil hitungTotalSemua() jika sudah ada
+            } else {
+                // Ini bakal muncul kalau stok habis
+                alert(data.message || "Gagal memperbarui stok!");
             }
         });
     }

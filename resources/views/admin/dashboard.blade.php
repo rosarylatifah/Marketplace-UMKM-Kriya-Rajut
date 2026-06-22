@@ -13,29 +13,41 @@
 {{-- Stat Cards --}}
 <div class="grid grid-cols-1 md:grid-cols-4 gap-5 mb-10">
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
-        <p class="text-[11px] text-gray-400">total produk aktif</p>
-    </div>
+    <a href="{{ route('admin.produk.index') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Total produk aktif</p>
+        </div>
+    </a>
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Baru</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananBaru }}</p>
-        <p class="text-[11px] text-gray-400">Menunggu Konfirmasi</p>
-    </div>
+    <a href="{{ route('admin.pesanan.konfirmasi') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Baru</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananBaru }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Menunggu Konfirmasi</p>
+        </div>
+    </a>
 
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Aktif</p>
-        <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananAktif }}</p>
-        <p class="text-[11px] text-gray-400">Sedang Diproses</p>
-    </div>
-
-    <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-sm transition duration-200">
-        <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Total Pendapatan</p>
-        <p class="text-2xl font-bold text-[#001f3f] mb-1">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p>
-        <p class="text-[11px] text-gray-400">Dari pesanan selesai</p>
-    </div>
+    <a href="{{ route('admin.pesanan.index') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pesanan Aktif</p>
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $pesananAktif }}</p>
+            <p class="text-[11px] text-gray-400 font-medium">Sedang Diproses</p>
+        </div>
+    </a>
+    
+    <a href="{{ route('admin.pendapatan.bulanan') }}" class="block">
+        <div class="bg-white border border-gray-200 rounded-xl p-7 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer flex flex-col justify-between h-full">
+            <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Pendapatan Kotor Bulan Ini</p>
+            <p class="text-2xl font-bold text-[#001f3f] mb-1">
+                Rp {{ number_format($pendapatanKotorBulanIni, 0, ',', '.') }}
+            </p>
+            <p class="text-[11px] text-gray-400">
+                <span class="text-green-600 font-medium">Murni produk</span> • Tidak termasuk ongkir
+            </p>
+        </div>
+    </a>
 
 </div>
 
@@ -59,11 +71,14 @@
                 <p class="text-[11px] font-bold text-[#001f3f] uppercase tracking-widest">{{ $a->id_pesanan }}</p>
                 <p class="text-xs text-gray-400 mt-1">{{ $a->nama_pembeli }} &nbsp;·&nbsp; Rp {{ number_format($a->total, 0, ',', '.') }}</p>
             </div>
+            
             <div class="text-right">
-                @if($a->status == 'SEDANG DIPROSES')
-                    <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Diproses</span>
+                @if($a->status == 'BELUM KONFIRMASI')
+                    <span class="inline-block bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Belum Dikonfirmasi</span>
+                @elseif($a->status == 'SEDANG DIPROSES')
+                    <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Sedang Diproses</span>
                 @elseif($a->status == 'DALAM PERJALANAN')
-                    <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dikirim</span>
+                    <span class="inline-block bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dalam Perjalanan</span>
                 @elseif($a->status == 'DIBATALKAN')
                     <span class="inline-block bg-rose-50 text-rose-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Dibatalkan</span>
                 @elseif($a->status == 'SELESAI')
@@ -71,6 +86,7 @@
                 @endif
                 <p class="text-[10px] text-gray-300 mt-1">{{ $a->created_at->format('d/m/Y') }}</p>
             </div>
+
         </div>
         @empty
         <div class="py-16 text-center">

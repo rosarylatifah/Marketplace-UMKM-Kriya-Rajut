@@ -118,9 +118,125 @@
                                         <div class="space-y-3 text-xs">
                                             <div>
                                                 <span class="text-[10px] text-gray-400 block uppercase tracking-wider font-semibold">Produk yang Dipesan:</span>
-                                                <p class="text-gray-800 font-bold uppercase bg-gray-50 p-2.5 rounded border border-gray-100 mt-1 leading-relaxed">
-                                                    {{ $p->nama_barang }}
-                                                </p>
+                                                
+                                                <div class="relative w-full border border-gray-100 rounded-lg overflow-hidden bg-gray-50/50">
+                                                    <div class="max-h-[250px] overflow-y-auto">
+                                                        <table class="w-full text-left border-collapse">
+                                                            <thead class="sticky top-0 bg-gray-100 z-10">
+                                                                <tr class="bg-gray-100 text-[9px] uppercase tracking-wider text-gray-500 font-bold border-b border-gray-200">
+                                                                    <th class="px-4 py-2.5">Gambar & Produk</th>
+                                                                    <th class="px-4 py-2.5 text-center w-16">Qty</th>
+                                                                </tr>
+                                                            </thead>
+                                                        <tbody class="divide-y divide-gray-200 bg-white text-xs">
+                                                            @php
+                                                                // Memisahkan multi-produk berdasarkan koma
+                                                                $items = explode(',', $p->nama_barang);
+                                                            @endphp
+
+                                                            @foreach ($items as $item)
+                                                                @php
+                                                                    $item = trim($item);
+                                                                    if (empty($item)) continue;
+
+                                                                    // 1. Ekstrak Quantity (x1 atau X1)
+                                                                    $qty = '1';
+                                                                    if (preg_match('/\(X(\d+)\)/i', $item, $matchQty)) {
+                                                                        $qty = $matchQty[1];
+                                                                        $itemClean = trim(preg_replace('/\(X\d+\)/i', '', $item));
+                                                                    } else {
+                                                                        $itemClean = $item;
+                                                                    }
+
+                                                                    // 2. Ekstrak Nama Produk Utama dan Teks Varian
+                                                                    $namaProdukSaja = $itemClean;
+                                                                    $varianSaja = '-';
+                                                                    if (preg_match('/^([^(]+)\(([^)]+)\)/', $itemClean, $matchDetail)) {
+                                                                        $namaProdukSaja = trim($matchDetail[1]);
+                                                                        $varianSaja = trim($matchDetail[2]);
+                                                                    }
+
+                                                                    // 3. PENCARIAN SUPER FLEKSIBEL (ROBUST SEARCHING)
+                                                                    $dbProduk = null;
+                                                                    if (isset($semua_produk)) {
+                                                                        $dbProduk = $semua_produk->first(function($prod) use ($namaProdukSaja, $varianSaja) {
+                                                                            $namaDbClean = strtoupper(preg_replace('/\s+/', '', trim($prod->nama)));
+                                                                            $namaCariClean = strtoupper(preg_replace('/\s+/', '', trim($namaProdukSaja)));
+                                                                            $varianCariClean = strtoupper(preg_replace('/\s+/', '', trim($varianSaja)));
+
+                                                                            $matchNama = ($namaDbClean === $namaCariClean || stripos($namaDbClean, $namaCariClean) !== false || stripos($namaCariClean, $namaDbClean) !== false);
+                                                                            $matchVarianKeNamaDb = (!empty($varianSaja) && stripos($namaDbClean, $varianCariClean) !== false);
+
+                                                                            return $matchNama || $matchVarianKeNamaDb;
+                                                                        });
+                                                                    }
+
+                                                                    // 4. Ambil Jalur Gambar Produk / Gambar Varian dari Database
+                                                                    $namaFileGambar = null;
+                                                                    if ($dbProduk) {
+                                                                        $dbVarian = $dbProduk->variasis->first(function($v) use ($varianSaja) {
+                                                                            $warnaDb = strtoupper(preg_replace('/\s+/', '', trim($v->warna ?? '')));
+                                                                            $ukuranDb = strtoupper(preg_replace('/\s+/', '', trim($v->ukuran ?? '')));
+                                                                            $varianCari = strtoupper(preg_replace('/\s+/', '', trim($varianSaja)));
+
+                                                                            $matchWarna = (!empty($warnaDb) && (stripos($varianCari, $warnaDb) !== false || stripos($warnaDb, $varianCari) !== false));
+                                                                            $matchUkuran = (!empty($ukuranDb) && (stripos($varianCari, $ukuranDb) !== false || stripos($ukuranDb, $varianCari) !== false));
+
+                                                                            return $matchWarna || $matchUkuran;
+                                                                        });
+
+                                                                        $namaFileGambar = ($dbVarian && !empty($dbVarian->foto)) ? $dbVarian->foto : $dbProduk->foto;
+                                                                    }
+
+                                                                    $pathFoto = $namaFileGambar ? asset('images/' . $namaFileGambar) : null;
+                                                                @endphp
+
+                                                                <tr class="hover:bg-gray-50/80 transition-colors">
+                                                                    
+                                                                    {{-- Kolom Gambar & Info Produk --}}
+                                                                    <td class="px-4 py-3">
+                                                                        <div class="flex items-center gap-3">
+                                                                            {{-- Thumbnail Frame Gambar Produk --}}
+                                                                            <div class="w-12 h-12 rounded border border-gray-200 bg-gray-50 flex-shrink-0 overflow-hidden flex items-center justify-center shadow-sm">
+                                                                                @if($pathFoto)
+                                                                                    <img src="{{ $pathFoto }}" alt="Produk" class="w-full h-full object-cover">
+                                                                                @else
+                                                                                    <div class="text-gray-400 text-center flex flex-col items-center justify-center">
+                                                                                        <i class="fa-solid fa-image text-xs block mb-0.5"></i>
+                                                                                        <span class="text-[7px] uppercase tracking-wider font-semibold">No Img</span>
+                                                                                    </div>
+                                                                                @endif
+                                                                            </div>
+
+                                                                            {{-- Deskripsi Judul Produk & Tautan Dinamis Admin --}}
+                                                                            <div class="flex flex-col min-w-0">
+                                                                                @if ($dbProduk)
+                                                                                    <a href="{{ route('admin.produk.edit', $dbProduk->id) }}" class="font-bold text-[#001f3f] hover:text-blue-600 hover:underline uppercase tracking-wide text-[11px] truncate">
+                                                                                        {{ $namaProdukSaja }}
+                                                                                    </a>
+                                                                                @else
+                                                                                    <span class="font-bold text-gray-700 uppercase tracking-wide text-[11px] truncate">
+                                                                                        {{ $namaProdukSaja }}
+                                                                                    </span>
+                                                                                @endif
+                                                                                
+                                                                                <span class="text-[9px] text-gray-400 font-medium uppercase mt-0.5">
+                                                                                    Varian: <span class="text-gray-600 font-semibold">{{ $varianSaja }}</span>
+                                                                                </span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+
+                                                                    {{-- Kolom Quantity Belanja --}}
+                                                                    <td class="px-4 py-3 text-center font-bold text-gray-800 align-middle text-sm">
+                                                                        x{{ $qty }}
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                                    
                                             </div>
 
                                             <div class="grid grid-cols-2 gap-4">
@@ -168,6 +284,7 @@
                                                     </span>
                                                 </div>
                                             </div>
+
                                         </div>
 
                                         {{-- Tombol Hubungi Pembeli WhatsApp --}}
@@ -179,7 +296,7 @@
                                                     $nomorClean = '62' . substr($nomorClean, 1);
                                                 }
                                                 $nomorTujuan = empty($nomorClean) ? '628123456789' : $nomorClean;
-                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut (Namonic) ingin mengonfirmasi pesanan Anda dengan ID #" . $p->id_pesanan . ". Apakah data transaksinya sudah sesuai?";
+                                                $pesanWA = "Halo " . $p->nama_pembeli . ", kami dari Admin Kriya Rajut (StitchySist) ingin mengonfirmasi pesanan Anda dengan ID #" . $p->id_pesanan . ". Apakah data transaksinya sudah sesuai?";
                                                 $linkWA = "https://api.whatsapp.com/send?phone=" . $nomorTujuan . "&text=" . urlencode($pesanWA);
                                             @endphp
                                             
@@ -190,7 +307,7 @@
                                             @endif
 
                                             <a href="{{ $linkWA }}" target="_blank" class="flex items-center justify-center gap-2 w-full text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] uppercase tracking-wider py-3 rounded-lg transition-all shadow-md">
-                                                <i class="fa-brands fa-whatsapp text-base"></i> Hubungi Pembeli via WhatsApp
+                                                <i class="fa-brands fa-whatsapp text-base"></i> Kirim Pesan via WhatsApp
                                             </a>
                                         </div>
                                     </div>
@@ -200,17 +317,40 @@
                         </div>
                     </td>
 
-                    {{-- Kolom Tambahan: Bukti Pembayaran --}}
-                    <td class="px-8 py-4 align-middle">
+                    {{-- Kolom Bukti Pembayaran dengan Modal Popup --}}
+                    <td class="px-8 py-4 align-middle" x-data="{ openModal: false, imgUrl: '' }">
                         @if($p->bukti_pembayaran)
-                            <a href="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" target="_blank" class="inline-block group">
+                            {{-- Tombol untuk buka modal --}}
+                            <button @click="openModal = true; imgUrl = '{{ asset('images/bukti/' . $p->bukti_pembayaran) }}'" 
+                                    type="button" 
+                                    class="inline-block group border-none bg-transparent cursor-pointer transition-transform hover:scale-105">
                                 <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
                                     <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
                                     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                         <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
                                     </div>
                                 </div>
-                            </a>
+                            </button>
+
+                            {{-- Modal Popup --}}
+                            <div x-show="openModal" 
+                                class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+                                x-transition:enter="transition ease-out duration-300"
+                                x-transition:enter-start="opacity-0"
+                                x-transition:enter-end="opacity-100"
+                                x-transition:leave="transition ease-in duration-200"
+                                x-transition:leave-start="opacity-100"
+                                x-transition:leave-end="opacity-0"
+                                style="display: none;">
+                                
+                                <div class="relative max-w-2xl w-full bg-white p-2 rounded-lg shadow-2xl" @click.away="openModal = false">
+                                    <button @click="openModal = false" class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 transition shadow-lg">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                    
+                                    <img :src="imgUrl" alt="Bukti Pembayaran" class="w-full h-auto rounded">
+                                </div>
+                            </div>
                         @else
                             <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md">
                                 ⏳ Belum Kirim
@@ -238,12 +378,12 @@
                             <form action="{{ route('pesanan.update', $p->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
-                                <input type="hidden" name="status" value="SEDANG DIPROSES">
-                                <button type="submit"
-                                    onclick="return confirm('Konfirmasi pesanan #{{ $p->id_pesanan }} dan pindahkan ke Pesanan Masuk?')"
-                                    class="text-[10px] font-bold uppercase tracking-wider bg-[#001f3f] hover:bg-[#003366] text-white px-4 py-2 rounded-lg transition-all whitespace-nowrap">
-                                    Konfirmasi
-                                </button>
+                                
+                                <select name="status" onchange="if(this.value === 'SEDANG DIPROSES' ? confirm('Konfirmasi pesanan ini dan pindahkan ke Pesanan Masuk?') : true) { this.form.submit(); }" 
+                                        class="text-[11px] font-bold uppercase tracking-wider bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:border-[#001f3f] focus:outline-none transition-all cursor-pointer">
+                                    <option value="BELUM KONFIRMASI" {{ $p->status == 'BELUM KONFIRMASI' ? 'selected' : '' }}> Belum Konfirmasi</option>
+                                    <option value="SEDANG DIPROSES"> Sudah Konfirmasi</option>
+                                </select>
                             </form>
 
                             {{-- Tombol Batalkan oleh Admin --}}

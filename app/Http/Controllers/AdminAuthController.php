@@ -22,13 +22,12 @@ class AdminAuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Mencocokkan inputan dengan password ter-hash di DB
-        if (Auth::attempt($credentials)) {
+        // UBAH JADI INI (Pake guard 'admin')
+        if (Auth::guard('admin')->attempt($credentials)) {
             $request->session()->regenerate();
             return redirect()->intended('/admin/dashboard');
         }
 
-        // Jika salah, balik ke halaman login dengan error text
         return back()->withErrors([
             'login_error' => 'Email atau Password yang kamu masukkan salah!',
         ])->onlyInput('email');
@@ -45,8 +44,8 @@ class AdminAuthController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        // Fitur bawaan Laravel untuk mengurus token & kirim email otomatis
-        $status = Password::sendResetLink($request->only('email'));
+        // PENTING: Tambahin Password::broker('admins') biar gak tabrakan sama user biasa
+        $status = Password::broker('admins')->sendResetLink($request->only('email'));
 
         if ($status === Password::RESET_LINK_SENT) {
             return back()->with('status', 'Link reset password sudah dikirim ke email kamu!');
@@ -55,13 +54,53 @@ class AdminAuthController extends Controller
         return back()->withErrors(['email' => 'Email admin tidak ditemukan.']);
     }
 
-    // 5. Proses Logout Admin
+    // 5. Tampilkan Form Input Password Baru (Dipanggil dari link email)
+    public function showResetPasswordForm($token, Request $request)
+    {
+        // Oper token dan email ke blade reset
+        return view('admin.auth.reset-password', [
+            'token' => $token,
+            'email' => $request->email
+        ]);
+    }
+
+    // 6. Proses Update Password Baru ke Database
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        // Eksekusi reset password menggunakan broker 'admins'
+        $status = Password::broker('admins')->reset([
+            'token' => $request->token,
+            'email' => $request->email,
+            'password' => $request->password,
+            'password_confirmation' => $request->password_confirmation,
+        ], function ($user, $password) {
+            $user->forceFill([
+                'password' => bcrypt($password) // Meng-hash password baru
+            ])->save();
+        });
+
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('admin.login')->with('status', 'Password berhasil diubah! Silakan login.');
+        }
+
+        return back()->withErrors(['email' => [__($status)]]);
+    }
+
+    // 7. Proses Logout Admin
     public function logout(Request $request)
     {
-        Auth::logout();
+        // UBAH JADI INI (Pake guard 'admin')
+        Auth::guard('admin')->logout();
+        
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         
-        return redirect('/admin/login');
+        return redirect()->route('admin.login');
     }
 }

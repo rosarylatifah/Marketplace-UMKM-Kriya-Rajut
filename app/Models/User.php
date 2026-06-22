@@ -45,4 +45,25 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * ALUR RESET PASSWORD ADMIN
+     * Mengubah rute link reset password bawaan Laravel menjadi rute admin lu
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $url = route('admin.password.reset', [
+            'token' => $token,
+            'email' => $this->email
+        ]);
+
+        // Langsung tembak teks suratnya ke laravel.log secara manual!
+        \Illuminate\Support\Facades\Log::info("\n" . str_repeat('=', 50) . "\n" .
+            "LINK RESET PASSWORD ADMIN NAMONIC\n" .
+            "Kirim Ke: " . $this->email . "\n" .
+            "Silakan copy-paste link di bawah ini.\n" .
+            $url . "\n" .
+            str_repeat('=', 50) . "\n"
+        );
+    }
 }

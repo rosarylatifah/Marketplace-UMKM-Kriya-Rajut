@@ -53,24 +53,19 @@ class PesananController extends Controller
             ->when($search, function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('id_pesanan', 'LIKE', "%{$search}%")
-                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%")
-                      ->orWhere('status', 'LIKE', "%{$search}%");
+                    ->orWhere('nama_pembeli', 'LIKE', "%{$search}%")
+                    ->orWhere('status', 'LIKE', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc')
             ->get();
-                    
-        $pesanan_masuk->transform(function ($pesanan) {
-            if ($pesanan->user) {
-                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
-            } else {
-                $userAsli = User::where('email', $pesanan->email)->first();
-                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
-            }
-            return $pesanan;
-        });
+                
+        // Pake fungsi sakti syncNoHp biar ringkas
+        $pesanan_masuk->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
 
-        return view('admin.pesanan_masuk', compact('pesanan_masuk'));
+        $semua_produk = Produk::with('variasis')->get();
+
+        return view('admin.pesanan_masuk', compact('pesanan_masuk', 'semua_produk'));
     }
 
     /**
@@ -92,9 +87,12 @@ class PesananController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        // 🔥 Sinkronisasi nomor HP dari tabel user berdasarkan email pembeli biar link WhatsApp-nya beneran aktif
         $pesanan_konfirmasi->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
-                    
-        return view('admin.pesanan_konfirmasi', compact('pesanan_konfirmasi'));
+        
+        $semua_produk = Produk::with('variasis')->get();
+
+        return view('admin.pesanan_konfirmasi', compact('pesanan_konfirmasi', 'semua_produk'));
     }
 
     /**
@@ -109,23 +107,18 @@ class PesananController extends Controller
             ->when($search, function ($query) use ($search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('id_pesanan', 'LIKE', "%{$search}%")
-                      ->orWhere('nama_pembeli', 'LIKE', "%{$search}%");
+                    ->orWhere('nama_pembeli', 'LIKE', "%{$search}%");
                 });
             })
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $pesanan_selesai->transform(function ($pesanan) {
-            if ($pesanan->user) {
-                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
-            } else {
-                $userAsli = User::where('email', $pesanan->email)->first();
-                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
-            }
-            return $pesanan;
-        });
+        // Sama, pake fungsi sakti syncNoHp
+        $pesanan_selesai->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
 
-        return view('admin.pesanan_selesai', compact('pesanan_selesai'));
+        $semua_produk = Produk::with('variasis')->get();
+
+        return view('admin.pesanan_selesai', compact('pesanan_selesai', 'semua_produk'));
     }
 
     private function syncNoHp($pesanan)
@@ -147,22 +140,26 @@ class PesananController extends Controller
     /**
      * SISI ADMIN: Melihat data pesanan yang dibatalkan/refund.
      */
-    public function dibatalkan()
+    public function dibatalkan(Request $request)
     {
-        $pesanan_batal = Pesanan::with('user')
-                                ->where('status', 'DIBATALKAN')
-                                ->orderBy('created_at', 'desc')
-                                ->get();
+        // 1. Mulai query dengan status 'DIBATALKAN'
+        $query = Pesanan::with('user')
+                        ->where('status', 'DIBATALKAN');
 
-        $pesanan_batal->transform(function ($pesanan) {
-            if ($pesanan->user) {
-                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
-            } else {
-                $userAsli = User::where('email', $pesanan->email)->first();
-                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
-            }
-            return $pesanan;
-        });
+        // 2. Filter pencarian kalau ada input 'search'
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('id_pesanan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nama_pembeli', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+
+        // 3. Ambil data dengan urutan terbaru
+        $pesanan_batal = $query->orderBy('created_at', 'desc')->get();
+
+        // 4. Transform nomor HP
+        $pesanan_batal->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
 
         $semua_produk = Produk::with('variasis')->get();
 
@@ -172,28 +169,36 @@ class PesananController extends Controller
     /**
      * SISI ADMIN: Menampilkan daftar pengajuan pembatalan yang menunggu keputusan.
      */
-    public function pengajuanBatal()
-    {
-        $pesanan_pengajuan = Pesanan::with('user')
-            ->where('status', 'PENGAJUAN BATAL')
-            ->orderBy('created_at', 'desc')
-            ->get();
+    public function pengajuanBatal(Request $request) 
+    {   
+        // 1. Mulai query dengan kondisi dasar
+        $query = Pesanan::with('user')
+            ->where('status', 'PENGAJUAN BATAL');
 
-        $pesanan_pengajuan->transform(function ($pesanan) {
-            if ($pesanan->user) {
-                $pesanan->no_hp = $pesanan->user->no_hp ?? $pesanan->user->telepon ?? $pesanan->user->no_telp;
-            } else {
-                $userAsli = User::where('email', $pesanan->email)->first();
-                $pesanan->no_hp = $userAsli ? ($userAsli->no_hp ?? $userAsli->telepon ?? $userAsli->no_telp) : null;
-            }
-            return $pesanan;
-        });
+        // 2. Tambahin logika pencarian kalau ada input 'search'
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('id_pesanan', 'LIKE', "%{$searchTerm}%")
+                ->orWhere('nama_pembeli', 'LIKE', "%{$searchTerm}%");
+            });
+        }
 
-        return view('admin.pesanan_pengajuan_batal', compact('pesanan_pengajuan'));
+        // 3. Ambil datanya
+        $pesanan_pengajuan = $query->orderBy('created_at', 'desc')->get();
+
+        // 4. Transform data buat nomor HP
+        $pesanan_pengajuan->transform(fn ($pesanan) => $this->syncNoHp($pesanan));
+
+        $semua_produk = Produk::with('variasis')->get();
+
+        return view('admin.pesanan_pengajuan_batal', compact('pesanan_pengajuan', 'semua_produk'));
     }
 
     /**
      * SISI ADMIN: Menyetujui pengajuan pembatalan.
+     * Stok variasi produk dikembalikan berdasarkan snapshot item saat checkout,
+     * bukan dari session, supaya tetap akurat walau dieksekusi di sesi admin.
      */
     public function setujuiPembatalan($id)
     {
