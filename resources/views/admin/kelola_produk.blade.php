@@ -53,6 +53,11 @@
         {{ session('success') }}
     </div>
 @endif
+@if(session('error'))
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+        {{ session('error') }}
+    </div>
+@endif
 
 {{-- =====================================================================
      BULK DELETE: Toolbar (muncul saat ada produk yang dicentang)
@@ -238,10 +243,8 @@
 
 {{-- MODAL KELOLA KATEGORI --}}
 <div id="modal-kelola-kategori" tabindex="-1" aria-hidden="true"
-    class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-xl max-h-full">
-        <div class="relative bg-white rounded-xl shadow">
-            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-start w-full md:inset-0 h-[calc(100%-1rem)] max-h-full pt-16"    <div class="relative p-4 w-full max-w-xl max-h-full">
+<div class="relative bg-white rounded-xl shadow max-h-[80vh] overflow-y-auto">            <div class="flex items-center justify-between p-6 border-b border-gray-100">
                 <h3 class="text-[11px] font-bold text-[#001f3f] uppercase tracking-[0.2em]">Kelola Kategori</h3>
                 <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors" data-modal-hide="modal-kelola-kategori">
                     <i class="fa-solid fa-xmark"></i>
@@ -260,6 +263,18 @@
                         + Tambah
                     </button>
                 </form>
+                @if($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Buka kembali modal kategori kalau ada error validasi
+        const modal = document.getElementById('modal-kelola-kategori');
+        if (modal) {
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+    });
+</script>
+@endif
 
                 <div class="border border-gray-200 rounded-xl overflow-hidden">
                     <table class="w-full text-left">

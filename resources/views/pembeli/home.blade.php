@@ -72,7 +72,9 @@
             <img src="{{ asset('images/' . $p->foto) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ $p->nama }}">
         </div>
         <h3 class="font-bold text-gray-800 text-[11px] sm:text-xs uppercase tracking-wide line-clamp-2 w-full px-1 leading-snug">{{ $p->nama }}</h3>
-        <p class="text-[10px] text-gray-400 my-1.5 uppercase tracking-wider px-1">{{ $p->kategori ?? 'Umum' }}</p>
+        <p class="text-[10px] text-gray-400 my-1.5 uppercase tracking-wider px-1">
+    {{ $kategoriMap[$p->kategori] ?? $p->kategori ?? 'Umum' }}
+</p>
         <p class="text-xs font-bold text-[#001f3f] mb-3">
             @if($p->variasis->count() > 0)
                 Rp {{ number_format($p->variasis->min('harga'), 0, ',', '.') }}

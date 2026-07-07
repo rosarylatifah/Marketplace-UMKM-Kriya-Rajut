@@ -60,7 +60,6 @@
                     <th class="px-8 py-4">Detail Pesanan</th>
                     <th class="px-8 py-4">Bukti Pembayaran</th>
                     <th class="px-8 py-4">Total</th>
-                    <th class="px-8 py-4 text-center">Status Saat Ini</th>
                     <th class="px-8 py-4 text-center">Aksi Verifikasi</th>
                 </tr>
             </thead>
@@ -317,93 +316,66 @@
                         </div>
                     </td>
 
-                    {{-- Kolom Bukti Pembayaran dengan Modal Popup --}}
-                    <td class="px-8 py-4 align-middle" x-data="{ openModal: false, imgUrl: '' }">
-                        @if($p->bukti_pembayaran)
-                            {{-- Tombol untuk buka modal --}}
-                            <button @click="openModal = true; imgUrl = '{{ asset('images/bukti/' . $p->bukti_pembayaran) }}'" 
-                                    type="button" 
-                                    class="inline-block group border-none bg-transparent cursor-pointer transition-transform hover:scale-105">
-                                <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
-                                    <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}" alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
-                                    <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
-                                    </div>
-                                </div>
-                            </button>
-
-                            {{-- Modal Popup --}}
-                            <div x-show="openModal" 
-                                class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
-                                x-transition:enter="transition ease-out duration-300"
-                                x-transition:enter-start="opacity-0"
-                                x-transition:enter-end="opacity-100"
-                                x-transition:leave="transition ease-in duration-200"
-                                x-transition:leave-start="opacity-100"
-                                x-transition:leave-end="opacity-0"
-                                style="display: none;">
-                                
-                                <div class="relative max-w-2xl w-full bg-white p-2 rounded-lg shadow-2xl" @click.away="openModal = false">
-                                    <button @click="openModal = false" class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 transition shadow-lg">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                    
-                                    <img :src="imgUrl" alt="Bukti Pembayaran" class="w-full h-auto rounded">
-                                </div>
-                            </div>
-                        @else
-                            <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md">
-                                ⏳ Belum Kirim
-                            </span>
-                        @endif
-                    </td>
+{{-- Kolom Bukti Pembayaran --}}
+<td class="px-8 py-4 align-middle">
+    @if($p->bukti_pembayaran)
+        <button type="button"
+            onclick="bukaModalBukti('{{ asset('images/bukti/' . $p->bukti_pembayaran) }}')"
+            class="inline-block group border-none bg-transparent cursor-pointer transition-transform hover:scale-105">
+            <div class="w-12 h-12 bg-gray-100 rounded-lg border border-gray-200 overflow-hidden group-hover:border-[#001f3f] transition-all flex items-center justify-center relative shadow-sm">
+                <img src="{{ asset('images/bukti/' . $p->bukti_pembayaran) }}"
+                    alt="Bukti Pembayaran" class="w-full h-full object-cover group-hover:scale-110 transition-all duration-150">
+                <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <i class="fa-solid fa-magnifying-glass text-white text-xs"></i>
+                </div>
+            </div>
+        </button>
+    @else
+        <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md">
+            ⏳ Belum Kirim
+        </span>
+    @endif
+</td>
 
                     {{-- 4. Total Bayar --}}
                     <td class="px-8 py-4 text-sm font-bold text-[#001f3f] align-middle">
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
 
-                    {{-- 5. Status Awal Badges --}}
-                    <td class="px-8 py-4 align-middle text-center">
-                        <span class="inline-block whitespace-nowrap text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border bg-amber-50 text-amber-600 border-amber-200">
-                            {{ $p->status }}
-                        </span>
-                    </td>
+{{-- 6. Aksi Verifikasi: Konfirmasi + Batalkan --}}
+<td class="px-8 py-4 align-middle text-center">
+    <div class="flex flex-col items-center gap-2">
 
-                    {{-- 6. Aksi Verifikasi: Konfirmasi + Batalkan --}}
-                    <td class="px-8 py-4 align-middle text-center">
-                        <div class="flex flex-col items-center gap-2">
+        {{-- Tombol Konfirmasi hijau --}}
+        <form action="{{ route('pesanan.update', $p->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <input type="hidden" name="status" value="SEDANG DIPROSES">
+            <button type="submit"
+                onclick="return confirm('Konfirmasi pesanan ini dan pindahkan ke Pesanan Masuk?')"
+                class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-all">
+                KONFIRMASI
+            </button>
+        </form>
 
-                            {{-- Tombol Konfirmasi (pindah ke Sedang Diproses) --}}
-                            <form action="{{ route('pesanan.update', $p->id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                
-                                <select name="status" onchange="if(this.value === 'SEDANG DIPROSES' ? confirm('Konfirmasi pesanan ini dan pindahkan ke Pesanan Masuk?') : true) { this.form.submit(); }" 
-                                        class="text-[11px] font-bold uppercase tracking-wider bg-white border border-gray-200 rounded-lg px-3 py-2 text-gray-700 focus:border-[#001f3f] focus:outline-none transition-all cursor-pointer">
-                                    <option value="BELUM KONFIRMASI" {{ $p->status == 'BELUM KONFIRMASI' ? 'selected' : '' }}> Belum Konfirmasi</option>
-                                    <option value="SEDANG DIPROSES"> Sudah Konfirmasi</option>
-                                </select>
-                            </form>
+        {{-- Tombol Tolak merah --}}
+        <form action="{{ route('admin.pesanan.batalkanOlehAdmin', $p->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            <button type="submit"
+                onclick="return confirm('Batalkan pesanan #{{ $p->id_pesanan }}? Stok produk akan dikembalikan otomatis.')"
+                class="text-[10px] font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-7 py-1 rounded-lg transition-all whitespace-nowrap">
+                TOLAK
+            </button>
+        </form>
 
-                            {{-- Tombol Batalkan oleh Admin --}}
-                            <form action="{{ route('admin.pesanan.batalkanOlehAdmin', $p->id) }}" method="POST">
-                                @csrf
-                                @method('PUT')
-                                <button type="submit"
-                                    onclick="return confirm('Batalkan pesanan #{{ $p->id_pesanan }}? Stok produk akan dikembalikan otomatis.')"
-                                    class="text-[10px] font-bold uppercase tracking-wider bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-lg transition-all whitespace-nowrap">
-                                    ✖ TOLAK
-                                </button>
-                            </form>
-
-                        </div>
-                    </td>
+    </div>
+</td>
 
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="px-8 py-16 text-center">
+                    <td colspan="6" class="px-8 py-16 text-center">
                         <div class="flex flex-col items-center gap-3">
                             <i class="fa-solid fa-inbox text-3xl text-gray-200"></i>
                             <p class="text-sm text-gray-400 uppercase tracking-widest">Tidak ada pesanan yang perlu dikonfirmasi</p>
@@ -417,4 +389,30 @@
 
 </div>
 
+
+{{-- MODAL BUKTI PEMBAYARAN (shared, satu modal untuk semua baris) --}}
+<div id="modal-bukti-pembayaran"
+    class="hidden fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+    onclick="if(event.target===this) tutupModalBukti()">
+    <div class="relative max-w-2xl w-full bg-white p-2 rounded-lg shadow-2xl">
+        <button onclick="tutupModalBukti()"
+            class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-700 transition shadow-lg">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img id="modal-bukti-img" src="" alt="Bukti Pembayaran" class="w-full h-auto rounded max-h-[80vh] object-contain">
+    </div>
+</div>
+
+<script>
+function bukaModalBukti(url) {
+    document.getElementById('modal-bukti-img').src = url;
+    document.getElementById('modal-bukti-pembayaran').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+}
+function tutupModalBukti() {
+    document.getElementById('modal-bukti-pembayaran').classList.add('hidden');
+    document.getElementById('modal-bukti-img').src = '';
+    document.body.classList.remove('overflow-hidden');
+}
+</script>
 @endsection

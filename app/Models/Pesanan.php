@@ -30,6 +30,7 @@ class Pesanan extends Model
         'total',
         'ongkir',
         'status',
+        'refund_status',
         'bukti_pembayaran',
         'items_snapshot',
     ];

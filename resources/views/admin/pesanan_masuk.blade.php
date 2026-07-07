@@ -304,22 +304,42 @@
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
 
-                    {{-- 5. Status Dropdown --}}
-                    <td class="px-8 py-4 align-middle">
-                        <form action="{{ route('pesanan.update', $p->id) }}" method="POST" id="form-status-{{ $p->id }}">
-                            @csrf
-                            @method('PUT')
-                            <select name="status" onchange="document.getElementById('form-status-{{ $p->id }}').submit()"
-                                class="text-[10px] font-bold uppercase tracking-widest border border-gray-200 rounded-lg px-3 py-2 cursor-pointer outline-none transition-all duration-150
-                                {{ $p->status == 'SEDANG DIPROSES' ? 'bg-amber-50 text-amber-600 border-amber-200' : '' }}
-                                {{ $p->status == 'DALAM PERJALANAN' ? 'bg-blue-50 text-blue-600 border-blue-200' : '' }}
-                                {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : '' }}">
-                                <option value="SEDANG DIPROSES" {{ $p->status == 'SEDANG DIPROSES' ? 'selected' : '' }}>Sedang Diproses</option>
-                                <option value="DALAM PERJALANAN" {{ $p->status == 'DALAM PERJALANAN' ? 'selected' : '' }}>Dalam Perjalanan</option>
-                                <option value="SELESAI" {{ $p->status == 'SELESAI' ? 'selected' : '' }}>Selesai</option>
-                            </select>
-                        </form>
-                    </td>
+{{-- 5. Status Dropdown --}}
+<td class="px-8 py-4 align-middle">
+    <form action="{{ route('pesanan.update', $p->id) }}" method="POST" id="form-status-{{ $p->id }}">
+        @csrf
+        @method('PUT')
+        <select name="status"
+            onchange="
+                if (this.value === 'DIBATALKAN') {
+                    if (confirm('Batalkan pesanan #{{ $p->id_pesanan }}? Stok akan dikembalikan dan refund akan ditandai menunggu konfirmasi.')) {
+                        document.getElementById('form-batalkan-{{ $p->id }}').submit();
+                    } else {
+                        this.value = '{{ $p->status }}';
+                    }
+                } else {
+                    document.getElementById('form-status-{{ $p->id }}').submit();
+                }
+            "
+            class="text-[10px] font-bold uppercase tracking-widest border border-gray-200 rounded-lg px-3 py-2 cursor-pointer outline-none transition-all duration-150
+            {{ $p->status == 'SEDANG DIPROSES' ? 'bg-amber-50 text-amber-600 border-amber-200' : '' }}
+            {{ $p->status == 'DALAM PERJALANAN' ? 'bg-blue-50 text-blue-600 border-blue-200' : '' }}
+            {{ $p->status == 'SELESAI' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : '' }}">
+            <option value="SEDANG DIPROSES"   {{ $p->status == 'SEDANG DIPROSES'   ? 'selected' : '' }}>Sedang Diproses</option>
+            <option value="DALAM PERJALANAN"  {{ $p->status == 'DALAM PERJALANAN'  ? 'selected' : '' }}>Dalam Perjalanan</option>
+            <option value="SELESAI"           {{ $p->status == 'SELESAI'           ? 'selected' : '' }}>Selesai</option>
+            <option value="DIBATALKAN" class="text-red-500">Dibatalkan</option>
+        </select>
+    </form>
+
+    {{-- Form batalkan tersembunyi (pakai route khusus yang kembalikan stok + set refund) --}}
+    <form id="form-batalkan-{{ $p->id }}"
+        action="{{ route('admin.pesanan.batalkanDariMasuk', $p->id) }}"
+        method="POST" class="hidden">
+        @csrf
+        @method('PUT')
+    </form>
+</td>
 
                 </tr>
                 @empty

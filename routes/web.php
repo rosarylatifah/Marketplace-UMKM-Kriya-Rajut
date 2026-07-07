@@ -78,7 +78,7 @@ Route::middleware(['guest'])->group(function () {
     Route::post('/admin/forgot-password', [AdminAuthController::class, 'sendResetLink'])->name('admin.password.email');
 
     // Tampilan & Proses Reset Password Admin
-    Route::get('/admin/reset-password/{token}', [AdminAuthController::class, 'showResetForm'])->name('admin.password.reset');
+    Route::get('/admin/reset-password/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
     Route::post('/admin/reset-password', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
 });
 
@@ -120,6 +120,9 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     
     // 🌟 UTAMA: Route update status yang dipanggil oleh dropdown halaman konfirmasi & pesanan masuk
     Route::put('/pesanan-update/{id}', [PesananController::class, 'update'])->name('pesanan.update');
+    // batalin pesanan dari sisi admin (misal karena ada komplain dari pembeli)
+    Route::put('/admin/pesanan/{id}/batalkan-dari-masuk', [PesananController::class, 'batalkanDariMasuk'])->name('admin.pesanan.batalkanDariMasuk');
+
     
     // Sisi Admin: Riwayat Pesanan yang Berhasil Selesai
     Route::get('/pesanan-selesai', [PesananController::class, 'selesai'])->name('admin.pesanan.selesai');
@@ -130,6 +133,10 @@ Route::prefix('admin')->middleware(['auth:admin'])->group(function () {
     Route::put('/pesanan-batal/setujui/{id}', [PesananController::class, 'setujuiPembatalan'])->name('admin.pesanan.setujuiBatal');
     Route::put('/pesanan-batal/tolak/{id}', [PesananController::class, 'tolakPembatalan'])->name('admin.pesanan.tolakBatal');
     Route::put('/pesanan-batalkan-admin/{id}', [PesananController::class, 'batalkanOlehAdmin'])->name('admin.pesanan.batalkanOlehAdmin');
+    Route::put('/admin/pesanan/{id}/batalkan-dari-selesai', [PesananController::class, 'batalkanDariSelesai'])->name('admin.pesanan.batalkanDariSelesai');
+    // konfir refund selesai
+    Route::put('/admin/pesanan/{id}/konfirmasi-refund', [PesananController::class, 'konfirmasiRefund'])->name('admin.pesanan.konfirmasiRefund');
+
 
         
     // Sisi Admin: Penghapusan Objek Pesanan Permanen dari DB

@@ -21,7 +21,7 @@
     
             {{-- Header: ID & Status --}}
             <div class="px-6 pt-5 pb-4 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                <p class="text-xs text-gray-400 font-mono uppercase tracking-widest">ID: {{ $pesanan->id_pesanan }}</p>
+                <p class="font-bold text-xs text-gray-800 font-mono uppercase tracking-widest">ID: {{ $pesanan->id_pesanan }}</p>
                 <div class="flex items-center gap-2">
                     @if($pesanan->status === 'BELUM KONFIRMASI')
                         <div class="h-1.5 w-1.5 rounded-full bg-gray-400 animate-pulse"></div>
@@ -73,7 +73,7 @@
                     </div>
                     <div class="text-right flex-shrink-0">
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest">Subtotal</p>
-                        <p class="font-bold text-[#001f3f] text-10px">Rp {{ number_format($item['harga'] * $item['quantity'], 0, ',', '.') }}</p>
+                        <p class="font-bold text-[#001f3f] text-5px">Rp {{ number_format($item['harga'] * $item['quantity'], 0, ',', '.') }}</p>
                     </div>
                 </div>
                 @empty
@@ -132,10 +132,6 @@
                         <div class="flex items-center justify-center gap-2 border border-emerald-200 bg-emerald-50 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest text-emerald-600 w-full md:w-auto text-center">
                             <i class="fa-solid fa-circle-check text-xs"></i> Pesanan Diterima
                         </div>
-                        <button type="button" data-modal-target="modal-komplain" data-modal-toggle="modal-komplain"
-                            class="flex items-center justify-center gap-2 border border-orange-200 bg-orange-50 hover:bg-orange-100 px-6 py-3 rounded-lg text-xs font-bold uppercase tracking-widest text-orange-600 transition-all w-full md:w-auto text-center cursor-pointer">
-                            <i class="fa-solid fa-rotate-left text-xs"></i> Ajukan Retur / Komplain
-                        </button>
                     @endif
                 </div>
             </div>

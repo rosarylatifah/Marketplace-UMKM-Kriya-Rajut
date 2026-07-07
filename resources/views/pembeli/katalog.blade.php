@@ -117,7 +117,9 @@
             <h3
                 class="font-bold text-gray-800 text-[11px] sm:text-xs uppercase tracking-wide line-clamp-2 leading-snug">
                 {{ $p->nama }}</h3>
-            <p class="text-[10px] text-gray-400 my-1.5 uppercase tracking-wider px-1">{{ $p->kategori ?? 'Umum' }}</p>
+<p class="text-[10px] text-gray-400 my-1.5 uppercase tracking-wider px-1">
+    {{ $kategoriMap[$p->kategori] ?? $p->kategori ?? 'Umum' }}
+</p>
             <p class="text-xs font-bold text-[#001f3f] mb-3">
                 @if($p->variasis->count() > 0)
                 Rp {{ number_format($p->variasis->min('harga'), 0, ',', '.') }}

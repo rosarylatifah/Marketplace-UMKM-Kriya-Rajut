@@ -295,11 +295,11 @@
                         <div class="flex justify-center gap-2">
                             <form action="{{ route('admin.pesanan.setujuiBatal', $p->id) }}" method="POST">
                                 @csrf @method('PUT')
-                                <button type="submit" class="text-[10px] font-bold uppercase text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg">Setujui</button>
+                                <button type="submit" class="text-[10px] font-bold uppercase text-emerald-600 bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition-all">Setujui</button>
                             </form>
                             <form action="{{ route('admin.pesanan.tolakBatal', $p->id) }}" method="POST">
                                 @csrf @method('PUT')
-                                <button type="submit" class="text-[10px] font-bold uppercase text-red-500 bg-red-50 px-3 py-1.5 rounded-lg">Tolak</button>
+                                <button type="submit" class="text-[10px] font-bold uppercase text-red-500 bg-red-50 border border-red-300 hover:bg-red-100 px-3 py-1.5 rounded-lg transition-all">Tolak</button>
                             </form>
                         </div>
                     </td>

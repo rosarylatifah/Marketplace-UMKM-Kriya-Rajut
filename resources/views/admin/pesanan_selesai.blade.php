@@ -9,7 +9,17 @@
     <div class="mt-4 h-px w-12 bg-[#001f3f]"></div>
     <p class="text-sm text-gray-400 mt-3">Riwayat pemesanan kriya rajut yang telah selesai dan sukses diselesaikan.</p>
 </div>
+@if(session('success'))
+    <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+        {{ session('success') }}
+    </div>
+@endif
 
+@if(session('error'))
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+        {{ session('error') }}
+    </div>
+@endif
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
     {{-- Table Header + Form Search --}}
@@ -297,12 +307,25 @@
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
 
-                    {{-- 5. Status Badge Hijau SELESAI --}}
-                    <td class="px-8 py-4">
-                        <span class="text-[10px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg px-3 py-1.5 inline-block whitespace-nowrap">
-                            {{ $p->status }}
-                        </span>
-                    </td>
+{{-- 5. Status Dropdown: bisa dipindah ke Dibatalkan kalau ada komplain pasca-terima --}}
+<td class="px-8 py-4">
+    <form action="{{ route('admin.pesanan.batalkanDariSelesai', $p->id) }}" method="POST" class="inline-block">
+        @csrf
+        @method('PUT')
+        <select
+            onchange="if(this.value === 'DIBATALKAN') {
+                if(confirm('Yakin ingin membatalkan pesanan {{ $p->id_pesanan }} yang sudah selesai ini?\n\nGunakan ini kalau ada komplain pasca barang diterima (misal cacat/salah kirim). Stok TIDAK akan dikembalikan, dan pesanan akan pindah ke halaman Pesanan Batal untuk konfirmasi refund manual.')) {
+                    this.form.submit();
+                } else {
+                    this.selectedIndex = 0;
+                }
+            }"
+            class="text-[10px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg px-2 py-1.5 outline-none cursor-pointer hover:bg-emerald-100 transition-all whitespace-nowrap">
+            <option value="SELESAI" selected>{{ $p->status }}</option>
+            <option value="DIBATALKAN">Batalkan</option>
+        </select>
+    </form>
+</td>
 
                 </tr>
                 @empty

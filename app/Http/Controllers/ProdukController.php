@@ -22,7 +22,8 @@ class ProdukController extends Controller
             ->take(8)
             ->get();
 
-        return view('pembeli.home', compact('produk'));
+        $kategoriMap = \App\Models\Kategori::pluck('nama', 'kode')->toArray();
+        return view('pembeli.home', compact('produk', 'kategoriMap'));
     }
 
     // =====================================================================
@@ -81,9 +82,10 @@ public function katalog(Request $request, $category = null)
 
     $produk = $produk->values();
     $kategoris = Kategori::orderBy('nama')->get();
+    $kategoriMap = $kategoris->pluck('nama', 'kode')->toArray();
     $currentCategory = $kategoriAktif ? $kategoriAktif->nama : 'Semua';
 
-    return view('pembeli.katalog', compact('produk', 'kategoris', 'currentCategory'));
+    return view('pembeli.katalog', compact('produk', 'kategoris', 'currentCategory', 'kategoriMap'));
 }
 
     // =====================================================================
@@ -341,15 +343,73 @@ public function edit($id)
     // =====================================================================
     // ADMIN: Hapus Satu Produk
     // =====================================================================
-    public function destroy($id)
-    {
-        $produk = Produk::with(['variasis', 'fotos'])->findOrFail($id);
+public function destroy($id)
+{
+    $produk = Produk::with(['variasis', 'fotos'])->findOrFail($id);
 
-        // Hapus foto display
+    // ❌ Cegah hapus kalau produk ada di pesanan aktif
+    $statusAktif = ['BELUM KONFIRMASI', 'SEDANG DIPROSES', 'DALAM PERJALANAN'];
+    $adaDiPesananAktif = \App\Models\Pesanan::whereIn('status', $statusAktif)
+        ->where('nama_barang', 'LIKE', '%' . $produk->nama . '%')
+        ->exists();
+
+    if ($adaDiPesananAktif) {
+        return redirect()->route('admin.produk.index')
+            ->with('error', 'Produk "' . $produk->nama . '" tidak bisa dihapus karena sedang ada dalam pesanan aktif.');
+    }
+
+    // Hapus foto display
+    $pathDisplay = public_path('images/' . $produk->foto);
+    if (file_exists($pathDisplay)) @unlink($pathDisplay);
+
+    foreach ($produk->variasis as $v) {
+        if ($v->foto) {
+            $path = public_path('images/' . $v->foto);
+            if (file_exists($path)) @unlink($path);
+        }
+    }
+
+    foreach ($produk->fotos as $f) {
+        $path = public_path('images/' . $f->nama_foto);
+        if (file_exists($path)) @unlink($path);
+    }
+
+    $produk->delete();
+
+    return redirect()->route('admin.produk.index')
+        ->with('success', 'Produk "' . $produk->nama . '" berhasil dihapus.');
+}
+
+    // =====================================================================
+    // ADMIN: Hapus Banyak Produk Sekaligus (Bulk Delete)
+    // =====================================================================
+public function bulkDestroy(Request $request)
+{
+    $request->validate([
+        'ids'   => 'required|array|min:1',
+        'ids.*' => 'integer|exists:produk,id',
+    ]);
+
+    $produkList = Produk::with(['variasis', 'fotos'])->whereIn('id', $request->ids)->get();
+    $statusAktif = ['BELUM KONFIRMASI', 'SEDANG DIPROSES', 'DALAM PERJALANAN'];
+
+    $produkDitolak = [];
+    $produkDihapus = 0;
+
+    foreach ($produkList as $produk) {
+        // Cek pesanan aktif
+        $adaDiPesananAktif = \App\Models\Pesanan::whereIn('status', $statusAktif)
+            ->where('nama_barang', 'LIKE', '%' . $produk->nama . '%')
+            ->exists();
+
+        if ($adaDiPesananAktif) {
+            $produkDitolak[] = $produk->nama;
+            continue; // skip, jangan hapus
+        }
+
         $pathDisplay = public_path('images/' . $produk->foto);
         if (file_exists($pathDisplay)) @unlink($pathDisplay);
 
-        // Hapus foto tiap variasi
         foreach ($produk->variasis as $v) {
             if ($v->foto) {
                 $path = public_path('images/' . $v->foto);
@@ -357,54 +417,21 @@ public function edit($id)
             }
         }
 
-        // Hapus foto galeri
         foreach ($produk->fotos as $f) {
             $path = public_path('images/' . $f->nama_foto);
             if (file_exists($path)) @unlink($path);
         }
 
-        $produk->delete(); // cascade hapus variasi & galeri via DB
-
-        return redirect()->route('admin.produk.index')
-            ->with('success', 'Produk "' . $produk->nama . '" berhasil dihapus.');
+        $produk->delete();
+        $produkDihapus++;
     }
 
-    // =====================================================================
-    // ADMIN: Hapus Banyak Produk Sekaligus (Bulk Delete)
-    // =====================================================================
-    public function bulkDestroy(Request $request)
-    {
-        $request->validate([
-            'ids'   => 'required|array|min:1',
-            'ids.*' => 'integer|exists:produk,id',
-        ]);
-
-        $produkList = Produk::with(['variasis', 'fotos'])->whereIn('id', $request->ids)->get();
-        $jumlah = $produkList->count();
-
-        foreach ($produkList as $produk) {
-            // Hapus foto display
-            $pathDisplay = public_path('images/' . $produk->foto);
-            if (file_exists($pathDisplay)) @unlink($pathDisplay);
-
-            // Hapus foto tiap variasi
-            foreach ($produk->variasis as $v) {
-                if ($v->foto) {
-                    $path = public_path('images/' . $v->foto);
-                    if (file_exists($path)) @unlink($path);
-                }
-            }
-
-            // Hapus foto galeri
-            foreach ($produk->fotos as $f) {
-                $path = public_path('images/' . $f->nama_foto);
-                if (file_exists($path)) @unlink($path);
-            }
-
-            $produk->delete();
-        }
-
-        return redirect()->route('admin.produk.index')
-            ->with('success', $jumlah . ' produk berhasil dihapus sekaligus.');
+    $pesan = $produkDihapus . ' produk berhasil dihapus.';
+    if (!empty($produkDitolak)) {
+        $pesan .= ' ' . count($produkDitolak) . ' produk tidak bisa dihapus karena ada di pesanan aktif: ' . implode(', ', $produkDitolak) . '.';
+        return redirect()->route('admin.produk.index')->with('error', $pesan);
     }
+
+    return redirect()->route('admin.produk.index')->with('success', $pesan);
+}
 }

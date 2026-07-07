@@ -17,6 +17,12 @@
     </div>
 @endif
 
+@if(session('error'))
+    <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold uppercase tracking-wider">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
 
     {{-- Table Header + Form Search --}}
@@ -44,12 +50,12 @@
         <table class="w-full text-left">
             <thead>
                 <tr class="bg-[#F3F5F1] text-[10px] uppercase tracking-[0.2em] text-gray-400 font-bold">
-                    <th class="px-8 py-4">ID Pesanan</th>
-                    <th class="px-8 py-4">Nama Pembeli</th>
-                    <th class="px-8 py-4">Detail Pesanan</th>
-                    <th class="px-8 py-4">Total</th>
-                    <th class="px-8 py-4">Status</th>
-                    <th class="px-8 py-4 text-center">Aksi</th>
+<th class="px-8 py-4">ID Pesanan</th>
+<th class="px-8 py-4">Nama Pembeli</th>
+<th class="px-8 py-4">Detail Pesanan</th>
+<th class="px-8 py-4">Total</th>
+<th class="px-8 py-4 text-center">Refund</th>
+<th class="px-8 py-4 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
@@ -321,12 +327,30 @@
                         Rp{{ number_format(($p->total - ($p->ongkir ?? 0)), 0, ',', '.') }}
                     </td>
 
-                    {{-- 5. Status --}}
-                    <td class="px-8 py-4">
-                        <span class="text-[10px] font-bold uppercase tracking-widest bg-red-50 text-red-600 border border-red-200 rounded-lg px-3 py-1.5 inline-block">
-                            {{ $p->status }}
-                        </span>
-                    </td>
+{{-- Status Refund (gabungan) --}}
+<td class="px-8 py-4 text-center align-middle">
+    @if($p->refund_status === 'SELESAI')
+        <span class="inline-block text-[9px] font-bold uppercase tracking-widest bg-emerald-50 text-emerald-600 border border-emerald-200 px-3 py-1.5 rounded-lg">
+            ✓ Refund Selesai
+        </span>
+    @elseif($p->refund_status === 'MENUNGGU')
+        <div class="flex flex-col items-center gap-1.5">
+            <form action="{{ route('admin.pesanan.konfirmasiRefund', $p->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <button type="submit"
+                    onclick="return confirm('Konfirmasi bahwa refund untuk pesanan {{ $p->id_pesanan }} sudah berhasil dikirim ke pembeli?')"
+                    class="text-[9px] font-bold uppercase tracking-widest bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-4 py-1.5 rounded-lg transition-all whitespace-nowrap">
+                    Konfirmasi Refund
+                </button>
+            </form>
+        </div>
+    @else
+        <span class="inline-block text-[9px] font-bold uppercase tracking-widest bg-gray-50 text-gray-400 border border-gray-200 px-3 py-1.5 rounded-lg">
+            Tidak Perlu Refund
+        </span>
+    @endif
+</td>
 
                     {{-- 6. Aksi Hapus Log --}}
                     <td class="px-8 py-4 text-center">

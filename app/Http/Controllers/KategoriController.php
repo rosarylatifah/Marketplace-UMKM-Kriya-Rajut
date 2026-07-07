@@ -10,17 +10,21 @@ class KategoriController extends Controller
 {
 public function store(Request $request)
 {
+    // Cek duplikat manual pakai session flash, bukan withErrors
+    if (Kategori::whereRaw('LOWER(nama) = ?', [strtolower($request->nama)])->exists()) {
+        return redirect()->route('admin.produk.index')
+            ->with('error', 'Kategori dengan nama "' . $request->nama . '" sudah ada.');
+    }
+
     $request->validate([
-        'nama' => 'required|string|max:100|unique:kategoris,nama',
-    ], [
-        'nama.required' => 'Nama kategori wajib diisi.',
-        'nama.unique'   => 'Kategori dengan nama ini sudah ada.',
+        'nama' => 'required|string|max:100',
     ]);
 
     $data = Kategori::buatDariNama($request->nama);
 
     if (Kategori::where('slug', $data['slug'])->orWhere('kode', $data['kode'])->exists()) {
-        return back()->withErrors(['nama' => 'Kategori dengan nama serupa sudah ada.'])->withInput();
+        return redirect()->route('admin.produk.index')
+            ->with('error', 'Kategori dengan nama serupa sudah ada.');
     }
 
     Kategori::create($data);
@@ -33,17 +37,21 @@ public function update(Request $request, $id)
 {
     $kategori = Kategori::findOrFail($id);
 
+    // Cek duplikat manual (exclude diri sendiri)
+    if (Kategori::whereRaw('LOWER(nama) = ?', [strtolower($request->nama)])
+        ->where('id', '!=', $kategori->id)
+        ->exists()) {
+        return redirect()->route('admin.produk.index')
+            ->with('error', 'Kategori dengan nama "' . $request->nama . '" sudah ada.');
+    }
+
     $request->validate([
-        'nama' => 'required|string|max:100|unique:kategoris,nama,' . $kategori->id,
-    ], [
-        'nama.required' => 'Nama kategori wajib diisi.',
-        'nama.unique'   => 'Kategori dengan nama ini sudah ada.',
+        'nama' => 'required|string|max:100',
     ]);
 
     $kategori->update([
         'nama' => $request->nama,
-        'slug' => Str::slug($request->nama),
-        // 'kode' SENGAJA tidak diubah, biar produk yang sudah ada tetap nyambung
+        'slug' => \Illuminate\Support\Str::slug($request->nama),
     ]);
 
     return redirect()->route('admin.produk.index')
@@ -55,13 +63,15 @@ public function destroy($id)
     $kategori = Kategori::findOrFail($id);
     $jumlahProduk = $kategori->jumlahProduk();
 
-    $kategori->delete();
-
-    $pesan = 'Kategori "' . $kategori->nama . '" berhasil dihapus.';
+    // ❌ Cegah hapus kalau masih ada produk
     if ($jumlahProduk > 0) {
-        $pesan .= ' ' . $jumlahProduk . ' produk yang sebelumnya memakai kategori ini tetap aman, hanya saja tidak akan muncul di filter manapun sampai dipindah ke kategori lain.';
+        return redirect()->route('admin.produk.index')
+            ->with('error', 'Kategori "' . $kategori->nama . '" tidak bisa dihapus karena masih memiliki ' . $jumlahProduk . ' produk. Pindahkan produk ke kategori lain terlebih dahulu.');
     }
 
-    return redirect()->route('admin.produk.index')->with('success', $pesan);
+    $kategori->delete();
+
+    return redirect()->route('admin.produk.index')
+        ->with('success', 'Kategori "' . $kategori->nama . '" berhasil dihapus.');
 }
 }
