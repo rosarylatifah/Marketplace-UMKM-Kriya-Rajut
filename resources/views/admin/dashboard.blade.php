@@ -16,8 +16,14 @@
     <a href="{{ route('admin.produk.index') }}" class="block">
         <div class="bg-white border border-gray-200 rounded-xl p-6 transition-all duration-300 hover:shadow-md hover:border-blue-200 cursor-pointer">
             <p class="text-[10px] uppercase tracking-[0.25em] text-gray-400 mb-4">Produk Tersedia</p>
-            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $totalProduk }}</p>
-            <p class="text-[11px] text-gray-400 font-medium">Total produk aktif</p>
+            
+            {{-- Nampilin jumlah jenis produk --}}
+            <p class="text-4xl font-bold text-[#001f3f] mb-1">{{ $jumlahJenisProduk }}</p>
+            
+            {{-- Nampilin total stok --}}
+            <p class="text-[11px] text-gray-400 font-medium">
+                Total produk aktif dari {{ $totalStok }} stok
+            </p>
         </div>
     </a>
 
@@ -75,6 +81,8 @@
             <div class="text-right">
                 @if($a->status == 'BELUM KONFIRMASI')
                     <span class="inline-block bg-orange-50 text-orange-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Belum Dikonfirmasi</span>
+                @elseif($a->status == 'PENGAJUAN BATAL')
+                    <span class="inline-block text-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Pengajuan Batal</span>
                 @elseif($a->status == 'SEDANG DIPROSES')
                     <span class="inline-block bg-amber-50 text-amber-600 text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">Sedang Diproses</span>
                 @elseif($a->status == 'DALAM PERJALANAN')

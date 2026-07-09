@@ -48,7 +48,7 @@ class User extends Authenticatable
 
     /**
      * ALUR RESET PASSWORD ADMIN
-     * Mengubah rute link reset password bawaan Laravel menjadi rute admin lu
+     * Mengubah rute link reset password bawaan Laravel menjadi rute admin 
      */
     public function sendPasswordResetNotification($token)
     {

@@ -13,7 +13,8 @@ class DashboardController extends Controller
     public function index()
     {
         // 1. Total Produk Aktif (Sesuai stok barang yg ada di kelola produk)
-        $totalProduk = Produk::sum('stok');
+        $jumlahJenisProduk = Produk::count();
+        $totalStok = Produk::sum('stok');
 
         // 2. Pesanan Baru yang Menunggu Konfirmasi Admin
         $pesananBaru = Pesanan::where('status', 'BELUM KONFIRMASI')->count();
@@ -31,7 +32,8 @@ class DashboardController extends Controller
         $aktivitas = Pesanan::latest()->take(4)->get();
 
         return view('admin.dashboard', compact(
-            'totalProduk',
+            'jumlahJenisProduk',
+            'totalStok',
             'pesananBaru',
             'pesananAktif',
             'pendapatanKotorBulanIni',
@@ -39,30 +41,36 @@ class DashboardController extends Controller
         ));
     }
 
-    public function showPendapatanBulanan()
+    public function showPendapatanBulanan(Request $request)
     {
-        // Mengambil data pesanan selesai
-        $pendapatan_bulanan = Pesanan::whereMonth('created_at', date('m'))
-                                    ->whereYear('created_at', date('Y'))
-                                    ->where('status', 'SELESAI')
+        // Kalau user belum pilih apa-apa, otomatis nampilin bulan & tahun sekarang
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
+        $pendapatan_bulanan = Pesanan::where('status', 'SELESAI')
+                                    ->whereMonth('created_at', $bulan)
+                                    ->whereYear('created_at', $tahun)
                                     ->get();
 
-        // Logika perhitungan: Total - Ongkir
-        // Kita pake collection map buat ngitung subtotal per pesanan
         $total_keseluruhan = $pendapatan_bulanan->sum(function($p) {
-            return $p->total - $p->ongkir; // Pastikan kolom di database namanya 'ongkir'
+            return $p->total - $p->ongkir;
         });
 
-        return view('admin.pendapatanperbulan', compact('pendapatan_bulanan', 'total_keseluruhan'));
+        // Kirim semua variabel ini ke view biar dropdown-nya bisa "inget" pilihan user
+        return view('admin.pendapatanperbulan', compact('pendapatan_bulanan', 'total_keseluruhan', 'bulan', 'tahun'));
     }
 
-    public function exportData($format)
-    {
+    public function exportData(Request $request, $format)
+    {   
+        // Ambil bulan & tahun dari request (kalau kosong, otomatis pake bulan ini)
+        $bulan = $request->input('bulan', date('m'));
+        $tahun = $request->input('tahun', date('Y'));
+
         // Pastikan pakai 'with' kalau lo punya relasi ke User atau nama pembeli
         $data = \App\Models\Pesanan::with('user') // Contoh kalau ada relasi ke tabel User
                                     ->where('status', 'SELESAI')
-                                    ->whereMonth('created_at', date('m'))
-                                    ->whereYear('created_at', date('Y'))
+                                    ->whereMonth('created_at', $bulan)
+                                    ->whereYear('created_at', $tahun)
                                     ->get();
 
         if ($format == 'excel') {

@@ -17,7 +17,7 @@ class ProdukVariasi extends Model
         'warna',
         'stok',
         'harga',
-        'foto', // <-- TAMBAHAN SAKTI DI SINI BIAR BISA NYIMPAN FOTO PER WARNA, ZAR!
+        'foto', // <-- TAMBAHAN SAKTI DI SINI BIAR BISA NYIMPAN FOTO PER WARNA
     ];
 
     // Relasi balik ke produk utama

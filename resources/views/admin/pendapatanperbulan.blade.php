@@ -16,15 +16,39 @@
             <a href="/admin/dashboard" class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-[#001f3f] transition-colors flex items-center gap-1">
                 ← Kembali ke Dashboard
             </a>
+            
+            {{-- FORM FILTER --}}
+            <form action="{{ route('admin.pendapatan.bulanan') }}" method="GET" class="flex gap-2 mb-4">
+                <select name="bulan" class="text-[10px] p-2 border rounded-lg uppercase">
+                    @for ($m=1; $m<=12; $m++)
+                        <option value="{{ sprintf("%02d", $m) }}" {{ isset($bulan) && $bulan == sprintf("%02d", $m) ? 'selected' : '' }}>
+                            {{ date('F', mktime(0,0,0,$m, 1)) }}
+                        </option>
+                    @endfor
+                </select>
+                
+                <select name="tahun" class="text-[10px] p-2 border rounded-lg">
+                    @for ($y=date('Y'); $y>=2025; $y--)
+                        <option value="{{ $y }}" {{ isset($tahun) && $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
+                </select>
+                
+                <button type="submit" class="bg-[#001f3f] text-white px-4 py-2 rounded-lg text-[10px] font-bold uppercase">Filter</button>
+            </form>
+
+            {{-- TOMBOL EXPORT (DITAMBAHIN QUERY PARAMETER) --}}
             <div class="flex gap-2">
-                <a href="{{ route('admin.export.pendapatan', 'excel') }}" class="bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-emerald-700 transition-all">
+                <a href="{{ route('admin.export.pendapatan', ['format' => 'excel', 'bulan' => $bulan ?? date('m'), 'tahun' => $tahun ?? date('Y')]) }}" 
+                class="bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-emerald-700 transition-all">
                     Export Excel
                 </a>
-                <a href="{{ route('admin.export.pendapatan', 'pdf') }}" class="bg-[#001f3f] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-[#002d5a] transition-all">
+                <a href="{{ route('admin.export.pendapatan', ['format' => 'pdf', 'bulan' => $bulan ?? date('m'), 'tahun' => $tahun ?? date('Y')]) }}" 
+                class="bg-[#001f3f] text-white text-[10px] font-bold uppercase tracking-widest px-6 py-3 rounded-lg hover:bg-[#002d5a] transition-all">
                     Export PDF
                 </a>
             </div>
         </div>
+
     </div>
 </div>
 
